@@ -30,13 +30,23 @@ function AuthenticatedShell() {
     }
   }, [me, navigate]);
 
+  const today = new Date()
+    .toLocaleDateString("en-GB", {
+      weekday: "short",
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    })
+    .toUpperCase();
+
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background">
+      <div className="flex min-h-screen w-full bg-background">
         <AppSidebar />
-        <div className="flex-1 flex flex-col min-w-0">
-          <header className="h-12 flex items-center gap-2 border-b bg-card/50 px-3">
-            <SidebarTrigger />
+        <div className="flex min-w-0 flex-1 flex-col">
+          <header className="flex h-11 items-center justify-between gap-2 border-b bg-background px-3">
+            <SidebarTrigger className="text-muted-foreground" />
+            <span className="microlabel tnum text-[10px] text-muted-foreground/70">{today}</span>
           </header>
           <main className="flex-1 overflow-auto">
             <Outlet />

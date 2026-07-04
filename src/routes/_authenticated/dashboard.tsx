@@ -1,8 +1,12 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { companiesQuery, eventsQuery, tasksQuery, currentUserQuery } from "@/lib/queries";
 import { formatSEK, formatDate } from "@/lib/format";
-import { Building2, CalendarDays, AlertCircle, TrendingUp } from "lucide-react";
+import { PageHeader } from "@/components/shared/PageHeader";
+import { StatusTag } from "@/components/shared/StatusTag";
+import { Tri } from "@/components/shared/Tri";
+import { priorityColor, type TaskPriority } from "@/components/tasks/taskStyles";
+import { ArrowUpRight } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   loader: ({ context }) => {
@@ -22,83 +26,161 @@ function Dashboard() {
 
   const now = new Date();
   const in30 = new Date(now.getTime() + 30 * 86400_000);
-  const activeOutreach = companies.filter((c) => ["Contacted", "Negotiating", "Booked"].includes(c.status)).length;
+  const activeOutreach = companies.filter((c) =>
+    ["Contacted", "Negotiating", "Booked"].includes(c.status),
+  ).length;
   const upcoming = events
-    .filter((e) => e.date && new Date(e.date) >= new Date(now.toDateString()) && new Date(e.date) <= in30 && e.status !== "Cancelled")
+    .filter(
+      (e) =>
+        e.date &&
+        new Date(e.date) >= new Date(now.toDateString()) &&
+        new Date(e.date) <= in30 &&
+        e.status !== "Cancelled",
+    )
     .sort((a, b) => (a.date! < b.date! ? -1 : 1));
-  const overdue = tasks.filter((t) => t.status !== "Done" && t.due_date && new Date(t.due_date) < now).length;
+  const overdue = tasks.filter(
+    (t) => t.status !== "Done" && t.due_date && new Date(t.due_date) < now,
+  ).length;
   const revenue = events.reduce((s, e) => s + Number(e.revenue_from_partner || 0), 0);
   const cost = events.reduce((s, e) => s + Number(e.cost_to_us || 0) + Number(e.food_cost || 0), 0);
+  const net = revenue - cost;
   const myTasks = tasks
     .filter((t) => t.assigned_to === me?.id && t.status !== "Done")
     .sort((a, b) => ((a.due_date || "9999") < (b.due_date || "9999") ? -1 : 1));
 
   return (
-    <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
-      <header>
-        <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Welcome{me?.profile?.name ? `, ${me.profile.name.split(" ")[0]}` : ""}. Here's what's happening this semester.
-        </p>
-      </header>
+    <div className="mx-auto max-w-6xl space-y-8 p-6 md:p-10">
+      <PageHeader
+        title={`Hej${me?.profile?.name ? ` ${me.profile.name.split(" ")[0]}` : ""}.`}
+        lede="The state of the semester, at a glance."
+      />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard icon={Building2} label="Active outreach" value={String(activeOutreach)} hint="Contacted → Booked" />
-        <StatCard icon={CalendarDays} label="Upcoming events" value={String(upcoming.length)} hint="Next 30 days" />
-        <StatCard icon={AlertCircle} label="Overdue tasks" value={String(overdue)} accent={overdue > 0} />
-        <StatCard icon={TrendingUp} label="Net this semester" value={formatSEK(revenue - cost)} hint={`${formatSEK(revenue)} in / ${formatSEK(cost)} out`} />
+      {/* Ledger strip */}
+      <div className="grid grid-cols-2 divide-y border bg-card sm:grid-cols-4 sm:divide-x sm:divide-y-0">
+        <Stat label="Active outreach" value={String(activeOutreach)} hint="Contacted → Booked" />
+        <Stat label="Upcoming events" value={String(upcoming.length)} hint="Next 30 days" />
+        <Stat
+          label="Overdue tasks"
+          value={String(overdue)}
+          danger={overdue > 0}
+          hint={overdue > 0 ? "Needs attention" : "All clear"}
+        />
+        <Stat
+          label="Net this semester"
+          value={formatSEK(net)}
+          hint={`${formatSEK(revenue)} in · ${formatSEK(cost)} out`}
+          danger={net < 0}
+        />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <section className="rounded-xl border bg-card">
-          <div className="p-4 border-b">
-            <h2 className="text-sm font-semibold">Next 5 events</h2>
-          </div>
-          <div className="divide-y">
-            {upcoming.slice(0, 5).map((e) => (
-              <div key={e.id} className="p-4 flex items-center justify-between gap-3">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <Ledger
+          title="Next events"
+          to="/events"
+          empty={upcoming.length === 0}
+          emptyText="No upcoming events"
+        >
+          {upcoming.slice(0, 5).map((e) => (
+            <li key={e.id} className="flex items-center justify-between gap-3 px-4 py-3.5">
+              <div className="flex min-w-0 items-center gap-2.5">
+                <Tri className="h-2 w-2 shrink-0 text-brand/70" />
                 <div className="min-w-0">
-                  <div className="text-sm font-medium truncate">{e.title}</div>
-                  <div className="text-xs text-muted-foreground truncate">{(e as any).company?.name || "No company"}</div>
+                  <div className="truncate text-sm font-medium">{e.title}</div>
+                  <div className="microlabel mt-0.5 text-[10px] text-muted-foreground/80">
+                    {(e as any).company?.name || "No company"}
+                  </div>
                 </div>
-                <div className="text-xs text-muted-foreground shrink-0">{formatDate(e.date)}</div>
               </div>
-            ))}
-            {upcoming.length === 0 && <div className="p-6 text-sm text-muted-foreground text-center">No upcoming events</div>}
-          </div>
-        </section>
+              <span className="microlabel tnum shrink-0 text-muted-foreground">
+                {formatDate(e.date)}
+              </span>
+            </li>
+          ))}
+        </Ledger>
 
-        <section className="rounded-xl border bg-card">
-          <div className="p-4 border-b">
-            <h2 className="text-sm font-semibold">My tasks</h2>
-          </div>
-          <div className="divide-y">
-            {myTasks.slice(0, 8).map((t) => (
-              <div key={t.id} className="p-4 flex items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="text-sm font-medium truncate">{t.title}</div>
-                  <div className="text-xs text-muted-foreground">{t.priority} priority</div>
-                </div>
-                <div className="text-xs text-muted-foreground shrink-0">{formatDate(t.due_date)}</div>
+        <Ledger
+          title="My tasks"
+          to="/tasks"
+          empty={myTasks.length === 0}
+          emptyText="No open tasks assigned to you"
+        >
+          {myTasks.slice(0, 6).map((t) => (
+            <li key={t.id} className="flex items-center justify-between gap-3 px-4 py-3.5">
+              <div className="min-w-0">
+                <div className="truncate text-sm font-medium">{t.title}</div>
+                <StatusTag
+                  color={priorityColor[t.priority as TaskPriority]}
+                  className="mt-1 text-[9.5px]"
+                >
+                  {t.priority}
+                </StatusTag>
               </div>
-            ))}
-            {myTasks.length === 0 && <div className="p-6 text-sm text-muted-foreground text-center">No open tasks assigned to you</div>}
-          </div>
-        </section>
+              <span className="microlabel tnum shrink-0 text-muted-foreground">
+                {formatDate(t.due_date)}
+              </span>
+            </li>
+          ))}
+        </Ledger>
       </div>
     </div>
   );
 }
 
-function StatCard({ icon: Icon, label, value, hint, accent }: { icon: any; label: string; value: string; hint?: string; accent?: boolean }) {
+function Stat({
+  label,
+  value,
+  hint,
+  danger,
+}: {
+  label: string;
+  value: string;
+  hint?: string;
+  danger?: boolean;
+}) {
   return (
-    <div className="rounded-xl border bg-card p-5">
-      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-        <Icon className="h-3.5 w-3.5" />
-        <span>{label}</span>
+    <div className="px-5 py-5">
+      <div className="microlabel text-[10px] text-muted-foreground">{label}</div>
+      <div
+        className={`tnum mt-2 font-display text-[1.9rem] font-medium leading-none tracking-tight ${danger ? "text-brand" : ""}`}
+      >
+        {value}
       </div>
-      <div className={`mt-2 text-2xl font-semibold tracking-tight ${accent ? "text-[color:var(--brand-red)]" : ""}`}>{value}</div>
-      {hint && <div className="mt-1 text-xs text-muted-foreground">{hint}</div>}
+      {hint && (
+        <div className="microlabel tnum mt-2 text-[9.5px] text-muted-foreground/70">{hint}</div>
+      )}
     </div>
+  );
+}
+
+function Ledger({
+  title,
+  to,
+  empty,
+  emptyText,
+  children,
+}: {
+  title: string;
+  to: string;
+  empty: boolean;
+  emptyText: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="border bg-card">
+      <div className="flex items-center justify-between border-b px-4 py-3">
+        <h2 className="font-display text-base font-medium tracking-tight">{title}</h2>
+        <Link
+          to={to}
+          className="microlabel inline-flex items-center gap-1 text-[10px] text-muted-foreground transition-colors hover:text-brand"
+        >
+          View all <ArrowUpRight className="h-3 w-3" />
+        </Link>
+      </div>
+      {empty ? (
+        <div className="px-4 py-10 text-center text-sm text-muted-foreground">{emptyText}</div>
+      ) : (
+        <ul className="divide-y">{children}</ul>
+      )}
+    </section>
   );
 }

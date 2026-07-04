@@ -4,6 +4,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { companiesQuery, profilesQuery, eventsQuery } from "@/lib/queries";
 import { Button } from "@/components/ui/button";
 import { Plus, LayoutGrid, Table as TableIcon } from "lucide-react";
+import { PageHeader } from "@/components/shared/PageHeader";
 import { KanbanBoard } from "@/components/outreach/KanbanBoard";
 import { CompanyTable } from "@/components/outreach/CompanyTable";
 import { CompanyDialog } from "@/components/outreach/CompanyDialog";
@@ -28,26 +29,34 @@ function OutreachPage() {
   const detail = detailId ? companies.find((c) => c.id === detailId) : null;
 
   return (
-    <div className="p-6 md:p-8 space-y-5 max-w-[1400px] mx-auto">
-      <header className="flex items-center justify-between gap-3 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Outreach</h1>
-          <p className="text-sm text-muted-foreground mt-1">Track company outreach across the sales pipeline.</p>
+    <div className="mx-auto max-w-[1400px] space-y-6 p-6 md:p-10">
+      <PageHeader
+        title="Outreach"
+        lede="Company pipeline — who we've contacted, and who owns the relationship."
+      >
+        <div className="inline-flex border bg-card p-0.5">
+          <ViewButton
+            active={view === "kanban"}
+            onClick={() => setView("kanban")}
+            icon={LayoutGrid}
+            label="Board"
+          />
+          <ViewButton
+            active={view === "table"}
+            onClick={() => setView("table")}
+            icon={TableIcon}
+            label="Table"
+          />
         </div>
-        <div className="flex items-center gap-2">
-          <div className="inline-flex rounded-md border bg-card p-0.5">
-            <button onClick={() => setView("kanban")} className={`px-2.5 h-8 inline-flex items-center gap-1.5 text-xs rounded ${view === "kanban" ? "bg-muted font-medium" : "text-muted-foreground"}`}>
-              <LayoutGrid className="h-3.5 w-3.5" /> Kanban
-            </button>
-            <button onClick={() => setView("table")} className={`px-2.5 h-8 inline-flex items-center gap-1.5 text-xs rounded ${view === "table" ? "bg-muted font-medium" : "text-muted-foreground"}`}>
-              <TableIcon className="h-3.5 w-3.5" /> Table
-            </button>
-          </div>
-          <Button onClick={() => { setEditing(null); setDialogOpen(true); }}>
-            <Plus className="h-4 w-4" /> Add company
-          </Button>
-        </div>
-      </header>
+        <Button
+          onClick={() => {
+            setEditing(null);
+            setDialogOpen(true);
+          }}
+        >
+          <Plus className="h-4 w-4" /> Add company
+        </Button>
+      </PageHeader>
 
       {view === "kanban" ? (
         <KanbanBoard companies={companies} onOpen={(c) => setDetailId(c.id)} />
@@ -59,8 +68,35 @@ function OutreachPage() {
       <CompanyDetail
         company={detail}
         onClose={() => setDetailId(null)}
-        onEdit={(c) => { setEditing(c); setDialogOpen(true); setDetailId(null); }}
+        onEdit={(c) => {
+          setEditing(c);
+          setDialogOpen(true);
+          setDetailId(null);
+        }}
       />
     </div>
+  );
+}
+
+function ViewButton({
+  active,
+  onClick,
+  icon: Icon,
+  label,
+}: {
+  active: boolean;
+  onClick: () => void;
+  icon: any;
+  label: string;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`microlabel inline-flex h-8 items-center gap-1.5 px-3 text-[10px] transition-colors ${
+        active ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
+      }`}
+    >
+      <Icon className="h-3.5 w-3.5" /> {label}
+    </button>
   );
 }

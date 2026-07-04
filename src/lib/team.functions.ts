@@ -74,6 +74,9 @@ export const resetMemberPassword = createServerFn({ method: "POST" })
       user_metadata: { must_change_password: true },
     });
     if (error) throw new Error(error.message);
-    await supabaseAdmin.from("profiles").update({ must_change_password: true }).eq("id", data.userId);
+    await supabaseAdmin
+      .from("profiles")
+      .update({ must_change_password: true })
+      .eq("id", data.userId);
     return { tempPassword: password };
   });

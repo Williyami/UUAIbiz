@@ -10,7 +10,8 @@ export const bootstrapFirstAdmin = createServerFn({ method: "POST" })
       .eq("role", "admin");
     if (countErr) throw new Error(countErr.message);
     if ((count ?? 0) > 0) throw new Error("An admin already exists. Ask them to add your account.");
-    if (!data.email || data.password.length < 8) throw new Error("Provide an email and a password of at least 8 characters.");
+    if (!data.email || data.password.length < 8)
+      throw new Error("Provide an email and a password of at least 8 characters.");
     const { data: created, error } = await supabaseAdmin.auth.admin.createUser({
       email: data.email,
       password: data.password,
