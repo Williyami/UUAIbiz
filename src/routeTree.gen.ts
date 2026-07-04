@@ -13,10 +13,13 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthChangePasswordRouteImport } from './routes/auth.change-password'
+import { Route as AuthenticatedTeamRouteImport } from './routes/_authenticated/team'
 import { Route as AuthenticatedTasksRouteImport } from './routes/_authenticated/tasks'
 import { Route as AuthenticatedOutreachRouteImport } from './routes/_authenticated/outreach'
+import { Route as AuthenticatedInfoRouteImport } from './routes/_authenticated/info'
 import { Route as AuthenticatedEventsRouteImport } from './routes/_authenticated/events'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedContractsRouteImport } from './routes/_authenticated/contracts'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -37,6 +40,11 @@ const AuthChangePasswordRoute = AuthChangePasswordRouteImport.update({
   path: '/change-password',
   getParentRoute: () => AuthRoute,
 } as any)
+const AuthenticatedTeamRoute = AuthenticatedTeamRouteImport.update({
+  id: '/team',
+  path: '/team',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedTasksRoute = AuthenticatedTasksRouteImport.update({
   id: '/tasks',
   path: '/tasks',
@@ -45,6 +53,11 @@ const AuthenticatedTasksRoute = AuthenticatedTasksRouteImport.update({
 const AuthenticatedOutreachRoute = AuthenticatedOutreachRouteImport.update({
   id: '/outreach',
   path: '/outreach',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedInfoRoute = AuthenticatedInfoRouteImport.update({
+  id: '/info',
+  path: '/info',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedEventsRoute = AuthenticatedEventsRouteImport.update({
@@ -57,23 +70,34 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedContractsRoute = AuthenticatedContractsRouteImport.update({
+  id: '/contracts',
+  path: '/contracts',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
+  '/contracts': typeof AuthenticatedContractsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/events': typeof AuthenticatedEventsRoute
+  '/info': typeof AuthenticatedInfoRoute
   '/outreach': typeof AuthenticatedOutreachRoute
   '/tasks': typeof AuthenticatedTasksRoute
+  '/team': typeof AuthenticatedTeamRoute
   '/auth/change-password': typeof AuthChangePasswordRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
+  '/contracts': typeof AuthenticatedContractsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/events': typeof AuthenticatedEventsRoute
+  '/info': typeof AuthenticatedInfoRoute
   '/outreach': typeof AuthenticatedOutreachRoute
   '/tasks': typeof AuthenticatedTasksRoute
+  '/team': typeof AuthenticatedTeamRoute
   '/auth/change-password': typeof AuthChangePasswordRoute
 }
 export interface FileRoutesById {
@@ -81,10 +105,13 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
+  '/_authenticated/contracts': typeof AuthenticatedContractsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/events': typeof AuthenticatedEventsRoute
+  '/_authenticated/info': typeof AuthenticatedInfoRoute
   '/_authenticated/outreach': typeof AuthenticatedOutreachRoute
   '/_authenticated/tasks': typeof AuthenticatedTasksRoute
+  '/_authenticated/team': typeof AuthenticatedTeamRoute
   '/auth/change-password': typeof AuthChangePasswordRoute
 }
 export interface FileRouteTypes {
@@ -92,29 +119,38 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/contracts'
     | '/dashboard'
     | '/events'
+    | '/info'
     | '/outreach'
     | '/tasks'
+    | '/team'
     | '/auth/change-password'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
+    | '/contracts'
     | '/dashboard'
     | '/events'
+    | '/info'
     | '/outreach'
     | '/tasks'
+    | '/team'
     | '/auth/change-password'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/_authenticated/contracts'
     | '/_authenticated/dashboard'
     | '/_authenticated/events'
+    | '/_authenticated/info'
     | '/_authenticated/outreach'
     | '/_authenticated/tasks'
+    | '/_authenticated/team'
     | '/auth/change-password'
   fileRoutesById: FileRoutesById
 }
@@ -154,6 +190,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthChangePasswordRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_authenticated/team': {
+      id: '/_authenticated/team'
+      path: '/team'
+      fullPath: '/team'
+      preLoaderRoute: typeof AuthenticatedTeamRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/tasks': {
       id: '/_authenticated/tasks'
       path: '/tasks'
@@ -166,6 +209,13 @@ declare module '@tanstack/react-router' {
       path: '/outreach'
       fullPath: '/outreach'
       preLoaderRoute: typeof AuthenticatedOutreachRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/info': {
+      id: '/_authenticated/info'
+      path: '/info'
+      fullPath: '/info'
+      preLoaderRoute: typeof AuthenticatedInfoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/events': {
@@ -182,21 +232,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/contracts': {
+      id: '/_authenticated/contracts'
+      path: '/contracts'
+      fullPath: '/contracts'
+      preLoaderRoute: typeof AuthenticatedContractsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedContractsRoute: typeof AuthenticatedContractsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedEventsRoute: typeof AuthenticatedEventsRoute
+  AuthenticatedInfoRoute: typeof AuthenticatedInfoRoute
   AuthenticatedOutreachRoute: typeof AuthenticatedOutreachRoute
   AuthenticatedTasksRoute: typeof AuthenticatedTasksRoute
+  AuthenticatedTeamRoute: typeof AuthenticatedTeamRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedContractsRoute: AuthenticatedContractsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedEventsRoute: AuthenticatedEventsRoute,
+  AuthenticatedInfoRoute: AuthenticatedInfoRoute,
   AuthenticatedOutreachRoute: AuthenticatedOutreachRoute,
   AuthenticatedTasksRoute: AuthenticatedTasksRoute,
+  AuthenticatedTeamRoute: AuthenticatedTeamRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
