@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate, redirect } from "@tanstack/react-router";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { Logo } from "@/components/layout/Logo";
 import { toast } from "sonner";
@@ -54,11 +54,11 @@ function ChangePasswordPage() {
         <form onSubmit={onSubmit} className="space-y-4">
           <div className="space-y-1.5">
             <Label htmlFor="p1">New password</Label>
-            <Input id="p1" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+            <PasswordInput id="p1" autoComplete="new-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="p2">Confirm password</Label>
-            <Input id="p2" type="password" required value={confirm} onChange={(e) => setConfirm(e.target.value)} />
+            <PasswordInput id="p2" autoComplete="new-password" required value={confirm} onChange={(e) => setConfirm(e.target.value)} />
           </div>
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? "Saving…" : "Save password"}
