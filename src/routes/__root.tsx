@@ -83,9 +83,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "description", content: "Internal ops tool for the UUAI Society Business team: outreach, events, tasks, and contracts." },
       { name: "robots", content: "noindex, nofollow" },
       { property: "og:title", content: "UUAIS Business — Team Ops" },
-      { property: "og:description", content: "Internal ops tool for the UUAI Society Business team." },
+      { property: "og:description", content: "Internal ops tool for the UUAI Society Business team: outreach, events, tasks, and contracts." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "UUAIS Business — Team Ops" },
+      { name: "twitter:description", content: "Internal ops tool for the UUAI Society Business team: outreach, events, tasks, and contracts." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/e05abc6d-a50b-4b9e-a097-339a73d4d59e/id-preview-719cbbf6--a8d82f26-dae5-4f37-ab50-a2e73c1dc547.lovable.app-1783184290173.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/e05abc6d-a50b-4b9e-a097-339a73d4d59e/id-preview-719cbbf6--a8d82f26-dae5-4f37-ab50-a2e73c1dc547.lovable.app-1783184290173.png" },
     ],
     links: [
       {
