@@ -13,6 +13,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthChangePasswordRouteImport } from './routes/auth.change-password'
+import { Route as AuthenticatedOutreachRouteImport } from './routes/_authenticated/outreach'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 
 const AuthRoute = AuthRouteImport.update({
@@ -34,6 +35,11 @@ const AuthChangePasswordRoute = AuthChangePasswordRouteImport.update({
   path: '/change-password',
   getParentRoute: () => AuthRoute,
 } as any)
+const AuthenticatedOutreachRoute = AuthenticatedOutreachRouteImport.update({
+  id: '/outreach',
+  path: '/outreach',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -44,12 +50,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/outreach': typeof AuthenticatedOutreachRoute
   '/auth/change-password': typeof AuthChangePasswordRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/outreach': typeof AuthenticatedOutreachRoute
   '/auth/change-password': typeof AuthChangePasswordRoute
 }
 export interface FileRoutesById {
@@ -58,19 +66,26 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/outreach': typeof AuthenticatedOutreachRoute
   '/auth/change-password': typeof AuthChangePasswordRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/dashboard' | '/auth/change-password'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/dashboard'
+    | '/outreach'
+    | '/auth/change-password'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/dashboard' | '/auth/change-password'
+  to: '/' | '/auth' | '/dashboard' | '/outreach' | '/auth/change-password'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/dashboard'
+    | '/_authenticated/outreach'
     | '/auth/change-password'
   fileRoutesById: FileRoutesById
 }
@@ -110,6 +125,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthChangePasswordRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_authenticated/outreach': {
+      id: '/_authenticated/outreach'
+      path: '/outreach'
+      fullPath: '/outreach'
+      preLoaderRoute: typeof AuthenticatedOutreachRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
@@ -122,10 +144,12 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedOutreachRoute: typeof AuthenticatedOutreachRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedOutreachRoute: AuthenticatedOutreachRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
