@@ -17,9 +17,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
-import { profilesQuery, companiesQuery, eventsQuery } from "@/lib/queries";
+import { profilesQuery, companiesQuery, eventsQuery, currentUserQuery } from "@/lib/queries";
 import { toast } from "sonner";
 import { TASK_STATUS_ORDER, TASK_PRIORITY_ORDER } from "./taskStyles";
 import { Trash2 } from "lucide-react";
@@ -30,15 +31,20 @@ export function TaskDialog({
   open,
   onOpenChange,
   task,
+  canEdit = true,
+  defaultPersonal = false,
 }: {
   open: boolean;
   onOpenChange: (o: boolean) => void;
   task?: Task | null;
+  canEdit?: boolean;
+  defaultPersonal?: boolean;
 }) {
   const qc = useQueryClient();
   const { data: profiles } = useSuspenseQuery(profilesQuery);
   const { data: companies } = useSuspenseQuery(companiesQuery);
   const { data: events } = useSuspenseQuery(eventsQuery);
+  const { data: me } = useSuspenseQuery(currentUserQuery);
   const [form, setForm] = useState<any>({});
 
   useEffect(() => {
@@ -48,22 +54,25 @@ export function TaskDialog({
         description: "",
         related_company_id: null,
         related_event_id: null,
-        assigned_to: null,
+        assigned_to: defaultPersonal ? (me?.id ?? null) : null,
         due_date: null,
         status: "To do",
         priority: "Medium",
+        personal: defaultPersonal,
       },
     );
-  }, [task, open]);
+  }, [task, open, defaultPersonal, me?.id]);
 
   const save = useMutation({
     mutationFn: async (values: any) => {
       const payload = {
         ...values,
         due_date: values.due_date || null,
-        assigned_to: values.assigned_to || null,
+        // personal tasks always belong to the current user
+        assigned_to: values.personal ? (me?.id ?? null) : values.assigned_to || null,
         related_company_id: values.related_company_id || null,
         related_event_id: values.related_event_id || null,
+        personal: !!values.personal,
       };
       if (task?.id) {
         const { error } = await supabase.from("tasks").update(payload).eq("id", task.id);
@@ -108,6 +117,18 @@ export function TaskDialog({
             save.mutate(form);
           }}
         >
+          <fieldset disabled={!canEdit} className="contents">
+          <label className="flex w-fit cursor-pointer items-center gap-2 border px-3 py-2">
+            <Checkbox
+              checked={!!form.personal}
+              onCheckedChange={(v) =>
+                setForm({ ...form, personal: !!v, assigned_to: v ? (me?.id ?? null) : form.assigned_to })
+              }
+            />
+            <span className="microlabel text-muted-foreground">
+              Personal task — only visible to you
+            </span>
+          </label>
           <Field label="Title">
             <Input
               value={form.title || ""}
@@ -154,24 +175,26 @@ export function TaskDialog({
                 </SelectContent>
               </Select>
             </Field>
-            <Field label="Assigned to">
-              <Select
-                value={form.assigned_to || "none"}
-                onValueChange={(v) => setForm({ ...form, assigned_to: v === "none" ? null : v })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Unassigned" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Unassigned</SelectItem>
-                  {profiles.map((p) => (
-                    <SelectItem key={p.id} value={p.id}>
-                      {p.name || p.email}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
+            {!form.personal && (
+              <Field label="Assigned to">
+                <Select
+                  value={form.assigned_to || "none"}
+                  onValueChange={(v) => setForm({ ...form, assigned_to: v === "none" ? null : v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Unassigned" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Unassigned</SelectItem>
+                    {profiles.map((p) => (
+                      <SelectItem key={p.id} value={p.id}>
+                        {p.name || p.email}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+            )}
             <Field label="Due date">
               <Input
                 type="date"
@@ -220,8 +243,9 @@ export function TaskDialog({
               </Select>
             </Field>
           </div>
+          </fieldset>
           <DialogFooter className="sm:justify-between">
-            {task?.id ? (
+            {canEdit && task?.id ? (
               <Button
                 type="button"
                 variant="ghost"
@@ -236,11 +260,13 @@ export function TaskDialog({
             )}
             <div className="flex gap-2">
               <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
-                Cancel
+                {canEdit ? "Cancel" : "Close"}
               </Button>
-              <Button type="submit" disabled={save.isPending}>
-                {save.isPending ? "Saving…" : "Save"}
-              </Button>
+              {canEdit && (
+                <Button type="submit" disabled={save.isPending}>
+                  {save.isPending ? "Saving…" : "Save"}
+                </Button>
+              )}
             </div>
           </DialogFooter>
         </form>

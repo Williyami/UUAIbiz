@@ -9,6 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { STATUS_ORDER, CompanyStatus, companyStatusColor } from "./statusStyles";
+import { INDUSTRY_ORDER } from "./industryStyles";
 import { StatusTag } from "@/components/shared/StatusTag";
 import { MemberChip } from "@/components/shared/MemberChip";
 import { formatDate } from "@/lib/format";
@@ -27,6 +28,7 @@ export function CompanyTable({
   const [status, setStatus] = useState<string>("all");
   const [assignee, setAssignee] = useState<string>("all");
   const [source, setSource] = useState<string>("all");
+  const [industry, setIndustry] = useState<string>("all");
 
   const sources = Array.from(new Set(companies.map((c) => c.source).filter(Boolean))) as string[];
   const profileMap = new Map(profiles.map((p) => [p.id, p]));
@@ -37,6 +39,7 @@ export function CompanyTable({
       if (assignee !== "all" && c.assigned_to !== (assignee === "none" ? null : assignee))
         return false;
       if (source !== "all" && c.source !== source) return false;
+      if (industry !== "all" && c.industry !== industry) return false;
       if (
         q &&
         !`${c.name} ${c.contact_person ?? ""} ${c.contact_email ?? ""}`
@@ -46,7 +49,7 @@ export function CompanyTable({
         return false;
       return true;
     });
-  }, [companies, q, status, assignee, source]);
+  }, [companies, q, status, assignee, source, industry]);
 
   return (
     <div className="space-y-3">
@@ -85,6 +88,14 @@ export function CompanyTable({
             </SelectItem>
           ))}
         </FilterSelect>
+        <FilterSelect value={industry} onChange={setIndustry} placeholder="Industry">
+          <SelectItem value="all">All industries</SelectItem>
+          {INDUSTRY_ORDER.map((i) => (
+            <SelectItem key={i} value={i}>
+              {i}
+            </SelectItem>
+          ))}
+        </FilterSelect>
         <span className="microlabel tnum ml-auto text-[10px] text-muted-foreground">
           {rows.length} / {companies.length}
         </span>
@@ -99,6 +110,7 @@ export function CompanyTable({
               <Th>Status</Th>
               <Th>Assigned</Th>
               <Th>Source</Th>
+              <Th>Industry</Th>
               <Th className="text-right">Last contact</Th>
             </tr>
           </thead>
@@ -128,10 +140,13 @@ export function CompanyTable({
                     </StatusTag>
                   </Td>
                   <Td>
-                    <MemberChip name={a ? a.name || a.email : null} />
+                    <MemberChip name={a ? a.name || a.email : null} avatarUrl={a?.avatar_url} />
                   </Td>
                   <Td>
                     <span className="text-xs text-muted-foreground">{c.source || "—"}</span>
+                  </Td>
+                  <Td>
+                    <span className="text-xs text-muted-foreground">{c.industry || "—"}</span>
                   </Td>
                   <Td className="text-right">
                     <span className="microlabel tnum text-[10px] text-muted-foreground">
@@ -143,7 +158,7 @@ export function CompanyTable({
             })}
             {rows.length === 0 && (
               <tr>
-                <td colSpan={6} className="p-10 text-center text-sm text-muted-foreground">
+                <td colSpan={7} className="p-10 text-center text-sm text-muted-foreground">
                   No companies match your filters
                 </td>
               </tr>

@@ -16,7 +16,7 @@ function randomPassword(len = 14) {
 
 export const createTeamMember = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { name: string; email: string; role: "admin" | "member" }) => d)
+  .inputValidator((d: { name: string; email: string; role: "admin" | "member" | "viewer" }) => d)
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -50,7 +50,7 @@ export const deleteTeamMember = createServerFn({ method: "POST" })
 
 export const setMemberRole = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { userId: string; role: "admin" | "member" }) => d)
+  .inputValidator((d: { userId: string; role: "admin" | "member" | "viewer" }) => d)
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");

@@ -5,9 +5,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { AuthLayout } from "@/components/layout/AuthLayout";
 import { toast } from "sonner";
 import { adminExists, bootstrapFirstAdmin } from "@/lib/bootstrap.functions";
+import { useMutation } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
@@ -25,6 +34,7 @@ function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [mode, setMode] = useState<"login" | "bootstrap">("login");
   const [name, setName] = useState("");
+  const [requestOpen, setRequestOpen] = useState(false);
 
   useEffect(() => {
     adminExists()
@@ -109,10 +119,93 @@ function AuthPage() {
         </Button>
         {mode === "login" && (
           <p className="microlabel pt-1 text-center text-[10px] text-muted-foreground/70">
-            No self sign-up — ask a team lead for access
+            No self sign-up — ask a team lead for access, or{" "}
+            <button
+              type="button"
+              onClick={() => setRequestOpen(true)}
+              className="underline underline-offset-2 hover:text-foreground"
+            >
+              request access
+            </button>
           </p>
         )}
       </form>
+      <RequestAccessDialog open={requestOpen} onOpenChange={setRequestOpen} />
     </AuthLayout>
+  );
+}
+
+function RequestAccessDialog({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+}) {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+
+  const submit = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from("access_requests")
+        .insert({ name: name.trim(), email: email.trim(), message: message.trim() || null });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Request sent — a team lead will follow up.");
+      onOpenChange(false);
+      setName("");
+      setEmail("");
+      setMessage("");
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-sm">
+        <DialogHeader>
+          <DialogTitle className="font-display text-xl font-medium tracking-tight">
+            Request access
+          </DialogTitle>
+        </DialogHeader>
+        <form
+          className="space-y-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!name.trim() || !email.trim()) return toast.error("Name and email are required");
+            submit.mutate();
+          }}
+        >
+          <div className="space-y-1.5">
+            <Label className="microlabel text-muted-foreground">Full name</Label>
+            <Input value={name} onChange={(e) => setName(e.target.value)} required />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="microlabel text-muted-foreground">Email</Label>
+            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="microlabel text-muted-foreground">Message (optional)</Label>
+            <Textarea
+              rows={3}
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="Which team, why you need access…"
+            />
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={submit.isPending}>
+              {submit.isPending ? "Sending…" : "Send request"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }

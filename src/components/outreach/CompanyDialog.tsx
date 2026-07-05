@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -20,6 +21,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { profilesQuery } from "@/lib/queries";
+import { INDUSTRY_ORDER } from "./industryStyles";
 import { toast } from "sonner";
 
 const STATUSES = [
@@ -55,9 +57,12 @@ export function CompanyDialog({
         contact_phone: "",
         status: "Contacted",
         source: "",
+        industry: null,
         notes: "",
         assigned_to: null,
         last_contact_date: null,
+        meeting_booked: false,
+        meeting_date: null,
       },
     );
   }, [company, open]);
@@ -68,6 +73,9 @@ export function CompanyDialog({
         ...values,
         last_contact_date: values.last_contact_date || null,
         assigned_to: values.assigned_to || null,
+        industry: values.industry || null,
+        meeting_booked: !!values.meeting_booked,
+        meeting_date: values.meeting_booked ? values.meeting_date || null : null,
       };
       if (company?.id) {
         const { error } = await supabase.from("companies").update(payload).eq("id", company.id);
@@ -133,6 +141,24 @@ export function CompanyDialog({
                 onChange={(e) => setForm({ ...form, source: e.target.value })}
               />
             </Field>
+            <Field label="Industry">
+              <Select
+                value={form.industry || "none"}
+                onValueChange={(v) => setForm({ ...form, industry: v === "none" ? null : v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="None" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">None</SelectItem>
+                  {INDUSTRY_ORDER.map((i) => (
+                    <SelectItem key={i} value={i}>
+                      {i}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
             <Field label="Status">
               <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v })}>
                 <SelectTrigger>
@@ -172,6 +198,26 @@ export function CompanyDialog({
                 onChange={(e) => setForm({ ...form, last_contact_date: e.target.value })}
               />
             </Field>
+          </div>
+          <div className="flex items-center gap-6 border-y py-3">
+            <label className="flex cursor-pointer items-center gap-2">
+              <Checkbox
+                checked={!!form.meeting_booked}
+                onCheckedChange={(v) => setForm({ ...form, meeting_booked: !!v })}
+              />
+              <span className="microlabel text-muted-foreground">Meeting booked?</span>
+            </label>
+            {form.meeting_booked && (
+              <div className="flex flex-1 items-center gap-2">
+                <Label className="microlabel shrink-0 text-muted-foreground">Date</Label>
+                <Input
+                  type="date"
+                  className="h-8"
+                  value={form.meeting_date || ""}
+                  onChange={(e) => setForm({ ...form, meeting_date: e.target.value })}
+                />
+              </div>
+            )}
           </div>
           <Field label="Notes">
             <Textarea

@@ -261,7 +261,8 @@ function ContractsPage() {
             </Field>
             <Button
               className="w-full"
-              disabled={generate.isPending}
+              disabled={generate.isPending || me?.role === "viewer"}
+              title={me?.role === "viewer" ? "Viewers can preview but not export" : undefined}
               onClick={() => {
                 if (!company.trim())
                   return toast.error(sv ? "Företagsnamn krävs" : "Company name is required");

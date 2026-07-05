@@ -3,7 +3,6 @@
 @import "tw-animate-css";
 
 @import "@fontsource-variable/archivo";
-@import "@fontsource-variable/fraunces";
 @import "@fontsource/ibm-plex-mono/400.css";
 @import "@fontsource/ibm-plex-mono/500.css";
 @import "@fontsource/ibm-plex-mono/600.css";
@@ -15,7 +14,7 @@
  *
  * Typography:
  *   --font-sans     Archivo (UI text)
- *   --font-display  Fraunces (page titles, editorial headers)
+ *   --font-display  Archivo (page titles — same family as body, not a distinct display face)
  *   --font-mono     IBM Plex Mono (data: dates, amounts, statuses, micro-labels)
  *
  * Surfaces are warm paper-white with hairline borders and flat cards.
@@ -28,7 +27,7 @@
 
 @theme inline {
   --font-sans: "Archivo Variable", "Helvetica Neue", Arial, sans-serif;
-  --font-display: "Fraunces Variable", Georgia, "Times New Roman", serif;
+  --font-display: "Archivo Variable", "Helvetica Neue", Arial, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
 
   --radius-sm: calc(var(--radius) - 2px);
@@ -119,56 +118,58 @@
   --chart-4: oklch(0.62 0.125 70);
   --chart-5: oklch(0.505 0.012 65);
 
-  /* Sidebar — warm near-black charcoal */
-  --sidebar: oklch(0.218 0.009 50);
-  --sidebar-foreground: oklch(0.78 0.008 78);
+  /* Sidebar — light glass material (translucency applied in the
+     liquid-glass rule at the bottom of this file) */
+  --sidebar: oklch(0.985 0.003 84);
+  --sidebar-foreground: oklch(0.42 0.012 60);
   --sidebar-primary: var(--brand-red);
   --sidebar-primary-foreground: oklch(0.985 0.003 84);
-  --sidebar-accent: oklch(0.272 0.01 50);
-  --sidebar-accent-foreground: oklch(0.955 0.004 84);
-  --sidebar-border: oklch(0.3 0.01 50);
+  --sidebar-accent: oklch(0.90 0.007 80);
+  --sidebar-accent-foreground: oklch(0.22 0.012 55);
+  --sidebar-border: oklch(0.86 0.008 80);
   --sidebar-ring: var(--brand-red);
 }
 
+/* Dark theme — deep navy, tuned to match /bg-dark.jpg */
 .dark {
-  --background: oklch(0.195 0.009 50);
-  --foreground: oklch(0.92 0.005 84);
-  --card: oklch(0.235 0.01 50);
-  --card-foreground: oklch(0.92 0.005 84);
-  --popover: oklch(0.235 0.01 50);
-  --popover-foreground: oklch(0.92 0.005 84);
-  --brand-red: oklch(0.6 0.19 19.5);
+  --background: oklch(0.17 0.04 278);
+  --foreground: oklch(0.93 0.008 278);
+  --card: oklch(0.215 0.042 278);
+  --card-foreground: oklch(0.93 0.008 278);
+  --popover: oklch(0.215 0.042 278);
+  --popover-foreground: oklch(0.93 0.008 278);
+  --brand-red: oklch(0.62 0.19 19.5);
   --brand-red-foreground: oklch(0.985 0.003 84);
   --primary: var(--brand-red);
   --primary-foreground: var(--brand-red-foreground);
-  --secondary: oklch(0.29 0.01 50);
-  --secondary-foreground: oklch(0.92 0.005 84);
-  --muted: oklch(0.29 0.01 50);
-  --muted-foreground: oklch(0.68 0.008 70);
-  --accent: oklch(0.31 0.01 50);
-  --accent-foreground: oklch(0.92 0.005 84);
+  --secondary: oklch(0.27 0.04 278);
+  --secondary-foreground: oklch(0.93 0.008 278);
+  --muted: oklch(0.27 0.04 278);
+  --muted-foreground: oklch(0.67 0.025 278);
+  --accent: oklch(0.29 0.042 278);
+  --accent-foreground: oklch(0.93 0.008 278);
   --destructive: var(--brand-red);
   --destructive-foreground: oklch(0.985 0.003 84);
-  --border: oklch(0.33 0.01 50);
-  --input: oklch(0.36 0.01 50);
+  --border: oklch(0.31 0.04 278);
+  --input: oklch(0.34 0.04 278);
   --ring: var(--brand-red);
-  --status-neutral: oklch(0.68 0.008 70);
-  --status-info: oklch(0.68 0.1 245);
-  --status-success: oklch(0.68 0.11 150);
-  --status-warning: oklch(0.72 0.12 70);
+  --status-neutral: oklch(0.67 0.025 278);
+  --status-info: oklch(0.7 0.1 245);
+  --status-success: oklch(0.7 0.11 150);
+  --status-warning: oklch(0.74 0.12 70);
   --status-danger: var(--brand-red);
   --chart-1: var(--brand-red);
-  --chart-2: oklch(0.68 0.1 245);
-  --chart-3: oklch(0.68 0.11 150);
-  --chart-4: oklch(0.72 0.12 70);
-  --chart-5: oklch(0.68 0.008 70);
-  --sidebar: oklch(0.165 0.008 50);
-  --sidebar-foreground: oklch(0.78 0.008 78);
+  --chart-2: oklch(0.7 0.1 245);
+  --chart-3: oklch(0.7 0.11 150);
+  --chart-4: oklch(0.74 0.12 70);
+  --chart-5: oklch(0.67 0.025 278);
+  --sidebar: oklch(0.145 0.035 278);
+  --sidebar-foreground: oklch(0.76 0.02 278);
   --sidebar-primary: var(--brand-red);
   --sidebar-primary-foreground: oklch(0.985 0.003 84);
-  --sidebar-accent: oklch(0.24 0.009 50);
-  --sidebar-accent-foreground: oklch(0.955 0.004 84);
-  --sidebar-border: oklch(0.27 0.009 50);
+  --sidebar-accent: oklch(0.215 0.042 278);
+  --sidebar-accent-foreground: oklch(0.95 0.006 278);
+  --sidebar-border: oklch(0.245 0.04 278);
   --sidebar-ring: var(--brand-red);
 }
 
@@ -200,9 +201,28 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     -webkit-font-smoothing: antialiased;
+    background-image: url("/bg-light.jpg");
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+  }
+
+  .dark body {
+    background-image: url("/bg-dark.jpg");
   }
 
   ::selection {
     background-color: color-mix(in oklch, var(--brand-red) 18%, transparent);
   }
 }
+
+/* Liquid-glass sidebar: translucent material over the body background image.
+   Low blur so the artwork's linework stays recognizable through the pane.
+   Unlayered so it wins over the bg-sidebar utility. */
+[data-sidebar="sidebar"] {
+  background-color: color-mix(in oklch, var(--sidebar) 38%, transparent);
+  -webkit-backdrop-filter: blur(10px) saturate(170%);
+  backdrop-filter: blur(10px) saturate(170%);
+  border-right: 1px solid color-mix(in oklch, var(--sidebar-border) 55%, transparent);
+}
+

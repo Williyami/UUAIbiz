@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { eventsQuery, profilesQuery, companiesQuery } from "@/lib/queries";
+import { eventsQuery, profilesQuery, companiesQuery, currentUserQuery } from "@/lib/queries";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -30,6 +30,7 @@ export const Route = createFileRoute("/_authenticated/events")({
     context.queryClient.ensureQueryData(eventsQuery);
     context.queryClient.ensureQueryData(profilesQuery);
     context.queryClient.ensureQueryData(companiesQuery);
+    context.queryClient.ensureQueryData(currentUserQuery);
   },
   component: EventsPage,
   errorComponent: ({ error }) => <div className="p-8 text-destructive">Error: {error.message}</div>,
@@ -42,6 +43,8 @@ function net(e: any) {
 function EventsPage() {
   const { data: events } = useSuspenseQuery(eventsQuery);
   const { data: profiles } = useSuspenseQuery(profilesQuery);
+  const { data: me } = useSuspenseQuery(currentUserQuery);
+  const canEdit = me?.role !== "viewer";
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<any | null>(null);
   const [q, setQ] = useState("");
@@ -94,14 +97,16 @@ function EventsPage() {
         title="Events"
         lede="Every event we've run or booked — dates, money and ownership."
       >
-        <Button
-          onClick={() => {
-            setEditing(null);
-            setDialogOpen(true);
-          }}
-        >
-          <Plus className="h-4 w-4" /> New event
-        </Button>
+        {canEdit && (
+          <Button
+            onClick={() => {
+              setEditing(null);
+              setDialogOpen(true);
+            }}
+          >
+            <Plus className="h-4 w-4" /> New event
+          </Button>
+        )}
       </PageHeader>
 
       <div className="grid grid-cols-2 divide-y border bg-card sm:grid-cols-4 sm:divide-x sm:divide-y-0">
@@ -216,7 +221,7 @@ function EventsPage() {
                     <Money value={n} signed />
                   </Td>
                   <Td>
-                    <MemberChip name={a ? a.name || a.email : null} />
+                    <MemberChip name={a ? a.name || a.email : null} avatarUrl={a?.avatar_url} />
                   </Td>
                   <Td>
                     {e.luma_link && (
@@ -246,7 +251,12 @@ function EventsPage() {
         </table>
       </div>
 
-      <EventDialog open={dialogOpen} onOpenChange={setDialogOpen} event={editing} />
+      <EventDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        event={editing}
+        canEdit={canEdit}
+      />
     </div>
   );
 }

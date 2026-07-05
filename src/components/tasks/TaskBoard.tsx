@@ -32,7 +32,15 @@ function isOverdue(task: any) {
   );
 }
 
-export function TaskBoard({ tasks, onOpen }: { tasks: any[]; onOpen: (t: any) => void }) {
+export function TaskBoard({
+  tasks,
+  onOpen,
+  canEdit = true,
+}: {
+  tasks: any[];
+  onOpen: (t: any) => void;
+  canEdit?: boolean;
+}) {
   const qc = useQueryClient();
   const { data: profiles } = useSuspenseQuery(profilesQuery);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
@@ -74,6 +82,7 @@ export function TaskBoard({ tasks, onOpen }: { tasks: any[]; onOpen: (t: any) =>
             tasks={tasks.filter((t) => t.status === s)}
             profileMap={profileMap}
             onOpen={onOpen}
+            canEdit={canEdit}
           />
         ))}
       </div>
@@ -89,13 +98,15 @@ function Column({
   tasks,
   profileMap,
   onOpen,
+  canEdit,
 }: {
   status: TaskStatus;
   tasks: any[];
   profileMap: Map<string, any>;
   onOpen: (t: any) => void;
+  canEdit: boolean;
 }) {
-  const { setNodeRef, isOver } = useDroppable({ id: status });
+  const { setNodeRef, isOver } = useDroppable({ id: status, disabled: !canEdit });
   return (
     <div
       ref={setNodeRef}
@@ -110,7 +121,13 @@ function Column({
       </div>
       <div className="flex-1 space-y-2 p-2">
         {tasks.map((t) => (
-          <DraggableCard key={t.id} task={t} profileMap={profileMap} onOpen={onOpen} />
+          <DraggableCard
+            key={t.id}
+            task={t}
+            profileMap={profileMap}
+            onOpen={onOpen}
+            canEdit={canEdit}
+          />
         ))}
         {tasks.length === 0 && (
           <div className="microlabel py-6 text-center text-[9.5px] text-muted-foreground/50">—</div>
@@ -120,10 +137,18 @@ function Column({
   );
 }
 
-function DraggableCard({ task, profileMap, onOpen }: any) {
-  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: task.id });
+function DraggableCard({ task, profileMap, onOpen, canEdit }: any) {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    id: task.id,
+    disabled: !canEdit,
+  });
   return (
-    <div ref={setNodeRef} {...listeners} {...attributes} style={{ opacity: isDragging ? 0.3 : 1 }}>
+    <div
+      ref={setNodeRef}
+      {...(canEdit ? listeners : {})}
+      {...attributes}
+      style={{ opacity: isDragging ? 0.3 : 1 }}
+    >
       <Card task={task} profileMap={profileMap} onOpen={onOpen} />
     </div>
   );
@@ -155,7 +180,10 @@ function Card({
         {overdue && <span className="microlabel text-[9.5px] text-brand">Overdue</span>}
       </div>
       <div className="mt-2.5 flex items-center justify-between gap-2">
-        <MemberChip name={assignee ? assignee.name || assignee.email : null} />
+        <MemberChip
+          name={assignee ? assignee.name || assignee.email : null}
+          avatarUrl={assignee?.avatar_url}
+        />
         <span
           className={`microlabel tnum text-[9.5px] ${overdue ? "font-semibold text-brand" : "text-muted-foreground/80"}`}
         >

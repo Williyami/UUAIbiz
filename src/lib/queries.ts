@@ -92,6 +92,18 @@ export const contractTemplatesQuery = queryOptions({
   },
 });
 
+export const accessRequestsQuery = queryOptions({
+  queryKey: ["accessRequests"],
+  queryFn: async () => {
+    const { data, error } = await supabase
+      .from("access_requests")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (error) throw error;
+    return data ?? [];
+  },
+});
+
 export const currentUserQuery = queryOptions({
   queryKey: ["currentUser"],
   queryFn: async () => {
@@ -101,11 +113,18 @@ export const currentUserQuery = queryOptions({
       supabase.from("profiles").select("*").eq("id", userData.user.id).maybeSingle(),
       supabase.from("user_roles").select("role").eq("user_id", userData.user.id),
     ]);
+    const roleSet = new Set((roles ?? []).map((r) => r.role));
+    const role: "admin" | "member" | "viewer" = roleSet.has("admin")
+      ? "admin"
+      : roleSet.has("member")
+        ? "member"
+        : "viewer";
     return {
       id: userData.user.id,
       email: userData.user.email ?? "",
       profile,
-      isAdmin: (roles ?? []).some((r) => r.role === "admin"),
+      isAdmin: role === "admin",
+      role,
     };
   },
 });

@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { companiesQuery, profilesQuery, eventsQuery } from "@/lib/queries";
+import { companiesQuery, profilesQuery, eventsQuery, currentUserQuery } from "@/lib/queries";
 import { Button } from "@/components/ui/button";
 import { Plus, LayoutGrid, Table as TableIcon } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -15,6 +15,7 @@ export const Route = createFileRoute("/_authenticated/outreach")({
     context.queryClient.ensureQueryData(companiesQuery);
     context.queryClient.ensureQueryData(profilesQuery);
     context.queryClient.ensureQueryData(eventsQuery);
+    context.queryClient.ensureQueryData(currentUserQuery);
   },
   component: OutreachPage,
   errorComponent: ({ error }) => <div className="p-8 text-destructive">Error: {error.message}</div>,
@@ -22,6 +23,8 @@ export const Route = createFileRoute("/_authenticated/outreach")({
 
 function OutreachPage() {
   const { data: companies } = useSuspenseQuery(companiesQuery);
+  const { data: me } = useSuspenseQuery(currentUserQuery);
+  const canEdit = me?.role !== "viewer";
   const [view, setView] = useState<"kanban" | "table">("kanban");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<any | null>(null);
@@ -48,18 +51,20 @@ function OutreachPage() {
             label="Table"
           />
         </div>
-        <Button
-          onClick={() => {
-            setEditing(null);
-            setDialogOpen(true);
-          }}
-        >
-          <Plus className="h-4 w-4" /> Add company
-        </Button>
+        {canEdit && (
+          <Button
+            onClick={() => {
+              setEditing(null);
+              setDialogOpen(true);
+            }}
+          >
+            <Plus className="h-4 w-4" /> Add company
+          </Button>
+        )}
       </PageHeader>
 
       {view === "kanban" ? (
-        <KanbanBoard companies={companies} onOpen={(c) => setDetailId(c.id)} />
+        <KanbanBoard companies={companies} onOpen={(c) => setDetailId(c.id)} canEdit={canEdit} />
       ) : (
         <CompanyTable companies={companies} onOpen={(c) => setDetailId(c.id)} />
       )}
@@ -68,6 +73,7 @@ function OutreachPage() {
       <CompanyDetail
         company={detail}
         onClose={() => setDetailId(null)}
+        canEdit={canEdit}
         onEdit={(c) => {
           setEditing(c);
           setDialogOpen(true);

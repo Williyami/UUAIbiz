@@ -8,6 +8,7 @@ import {
   eventsQuery,
   tasksQuery,
   currentUserQuery,
+  accessRequestsQuery,
 } from "@/lib/queries";
 import {
   createTeamMember,
@@ -15,6 +16,7 @@ import {
   setMemberRole,
   resetMemberPassword,
 } from "@/lib/team.functions";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -42,7 +44,23 @@ import {
 import { PageHeader } from "@/components/shared/PageHeader";
 import { initials } from "@/lib/format";
 import { toast } from "sonner";
-import { Plus, MoreHorizontal, Copy, KeyRound, ShieldCheck, UserMinus } from "lucide-react";
+import {
+  Plus,
+  MoreHorizontal,
+  Copy,
+  KeyRound,
+  ShieldCheck,
+  Eye,
+  UserMinus,
+  Check,
+  X,
+} from "lucide-react";
+
+type AppRole = "admin" | "member" | "viewer";
+
+function roleLabel(role: AppRole | undefined): string {
+  return role === "admin" ? "Admin" : role === "viewer" ? "Viewer" : "Business team";
+}
 
 export const Route = createFileRoute("/_authenticated/team")({
   loader: ({ context }) => {
@@ -51,6 +69,7 @@ export const Route = createFileRoute("/_authenticated/team")({
     context.queryClient.ensureQueryData(companiesQuery);
     context.queryClient.ensureQueryData(eventsQuery);
     context.queryClient.ensureQueryData(tasksQuery);
+    context.queryClient.ensureQueryData(accessRequestsQuery);
   },
   component: TeamPage,
   errorComponent: ({ error }) => <div className="p-8 text-destructive">Error: {error.message}</div>,
@@ -64,13 +83,18 @@ function TeamPage() {
   const { data: events } = useSuspenseQuery(eventsQuery);
   const { data: tasks } = useSuspenseQuery(tasksQuery);
   const { data: me } = useSuspenseQuery(currentUserQuery);
+  const { data: requests } = useSuspenseQuery(accessRequestsQuery);
 
   const [addOpen, setAddOpen] = useState(false);
   const [tempPassword, setTempPassword] = useState<{ email: string; password: string } | null>(
     null,
   );
+  const [prefill, setPrefill] = useState<{ name: string; email: string; requestId: string } | null>(
+    null,
+  );
 
-  const adminIds = new Set(roles.filter((r) => r.role === "admin").map((r) => r.user_id));
+  const roleMap = new Map(roles.map((r) => [r.user_id, r.role as AppRole]));
+  const pendingRequests = requests.filter((r) => r.status === "pending");
 
   const reset = useMutation({
     mutationFn: (userId: string) => resetMemberPassword({ data: { userId } }),
@@ -82,7 +106,7 @@ function TeamPage() {
   });
 
   const changeRole = useMutation({
-    mutationFn: ({ userId, role }: { userId: string; role: "admin" | "member" }) =>
+    mutationFn: ({ userId, role }: { userId: string; role: AppRole }) =>
       setMemberRole({ data: { userId, role } }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["userRoles"] });
@@ -101,6 +125,20 @@ function TeamPage() {
     onError: (e: any) => toast.error(e.message),
   });
 
+  const denyRequest = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("access_requests")
+        .update({ status: "denied" })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["accessRequests"] });
+      toast.success("Request denied");
+    },
+  });
+
   return (
     <div className="mx-auto max-w-4xl space-y-6 p-6 md:p-10">
       <PageHeader title="Team" lede="Who has access to the hub, and what they own.">
@@ -111,9 +149,54 @@ function TeamPage() {
         )}
       </PageHeader>
 
+      {me?.isAdmin && pendingRequests.length > 0 && (
+        <div className="border bg-card">
+          <div className="flex items-center justify-between border-b px-4 py-2.5">
+            <h2 className="font-display text-sm font-medium tracking-tight">Access requests</h2>
+            <span className="microlabel tnum text-[10px] text-muted-foreground">
+              {pendingRequests.length} pending
+            </span>
+          </div>
+          <div className="divide-y">
+            {pendingRequests.map((r) => (
+              <div key={r.id} className="flex items-center gap-4 px-4 py-3">
+                <div className="min-w-0 flex-1">
+                  <div className="text-sm font-medium">{r.name}</div>
+                  <div className="truncate font-mono text-[11px] text-muted-foreground">
+                    {r.email}
+                  </div>
+                  {r.message && (
+                    <div className="mt-1 text-xs text-muted-foreground/80">{r.message}</div>
+                  )}
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 text-muted-foreground"
+                  onClick={() => {
+                    setPrefill({ name: r.name, email: r.email, requestId: r.id });
+                    setAddOpen(true);
+                  }}
+                >
+                  <Check className="h-3.5 w-3.5" /> Approve
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 text-muted-foreground hover:text-destructive"
+                  onClick={() => denyRequest.mutate(r.id)}
+                >
+                  <X className="h-3.5 w-3.5" /> Deny
+                </Button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="divide-y border bg-card">
         {profiles.map((p) => {
-          const isAdmin = adminIds.has(p.id);
+          const role = roleMap.get(p.id);
           const owned = {
             companies: companies.filter((c) => c.assigned_to === p.id).length,
             events: events.filter((e) => e.assigned_to === p.id).length,
@@ -121,9 +204,17 @@ function TeamPage() {
           };
           return (
             <div key={p.id} className="flex items-center gap-4 px-4 py-4">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[3px] bg-foreground/85 font-mono text-xs font-semibold uppercase text-background">
-                {initials(p.name || p.email)}
-              </div>
+              {p.avatar_url ? (
+                <img
+                  src={p.avatar_url}
+                  alt=""
+                  className="h-10 w-10 shrink-0 rounded-full object-cover"
+                />
+              ) : (
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-foreground/85 font-mono text-xs font-semibold uppercase text-background">
+                  {initials(p.name || p.email)}
+                </div>
+              )}
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <span className="truncate text-sm font-medium">{p.name || p.email}</span>
@@ -131,9 +222,9 @@ function TeamPage() {
                     <span className="microlabel text-[9px] text-muted-foreground">You</span>
                   )}
                   <span
-                    className={`microlabel text-[9px] ${isAdmin ? "text-brand" : "text-muted-foreground"}`}
+                    className={`microlabel text-[9px] ${role === "admin" ? "text-brand" : "text-muted-foreground"}`}
                   >
-                    {isAdmin ? "Admin" : "Member"}
+                    {roleLabel(role)}
                   </span>
                 </div>
                 <div className="truncate font-mono text-[11px] text-muted-foreground">
@@ -153,13 +244,21 @@ function TeamPage() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem
-                      onClick={() =>
-                        changeRole.mutate({ userId: p.id, role: isAdmin ? "member" : "admin" })
-                      }
-                    >
-                      <ShieldCheck className="h-3.5 w-3.5" /> Make {isAdmin ? "member" : "admin"}
-                    </DropdownMenuItem>
+                    {(["admin", "member", "viewer"] as const)
+                      .filter((r) => r !== role)
+                      .map((r) => (
+                        <DropdownMenuItem
+                          key={r}
+                          onClick={() => changeRole.mutate({ userId: p.id, role: r })}
+                        >
+                          {r === "viewer" ? (
+                            <Eye className="h-3.5 w-3.5" />
+                          ) : (
+                            <ShieldCheck className="h-3.5 w-3.5" />
+                          )}{" "}
+                          Make {roleLabel(r).toLowerCase()}
+                        </DropdownMenuItem>
+                      ))}
                     <DropdownMenuItem onClick={() => reset.mutate(p.id)}>
                       <KeyRound className="h-3.5 w-3.5" /> Reset password
                     </DropdownMenuItem>
@@ -188,8 +287,22 @@ function TeamPage() {
 
       <AddMemberDialog
         open={addOpen}
-        onOpenChange={setAddOpen}
-        onCreated={(email, password) => setTempPassword({ email, password })}
+        onOpenChange={(o) => {
+          setAddOpen(o);
+          if (!o) setPrefill(null);
+        }}
+        prefill={prefill}
+        onCreated={(email, password) => {
+          setTempPassword({ email, password });
+          if (prefill) {
+            supabase
+              .from("access_requests")
+              .update({ status: "approved" })
+              .eq("id", prefill.requestId)
+              .then(() => qc.invalidateQueries({ queryKey: ["accessRequests"] }));
+            setPrefill(null);
+          }
+        }}
       />
       <TempPasswordDialog cred={tempPassword} onClose={() => setTempPassword(null)} />
     </div>
@@ -200,15 +313,28 @@ function AddMemberDialog({
   open,
   onOpenChange,
   onCreated,
+  prefill,
 }: {
   open: boolean;
   onOpenChange: (o: boolean) => void;
   onCreated: (email: string, password: string) => void;
+  prefill?: { name: string; email: string } | null;
 }) {
   const qc = useQueryClient();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState<"admin" | "member">("member");
+  const [role, setRole] = useState<AppRole>("member");
+
+  const openKey = open ? (prefill ? `${prefill.name}:${prefill.email}` : "new") : null;
+  const [seenKey, setSeenKey] = useState<string | null>(null);
+  if (openKey !== seenKey) {
+    setSeenKey(openKey);
+    if (openKey) {
+      setName(prefill?.name ?? "");
+      setEmail(prefill?.email ?? "");
+      setRole("member");
+    }
+  }
 
   const create = useMutation({
     mutationFn: () => createTeamMember({ data: { name, email, role } }),
@@ -251,13 +377,14 @@ function AddMemberDialog({
           </div>
           <div className="space-y-1.5">
             <Label className="microlabel text-muted-foreground">Role</Label>
-            <Select value={role} onValueChange={(v) => setRole(v as any)}>
+            <Select value={role} onValueChange={(v) => setRole(v as AppRole)}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="member">Member</SelectItem>
                 <SelectItem value="admin">Admin</SelectItem>
+                <SelectItem value="member">Business team</SelectItem>
+                <SelectItem value="viewer">Viewer</SelectItem>
               </SelectContent>
             </Select>
           </div>

@@ -28,10 +28,12 @@ export function EventDialog({
   open,
   onOpenChange,
   event,
+  canEdit = true,
 }: {
   open: boolean;
   onOpenChange: (o: boolean) => void;
   event?: any | null;
+  canEdit?: boolean;
 }) {
   const qc = useQueryClient();
   const { data: profiles } = useSuspenseQuery(profilesQuery);
@@ -121,6 +123,7 @@ export function EventDialog({
             save.mutate(form);
           }}
         >
+          <fieldset disabled={!canEdit} className="contents">
           <Field label="Title">
             <Input
               value={form.title || ""}
@@ -264,8 +267,9 @@ export function EventDialog({
               onChange={(e) => setForm({ ...form, notes: e.target.value })}
             />
           </Field>
+          </fieldset>
           <DialogFooter className="sm:justify-between">
-            {event?.id ? (
+            {canEdit && event?.id ? (
               <Button
                 type="button"
                 variant="ghost"
@@ -280,11 +284,13 @@ export function EventDialog({
             )}
             <div className="flex gap-2">
               <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
-                Cancel
+                {canEdit ? "Cancel" : "Close"}
               </Button>
-              <Button type="submit" disabled={save.isPending}>
-                {save.isPending ? "Saving…" : "Save"}
-              </Button>
+              {canEdit && (
+                <Button type="submit" disabled={save.isPending}>
+                  {save.isPending ? "Saving…" : "Save"}
+                </Button>
+              )}
             </div>
           </DialogFooter>
         </form>

@@ -17,16 +17,18 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { formatDate } from "@/lib/format";
-import { Mail, Phone, User, Calendar, FileSignature, Trash2, Pencil } from "lucide-react";
+import { Mail, Phone, User, Calendar, CalendarCheck, FileSignature, Trash2, Pencil } from "lucide-react";
 
 export function CompanyDetail({
   company,
   onClose,
   onEdit,
+  canEdit = true,
 }: {
   company: any | null;
   onClose: () => void;
   onEdit: (c: any) => void;
+  canEdit?: boolean;
 }) {
   const qc = useQueryClient();
   const navigate = useNavigate();
@@ -67,9 +69,16 @@ export function CompanyDetail({
     <Sheet open={!!company} onOpenChange={(o) => !o && onClose()}>
       <SheetContent className="overflow-y-auto sm:max-w-lg">
         <SheetHeader className="border-b pb-4">
-          <StatusTag color={companyStatusColor[company.status as CompanyStatus]}>
-            {company.status}
-          </StatusTag>
+          <div className="flex items-center gap-2">
+            <StatusTag color={companyStatusColor[company.status as CompanyStatus]}>
+              {company.status}
+            </StatusTag>
+            {company.industry && (
+              <span className="microlabel text-[9px] text-muted-foreground">
+                {company.industry}
+              </span>
+            )}
+          </div>
           <SheetTitle className="mt-1 font-display text-2xl font-medium tracking-tight">
             {company.name}
           </SheetTitle>
@@ -98,56 +107,68 @@ export function CompanyDetail({
                 Last contact: <span className="tnum">{formatDate(company.last_contact_date)}</span>
               </InfoRow>
             )}
+            {company.meeting_booked && (
+              <InfoRow icon={CalendarCheck}>
+                Meeting booked
+                {company.meeting_date && (
+                  <>
+                    : <span className="tnum">{formatDate(company.meeting_date)}</span>
+                  </>
+                )}
+              </InfoRow>
+            )}
           </section>
 
-          <section className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="microlabel text-muted-foreground">Status</label>
-              <Select value={company.status} onValueChange={(v) => update.mutate({ status: v })}>
-                <SelectTrigger className="mt-1.5">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {STATUS_ORDER.map((s) => (
-                    <SelectItem key={s} value={s}>
-                      {s}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <label className="microlabel text-muted-foreground">Assigned to</label>
-              <Select
-                value={company.assigned_to || "none"}
-                onValueChange={(v) => update.mutate({ assigned_to: v === "none" ? null : v })}
-              >
-                <SelectTrigger className="mt-1.5">
-                  <SelectValue placeholder="Unassigned" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Unassigned</SelectItem>
-                  {profiles.map((p) => (
-                    <SelectItem key={p.id} value={p.id}>
-                      {p.name || p.email}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </section>
+          <fieldset disabled={!canEdit} className="contents">
+            <section className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="microlabel text-muted-foreground">Status</label>
+                <Select value={company.status} onValueChange={(v) => update.mutate({ status: v })}>
+                  <SelectTrigger className="mt-1.5">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {STATUS_ORDER.map((s) => (
+                      <SelectItem key={s} value={s}>
+                        {s}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="microlabel text-muted-foreground">Assigned to</label>
+                <Select
+                  value={company.assigned_to || "none"}
+                  onValueChange={(v) => update.mutate({ assigned_to: v === "none" ? null : v })}
+                >
+                  <SelectTrigger className="mt-1.5">
+                    <SelectValue placeholder="Unassigned" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Unassigned</SelectItem>
+                    {profiles.map((p) => (
+                      <SelectItem key={p.id} value={p.id}>
+                        {p.name || p.email}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </section>
 
-          <section>
-            <label className="microlabel text-muted-foreground">Notes</label>
-            <Textarea
-              rows={6}
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              onBlur={() => notes !== company.notes && update.mutate({ notes })}
-              placeholder="Freeform notes about this company…"
-              className="mt-1.5"
-            />
-          </section>
+            <section>
+              <label className="microlabel text-muted-foreground">Notes</label>
+              <Textarea
+                rows={6}
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                onBlur={() => notes !== company.notes && update.mutate({ notes })}
+                placeholder="Freeform notes about this company…"
+                className="mt-1.5"
+              />
+            </section>
+          </fieldset>
 
           <section>
             <div className="microlabel mb-2 text-muted-foreground">
@@ -169,9 +190,11 @@ export function CompanyDetail({
           </section>
 
           <section className="flex flex-wrap gap-2 border-t pt-4">
-            <Button variant="outline" size="sm" onClick={() => onEdit(company)}>
-              <Pencil className="h-3.5 w-3.5" /> Edit
-            </Button>
+            {canEdit && (
+              <Button variant="outline" size="sm" onClick={() => onEdit(company)}>
+                <Pencil className="h-3.5 w-3.5" /> Edit
+              </Button>
+            )}
             <Button
               size="sm"
               onClick={() => {
@@ -187,14 +210,16 @@ export function CompanyDetail({
             >
               <FileSignature className="h-3.5 w-3.5" /> Generate contract
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="ml-auto text-destructive hover:text-destructive"
-              onClick={() => confirm(`Delete ${company.name}?`) && del.mutate()}
-            >
-              <Trash2 className="h-3.5 w-3.5" /> Delete
-            </Button>
+            {canEdit && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="ml-auto text-destructive hover:text-destructive"
+                onClick={() => confirm(`Delete ${company.name}?`) && del.mutate()}
+              >
+                <Trash2 className="h-3.5 w-3.5" /> Delete
+              </Button>
+            )}
           </section>
         </div>
       </SheetContent>

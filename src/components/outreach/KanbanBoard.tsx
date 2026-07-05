@@ -20,7 +20,15 @@ import { toast } from "sonner";
 const MAIN_STATUSES: CompanyStatus[] = ["Contacted", "Negotiating", "Booked", "Completed"];
 const SIDE_STATUSES: CompanyStatus[] = ["Declined", "On hold"];
 
-export function KanbanBoard({ companies, onOpen }: { companies: any[]; onOpen: (c: any) => void }) {
+export function KanbanBoard({
+  companies,
+  onOpen,
+  canEdit = true,
+}: {
+  companies: any[];
+  onOpen: (c: any) => void;
+  canEdit?: boolean;
+}) {
   const qc = useQueryClient();
   const { data: profiles } = useSuspenseQuery(profilesQuery);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
@@ -62,6 +70,7 @@ export function KanbanBoard({ companies, onOpen }: { companies: any[]; onOpen: (
             companies={companies.filter((c) => c.status === s)}
             profileMap={profileMap}
             onOpen={onOpen}
+            canEdit={canEdit}
           />
         ))}
       </div>
@@ -73,6 +82,7 @@ export function KanbanBoard({ companies, onOpen }: { companies: any[]; onOpen: (
             companies={companies.filter((c) => c.status === s)}
             profileMap={profileMap}
             onOpen={onOpen}
+            canEdit={canEdit}
             muted
           />
         ))}
@@ -89,15 +99,17 @@ function Column({
   companies,
   profileMap,
   onOpen,
+  canEdit,
   muted,
 }: {
   status: CompanyStatus;
   companies: any[];
   profileMap: Map<string, any>;
   onOpen: (c: any) => void;
+  canEdit: boolean;
   muted?: boolean;
 }) {
-  const { setNodeRef, isOver } = useDroppable({ id: status });
+  const { setNodeRef, isOver } = useDroppable({ id: status, disabled: !canEdit });
   return (
     <div
       ref={setNodeRef}
@@ -112,7 +124,13 @@ function Column({
       </div>
       <div className="flex-1 space-y-2 p-2">
         {companies.map((c) => (
-          <DraggableCard key={c.id} company={c} profileMap={profileMap} onOpen={onOpen} />
+          <DraggableCard
+            key={c.id}
+            company={c}
+            profileMap={profileMap}
+            onOpen={onOpen}
+            canEdit={canEdit}
+          />
         ))}
         {companies.length === 0 && (
           <div className="microlabel py-6 text-center text-[9.5px] text-muted-foreground/50">—</div>
@@ -122,10 +140,18 @@ function Column({
   );
 }
 
-function DraggableCard({ company, profileMap, onOpen }: any) {
-  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: company.id });
+function DraggableCard({ company, profileMap, onOpen, canEdit }: any) {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    id: company.id,
+    disabled: !canEdit,
+  });
   return (
-    <div ref={setNodeRef} {...listeners} {...attributes} style={{ opacity: isDragging ? 0.3 : 1 }}>
+    <div
+      ref={setNodeRef}
+      {...(canEdit ? listeners : {})}
+      {...attributes}
+      style={{ opacity: isDragging ? 0.3 : 1 }}
+    >
       <Card company={company} profileMap={profileMap} onOpen={onOpen} />
     </div>
   );
@@ -152,8 +178,16 @@ function Card({
           {company.contact_person}
         </div>
       )}
+      {company.industry && (
+        <div className="microlabel mt-1 text-[9px] text-muted-foreground/70">
+          {company.industry}
+        </div>
+      )}
       <div className="mt-2.5 flex items-center justify-between gap-2">
-        <MemberChip name={assignee ? assignee.name || assignee.email : null} />
+        <MemberChip
+          name={assignee ? assignee.name || assignee.email : null}
+          avatarUrl={assignee?.avatar_url}
+        />
         <span className="microlabel tnum text-[9.5px] text-muted-foreground/80">
           {company.last_contact_date ? formatDate(company.last_contact_date) : "—"}
         </span>
