@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { eventsQuery, profilesQuery, companiesQuery, currentUserQuery } from "@/lib/queries";
+import { eventsQuery, profilesQuery, companiesQuery, tasksQuery, currentUserQuery } from "@/lib/queries";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -16,6 +16,7 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { StatusTag } from "@/components/shared/StatusTag";
 import { MemberChip } from "@/components/shared/MemberChip";
 import { EventDialog } from "@/components/events/EventDialog";
+import { EventDetail } from "@/components/events/EventDetail";
 import {
   EVENT_STATUS_ORDER,
   EVENT_TYPE_ORDER,
@@ -30,6 +31,7 @@ export const Route = createFileRoute("/_authenticated/events")({
     context.queryClient.ensureQueryData(eventsQuery);
     context.queryClient.ensureQueryData(profilesQuery);
     context.queryClient.ensureQueryData(companiesQuery);
+    context.queryClient.ensureQueryData(tasksQuery);
     context.queryClient.ensureQueryData(currentUserQuery);
   },
   component: EventsPage,
@@ -47,6 +49,7 @@ function EventsPage() {
   const canEdit = me?.role !== "viewer";
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<any | null>(null);
+  const [detailId, setDetailId] = useState<string | null>(null);
   const [q, setQ] = useState("");
   const [status, setStatus] = useState("all");
   const [type, setType] = useState("all");
@@ -185,10 +188,7 @@ function EventsPage() {
               return (
                 <tr
                   key={e.id}
-                  onClick={() => {
-                    setEditing(e);
-                    setDialogOpen(true);
-                  }}
+                  onClick={() => setDetailId(e.id)}
                   className="cursor-pointer transition-colors hover:bg-accent/50"
                 >
                   <Td>
@@ -256,6 +256,16 @@ function EventsPage() {
         onOpenChange={setDialogOpen}
         event={editing}
         canEdit={canEdit}
+      />
+      <EventDetail
+        event={detailId ? (events.find((e) => e.id === detailId) ?? null) : null}
+        canEdit={canEdit}
+        onClose={() => setDetailId(null)}
+        onEdit={(e) => {
+          setEditing(e);
+          setDialogOpen(true);
+          setDetailId(null);
+        }}
       />
     </div>
   );

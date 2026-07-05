@@ -60,7 +60,8 @@ export function CompanyDialog({
         industry: null,
         notes: "",
         assigned_to: null,
-        last_contact_date: null,
+        // adding a contact counts as contact — prefill today, still editable
+        last_contact_date: new Date().toLocaleDateString("sv-SE"),
         meeting_booked: false,
         meeting_date: null,
       },

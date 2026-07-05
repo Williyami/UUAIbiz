@@ -58,9 +58,9 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="border-b border-sidebar-border px-3 py-3.5 group-data-[collapsible=icon]:px-2">
-        <div className="flex h-9 items-center gap-2.5 overflow-hidden">
+        <div className="flex h-9 items-center gap-2.5 overflow-hidden group-data-[collapsible=icon]:gap-0">
           <Logo size={28} className="group-data-[collapsible=icon]:hidden" />
-          <div className="flex min-w-0 flex-col gap-0.5 leading-none transition-opacity duration-200 group-data-[collapsible=icon]:opacity-0">
+          <div className="flex min-w-0 flex-col gap-0.5 overflow-hidden leading-none transition-opacity duration-200 group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:opacity-0">
             <span className="truncate font-display text-[14px] font-medium tracking-tight text-sidebar-accent-foreground">
               UUAI Society
             </span>

@@ -30,7 +30,7 @@ export const eventsQuery = queryOptions({
   queryFn: async () => {
     const { data, error } = await supabase
       .from("events")
-      .select("*, company:companies(id,name)")
+      .select("*, company:companies(id,name,contact_person,contact_email,contact_phone)")
       .order("date", { ascending: true, nullsFirst: false });
     if (error) throw error;
     return data ?? [];
