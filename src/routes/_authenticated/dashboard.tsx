@@ -100,8 +100,8 @@ function Dashboard() {
         mark={false}
       />
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {/* Stat cards */}
+      <div className="space-y-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <StatCard label="Active outreach" value={String(activeOutreach)}>
           {newCompanies30d > 0 ? (
             <>
@@ -121,7 +121,16 @@ function Dashboard() {
             {nextEvent ? `Next: ${formatDate(nextEvent.date)}` : "None in the next 30 days"}
           </span>
         </StatCard>
+        </div>
 
+        <Panel
+          title="Pipeline"
+          hint={`${companies.length} companies · ${declined} declined · ${onHold} on hold`}
+        >
+          <PipelineWave companies={companies} />
+        </Panel>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <StatCard label="Overdue tasks" value={String(overdue)} danger={overdue > 0}>
           <span className="text-muted-foreground">
             {dueThisWeek > 0 ? `${dueThisWeek} more due this week` : "Nothing due this week"}
@@ -141,16 +150,10 @@ function Dashboard() {
             <span className="text-muted-foreground">No revenue booked yet</span>
           )}
         </StatCard>
+        </div>
+      </div>
 
-        {/* Pipeline pipe — full row */}
-        <Panel
-          title="Pipeline"
-          hint={`${companies.length} companies · ${declined} declined · ${onHold} on hold`}
-          className="sm:col-span-2 lg:col-span-4"
-        >
-          <PipelineWave companies={companies} />
-        </Panel>
-
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {/* Cashflow */}
         <Panel title="Cashflow by month" hint={sem.label} className="lg:col-span-2">
           <CashflowChart events={events} />

@@ -1,7 +1,13 @@
 import { StatusTag } from "@/components/shared/StatusTag";
-import { companyStatusColor, type CompanyStatus } from "@/components/outreach/statusStyles";
+import type { CompanyStatus } from "@/components/outreach/statusStyles";
 
 const STAGES: CompanyStatus[] = ["Contacted", "Negotiating", "Booked", "Completed"];
+const STAGE_COLORS: Record<(typeof STAGES)[number], string> = {
+  Contacted: "color-mix(in oklch, var(--foreground) 62%, var(--card))",
+  Negotiating: "color-mix(in oklch, var(--brand-red) 42%, var(--foreground))",
+  Booked: "var(--brand-red)",
+  Completed: "color-mix(in oklch, var(--status-success) 72%, var(--foreground))",
+};
 
 const W = 800;
 const H = 150;
@@ -62,11 +68,32 @@ export function PipelineWave({ companies }: { companies: any[] }) {
                 <stop
                   key={s}
                   offset={`${((seg * (i + 0.5)) / W) * 100}%`}
-                  stopColor={companyStatusColor[s]}
+                  stopColor={STAGE_COLORS[s]}
                 />
               ))}
             </linearGradient>
+            <linearGradient id="pipeline-sheen" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="var(--card)" stopOpacity="0.48" />
+              <stop offset="44%" stopColor="var(--card)" stopOpacity="0.08" />
+              <stop offset="100%" stopColor="var(--foreground)" stopOpacity="0.18" />
+            </linearGradient>
+            <pattern id="pipeline-ledger" width="40" height="18" patternUnits="userSpaceOnUse">
+              <path
+                d="M 0 17.5 H 40"
+                stroke="var(--border)"
+                strokeOpacity="0.42"
+                strokeWidth="1"
+              />
+            </pattern>
           </defs>
+          <rect
+            x={0}
+            y={0}
+            width={W}
+            height={H}
+            fill="url(#pipeline-ledger)"
+            opacity="0.55"
+          />
           {/* stage boundaries */}
           {STAGES.slice(1).map((_, i) => (
             <line
@@ -75,24 +102,42 @@ export function PipelineWave({ companies }: { companies: any[] }) {
               x2={seg * (i + 1)}
               y1={12}
               y2={H - 12}
-              stroke="var(--border)"
+              stroke="color-mix(in oklch, var(--brand-red) 24%, var(--border))"
               strokeWidth="1"
-              strokeDasharray="2 5"
+              strokeDasharray="2 6"
             />
           ))}
           {/* midline */}
-          <line x1={0} x2={W} y1={MID} y2={MID} stroke="var(--border)" strokeWidth="1" />
+          <line
+            x1={0}
+            x2={W}
+            y1={MID}
+            y2={MID}
+            stroke="var(--foreground)"
+            strokeOpacity="0.18"
+            strokeWidth="1"
+          />
           {/* the pipe */}
-          <path d={d} fill="url(#pipeline-pipe)" fillOpacity="0.85" />
+          <path d={d} fill="url(#pipeline-pipe)" fillOpacity="0.92" />
+          <path d={d} fill="url(#pipeline-sheen)" />
+          <path
+            d={d}
+            fill="none"
+            stroke="color-mix(in oklch, var(--foreground) 38%, var(--brand-red))"
+            strokeOpacity="0.38"
+            strokeWidth="1.5"
+          />
         </svg>
       </div>
-      <div className="mt-3 grid grid-cols-2 divide-x border-t sm:grid-cols-4">
+      <div className="mt-3 grid grid-cols-2 divide-x border-t bg-muted/25 sm:grid-cols-4">
         {STAGES.map((s, i) => (
           <div key={s} className="flex items-center justify-between gap-2 px-4 py-3">
-            <StatusTag color={companyStatusColor[s]} className="text-[9.5px]">
+            <StatusTag color={STAGE_COLORS[s]} className="text-[9.5px]">
               {s}
             </StatusTag>
-            <span className="tnum font-display text-xl font-medium leading-none">{counts[i]}</span>
+            <span className="tnum font-display text-xl font-medium leading-none text-foreground">
+              {counts[i]}
+            </span>
           </div>
         ))}
       </div>
