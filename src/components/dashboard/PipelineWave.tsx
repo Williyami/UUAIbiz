@@ -1,12 +1,14 @@
 import { StatusTag } from "@/components/shared/StatusTag";
 import type { CompanyStatus } from "@/components/outreach/statusStyles";
 
-const STAGES: CompanyStatus[] = ["Contacted", "Negotiating", "Booked", "Completed"];
+const STAGES = ["Contacted", "Negotiating", "Booked", "Completed"] as const satisfies readonly CompanyStatus[];
+// Theme-adaptive: built from status tokens (which already shift per theme)
+// instead of --foreground, which turns these muddy in light mode.
 const STAGE_COLORS: Record<(typeof STAGES)[number], string> = {
-  Contacted: "color-mix(in oklch, var(--foreground) 62%, var(--card))",
-  Negotiating: "color-mix(in oklch, var(--brand-red) 42%, var(--foreground))",
+  Contacted: "var(--status-neutral)",
+  Negotiating: "color-mix(in oklch, var(--brand-red) 55%, var(--status-neutral))",
   Booked: "var(--brand-red)",
-  Completed: "color-mix(in oklch, var(--status-success) 72%, var(--foreground))",
+  Completed: "var(--status-success)",
 };
 
 const W = 800;
@@ -123,8 +125,8 @@ export function PipelineWave({ companies }: { companies: any[] }) {
           <path
             d={d}
             fill="none"
-            stroke="color-mix(in oklch, var(--foreground) 38%, var(--brand-red))"
-            strokeOpacity="0.38"
+            stroke="color-mix(in oklch, var(--brand-red) 40%, var(--border))"
+            strokeOpacity="0.6"
             strokeWidth="1.5"
           />
         </svg>

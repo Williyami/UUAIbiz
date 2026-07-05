@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { eventsQuery, profilesQuery, companiesQuery, tasksQuery, currentUserQuery } from "@/lib/queries";
@@ -16,7 +16,6 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { StatusTag } from "@/components/shared/StatusTag";
 import { MemberChip } from "@/components/shared/MemberChip";
 import { EventDialog } from "@/components/events/EventDialog";
-import { EventDetail } from "@/components/events/EventDetail";
 import {
   EVENT_STATUS_ORDER,
   EVENT_TYPE_ORDER,
@@ -47,9 +46,9 @@ function EventsPage() {
   const { data: profiles } = useSuspenseQuery(profilesQuery);
   const { data: me } = useSuspenseQuery(currentUserQuery);
   const canEdit = me?.role !== "viewer";
+  const navigate = useNavigate();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<any | null>(null);
-  const [detailId, setDetailId] = useState<string | null>(null);
   const [q, setQ] = useState("");
   const [status, setStatus] = useState("all");
   const [type, setType] = useState("all");
@@ -188,7 +187,7 @@ function EventsPage() {
               return (
                 <tr
                   key={e.id}
-                  onClick={() => setDetailId(e.id)}
+                  onClick={() => navigate({ to: "/events/$eventId", params: { eventId: e.id } })}
                   className="cursor-pointer transition-colors hover:bg-accent/50"
                 >
                   <Td>
@@ -256,16 +255,6 @@ function EventsPage() {
         onOpenChange={setDialogOpen}
         event={editing}
         canEdit={canEdit}
-      />
-      <EventDetail
-        event={detailId ? (events.find((e) => e.id === detailId) ?? null) : null}
-        canEdit={canEdit}
-        onClose={() => setDetailId(null)}
-        onEdit={(e) => {
-          setEditing(e);
-          setDialogOpen(true);
-          setDetailId(null);
-        }}
       />
     </div>
   );
