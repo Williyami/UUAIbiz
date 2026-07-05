@@ -22,94 +22,53 @@ export const Route = createFileRoute("/auth")({
   ssr: false,
   beforeLoad: async () => {
     const { data } = await supabase.auth.getSession();
-
-    if (data.session) {
-      throw redirect({ to: "/dashboard" });
-    }
+    if (data.session) throw redirect({ to: "/dashboard" });
   },
   component: AuthPage,
 });
 
 function AuthPage() {
   const navigate = useNavigate();
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [mode, setMode] = useState<"login" | "bootstrap">("login");
   const [name, setName] = useState("");
   const [requestOpen, setRequestOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   useEffect(() => {
     adminExists()
-      .then((result) => {
-        if (!result.exists) {
-          setMode("bootstrap");
-        }
+      .then((r) => {
+        if (!r.exists) setMode("bootstrap");
       })
-      .catch(() => {
-        // Keep the normal sign-in view if the bootstrap check fails.
-      });
+      .catch(() => {});
   }, []);
 
-  if (!mounted) {
-    return null;
-  }
-
-  async function onSubmit(event: React.FormEvent) {
-    event.preventDefault();
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
     setLoading(true);
-
     if (mode === "bootstrap") {
       try {
         await bootstrapFirstAdmin({ data: { name, email, password } });
-
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-
-        if (error) {
-          toast.error(error.message);
-          return;
-        }
-
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        setLoading(false);
+        if (error) return toast.error(error.message);
         toast.success("Admin account created");
         navigate({ to: "/dashboard" });
-      } catch (error: any) {
-        toast.error(error?.message ?? "Bootstrap failed");
-      } finally {
+      } catch (err: any) {
         setLoading(false);
+        toast.error(err.message ?? "Bootstrap failed");
       }
-
       return;
     }
-
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
-
     if (error) {
       toast.error(error.message);
       return;
     }
-
-    const mustChangePassword = Boolean(
-      (data.user?.user_metadata as { must_change_password?: boolean } | undefined)
-        ?.must_change_password,
-    );
-
-    navigate({
-      to: mustChangePassword ? "/auth/change-password" : "/dashboard",
-    });
+    const mustChange = (data.user?.user_metadata as any)?.must_change_password;
+    navigate({ to: mustChange ? "/auth/change-password" : "/dashboard" });
   }
 
   return (
@@ -127,15 +86,9 @@ function AuthPage() {
             <Label htmlFor="name" className="microlabel text-muted-foreground">
               Full name
             </Label>
-            <Input
-              id="name"
-              required
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-            />
+            <Input id="name" required value={name} onChange={(e) => setName(e.target.value)} />
           </div>
         )}
-
         <div className="space-y-2">
           <Label htmlFor="email" className="microlabel text-muted-foreground">
             Email
@@ -146,10 +99,9 @@ function AuthPage() {
             autoComplete="email"
             required
             value={email}
-            onChange={(event) => setEmail(event.target.value)}
+            onChange={(e) => setEmail(e.target.value)}
           />
         </div>
-
         <div className="space-y-2">
           <Label htmlFor="password" className="microlabel text-muted-foreground">
             Password
@@ -159,14 +111,12 @@ function AuthPage() {
             autoComplete={mode === "bootstrap" ? "new-password" : "current-password"}
             required
             value={password}
-            onChange={(event) => setPassword(event.target.value)}
+            onChange={(e) => setPassword(e.target.value)}
           />
         </div>
-
         <Button type="submit" className="w-full" disabled={loading}>
           {loading ? "Working…" : mode === "bootstrap" ? "Create admin account" : "Sign in"}
         </Button>
-
         {mode === "login" && (
           <p className="microlabel pt-1 text-center text-[10px] text-muted-foreground/70">
             No self sign-up — ask a team lead for access, or{" "}
@@ -180,7 +130,6 @@ function AuthPage() {
           </p>
         )}
       </form>
-
       <RequestAccessDialog open={requestOpen} onOpenChange={setRequestOpen} />
     </AuthLayout>
   );
@@ -191,7 +140,7 @@ function RequestAccessDialog({
   onOpenChange,
 }: {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
+  onOpenChange: (o: boolean) => void;
 }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -199,17 +148,11 @@ function RequestAccessDialog({
 
   const submit = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from("access_requests").insert({
-        name: name.trim(),
-        email: email.trim(),
-        message: message.trim() || null,
-      });
-
-      if (error) {
-        throw error;
-      }
+      const { error } = await supabase
+        .from("access_requests")
+        .insert({ name: name.trim(), email: email.trim(), message: message.trim() || null });
+      if (error) throw error;
     },
-
     onSuccess: () => {
       toast.success("Request sent — a team lead will follow up.");
       onOpenChange(false);
@@ -217,10 +160,7 @@ function RequestAccessDialog({
       setEmail("");
       setMessage("");
     },
-
-    onError: (error: any) => {
-      toast.error(error?.message ?? "Unable to send request");
-    },
+    onError: (e: any) => toast.error(e.message),
   });
 
   return (
@@ -231,51 +171,31 @@ function RequestAccessDialog({
             Request access
           </DialogTitle>
         </DialogHeader>
-
         <form
           className="space-y-4"
-          onSubmit={(event) => {
-            event.preventDefault();
-
-            if (!name.trim() || !email.trim()) {
-              toast.error("Name and email are required");
-              return;
-            }
-
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!name.trim() || !email.trim()) return toast.error("Name and email are required");
             submit.mutate();
           }}
         >
           <div className="space-y-1.5">
             <Label className="microlabel text-muted-foreground">Full name</Label>
-            <Input
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              required
-            />
+            <Input value={name} onChange={(e) => setName(e.target.value)} required />
           </div>
-
           <div className="space-y-1.5">
             <Label className="microlabel text-muted-foreground">Email</Label>
-            <Input
-              type="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              required
-            />
+            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
           </div>
-
           <div className="space-y-1.5">
-            <Label className="microlabel text-muted-foreground">
-              Message (optional)
-            </Label>
+            <Label className="microlabel text-muted-foreground">Message (optional)</Label>
             <Textarea
               rows={3}
               value={message}
-              onChange={(event) => setMessage(event.target.value)}
+              onChange={(e) => setMessage(e.target.value)}
               placeholder="Which team, why you need access…"
             />
           </div>
-
           <DialogFooter>
             <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
               Cancel
