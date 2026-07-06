@@ -110,7 +110,7 @@ function Column({
   return (
     <div
       ref={setNodeRef}
-      className={`flex min-h-[420px] flex-col border bg-card/50 ${isOver ? "bg-accent/60" : ""}`}
+      className={`flex min-h-[160px] flex-col border bg-card/50 md:min-h-[420px] ${isOver ? "bg-accent/60" : ""}`}
       style={{ borderTop: `2px solid ${taskStatusColor[status]}` }}
     >
       <div className="flex items-center justify-between border-b px-3 py-2.5">

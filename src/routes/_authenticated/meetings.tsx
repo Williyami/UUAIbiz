@@ -1,16 +1,21 @@
+import { useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { companiesQuery, profilesQuery } from "@/lib/queries";
+import { companiesQuery, profilesQuery, meetingsQuery } from "@/lib/queries";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { StatusTag } from "@/components/shared/StatusTag";
 import { MemberChip } from "@/components/shared/MemberChip";
+import { Button } from "@/components/ui/button";
 import { companyStatusColor, type CompanyStatus } from "@/components/outreach/statusStyles";
 import { formatDate } from "@/lib/format";
+import { MeetingDialog } from "@/components/meetings/MeetingDialog";
+import { Plus } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/meetings")({
   loader: ({ context }) => {
     context.queryClient.ensureQueryData(companiesQuery);
     context.queryClient.ensureQueryData(profilesQuery);
+    context.queryClient.ensureQueryData(meetingsQuery);
   },
   component: MeetingsPage,
   errorComponent: ({ error }) => <div className="p-8 text-destructive">Error: {error.message}</div>,
@@ -19,30 +24,76 @@ export const Route = createFileRoute("/_authenticated/meetings")({
 function MeetingsPage() {
   const { data: companies } = useSuspenseQuery(companiesQuery);
   const { data: profiles } = useSuspenseQuery(profilesQuery);
+  const { data: meetings } = useSuspenseQuery(meetingsQuery);
   const navigate = useNavigate();
   const profileMap = new Map(profiles.map((p) => [p.id, p]));
 
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editing, setEditing] = useState<any>(null);
+
   const today = new Date(new Date().toDateString());
-  const booked = companies.filter((c: any) => c.meeting_booked);
-  const upcoming = booked
-    .filter((c: any) => !c.meeting_date || new Date(c.meeting_date) >= today)
-    .sort((a: any, b: any) => (a.meeting_date || "9999").localeCompare(b.meeting_date || "9999"));
-  const past = booked
-    .filter((c: any) => c.meeting_date && new Date(c.meeting_date) < today)
-    .sort((a: any, b: any) => b.meeting_date!.localeCompare(a.meeting_date!));
+
+  const fromCompanies = companies
+    .filter((c: any) => c.meeting_booked)
+    .map((c: any) => ({
+      id: `company-${c.id}`,
+      kind: "company" as const,
+      title: c.name,
+      subtitle: c.contact_person || "No contact person",
+      meeting_date: c.meeting_date,
+      status: c.status,
+      assigned_to: c.assigned_to,
+      source: c,
+    }));
+
+  const manual = meetings.map((m: any) => ({
+    id: m.id,
+    kind: "manual" as const,
+    title: m.title,
+    subtitle: m.company?.name || "No linked company",
+    meeting_date: m.meeting_date,
+    status: null,
+    assigned_to: m.assigned_to,
+    source: m,
+  }));
+
+  const all = [...fromCompanies, ...manual];
+  const upcoming = all
+    .filter((m) => !m.meeting_date || new Date(m.meeting_date) >= today)
+    .sort((a, b) => (a.meeting_date || "9999").localeCompare(b.meeting_date || "9999"));
+  const past = all
+    .filter((m) => m.meeting_date && new Date(m.meeting_date) < today)
+    .sort((a, b) => b.meeting_date!.localeCompare(a.meeting_date!));
+
+  function open(row: any) {
+    if (row.kind === "company") {
+      navigate({ to: "/outreach" });
+    } else {
+      setEditing(row.source);
+      setDialogOpen(true);
+    }
+  }
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 p-6 md:p-10">
       <PageHeader
         title="Meetings"
-        lede="Every company meeting on the books — set from a company's 'Meeting booked?' field in Outreach."
-      />
+        lede="Company meetings booked from Outreach, plus any added manually."
+      >
+        <Button
+          onClick={() => {
+            setEditing(null);
+            setDialogOpen(true);
+          }}
+        >
+          <Plus className="h-4 w-4" /> Add meeting
+        </Button>
+      </PageHeader>
 
-      {booked.length === 0 ? (
+      {all.length === 0 ? (
         <div className="border border-dashed bg-card/50 px-6 py-16 text-center">
           <p className="text-sm text-muted-foreground">
-            No meetings booked yet. Tick "Meeting booked?" on a company in Outreach and it shows up
-            here.
+            No meetings yet. Tick "Meeting booked?" on a company in Outreach, or add one manually.
           </p>
         </div>
       ) : (
@@ -51,7 +102,7 @@ function MeetingsPage() {
             title="Upcoming"
             rows={upcoming}
             profileMap={profileMap}
-            onOpen={() => navigate({ to: "/outreach" })}
+            onOpen={open}
             emptyText="Nothing upcoming"
           />
           {past.length > 0 && (
@@ -59,12 +110,14 @@ function MeetingsPage() {
               title="Past"
               rows={past}
               profileMap={profileMap}
-              onOpen={() => navigate({ to: "/outreach" })}
+              onOpen={open}
               muted
             />
           )}
         </>
       )}
+
+      <MeetingDialog open={dialogOpen} onOpenChange={setDialogOpen} meeting={editing} />
     </div>
   );
 }
@@ -80,7 +133,7 @@ function MeetingList({
   title: string;
   rows: any[];
   profileMap: Map<string, any>;
-  onOpen: (c: any) => void;
+  onOpen: (row: any) => void;
   muted?: boolean;
   emptyText?: string;
 }) {
@@ -94,30 +147,32 @@ function MeetingList({
         <div className="px-4 py-8 text-center text-sm text-muted-foreground">{emptyText}</div>
       ) : (
         <ul className="divide-y">
-          {rows.map((c) => {
-            const a = c.assigned_to ? profileMap.get(c.assigned_to) : null;
+          {rows.map((row) => {
+            const a = row.assigned_to ? profileMap.get(row.assigned_to) : null;
             return (
               <li
-                key={c.id}
-                onClick={() => onOpen(c)}
+                key={row.id}
+                onClick={() => onOpen(row)}
                 className="flex cursor-pointer items-center justify-between gap-3 px-4 py-3.5 transition-colors hover:bg-accent/50"
               >
                 <div className="min-w-0">
-                  <div className="truncate text-sm font-medium">{c.name}</div>
+                  <div className="truncate text-sm font-medium">{row.title}</div>
                   <div className="microlabel mt-0.5 text-[9.5px] text-muted-foreground/80">
-                    {c.contact_person || "No contact person"}
+                    {row.subtitle}
                   </div>
                 </div>
                 <div className="flex shrink-0 items-center gap-4">
-                  <StatusTag
-                    color={companyStatusColor[c.status as CompanyStatus]}
-                    className="hidden text-[9.5px] sm:inline-flex"
-                  >
-                    {c.status}
-                  </StatusTag>
+                  {row.status && (
+                    <StatusTag
+                      color={companyStatusColor[row.status as CompanyStatus]}
+                      className="hidden text-[9.5px] sm:inline-flex"
+                    >
+                      {row.status}
+                    </StatusTag>
+                  )}
                   <MemberChip name={a ? a.name || a.email : null} compact />
                   <span className="microlabel tnum text-muted-foreground">
-                    {c.meeting_date ? formatDate(c.meeting_date) : "Date TBD"}
+                    {row.meeting_date ? formatDate(row.meeting_date) : "Date TBD"}
                   </span>
                 </div>
               </li>
