@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
+import { NotificationBell } from "@/components/layout/NotificationBell";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { currentUserQuery } from "@/lib/queries";
 
@@ -31,15 +32,6 @@ function AuthenticatedShell() {
     }
   }, [me, navigate]);
 
-  const today = new Date()
-    .toLocaleDateString("en-GB", {
-      weekday: "short",
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    })
-    .toUpperCase();
-
   return (
     <SidebarProvider
       defaultOpen={false}
@@ -51,9 +43,7 @@ function AuthenticatedShell() {
           <div className="flex items-center justify-between gap-2 border-b border-border/70 bg-card/85 px-3 py-2 md:absolute md:right-3 md:top-3 md:z-10 md:justify-start md:rounded-[3px] md:border md:px-2.5 md:py-1.5 md:shadow-sm md:backdrop-blur-sm">
             <SidebarTrigger className="text-muted-foreground md:hidden" />
             <div className="flex items-center gap-2">
-              <span className="microlabel tnum text-[10px] font-semibold text-foreground/80">
-                {today}
-              </span>
+              <NotificationBell />
               <ThemeToggle />
             </div>
           </div>

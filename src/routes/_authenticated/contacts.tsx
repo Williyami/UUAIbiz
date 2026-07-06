@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { companiesQuery, contactsQuery, currentUserQuery } from "@/lib/queries";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ContactDialog } from "@/components/contacts/ContactDialog";
+import { CompanyContactDialog } from "@/components/contacts/CompanyContactDialog";
 import { Plus, Search, Mail, Phone } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/contacts")({
@@ -32,11 +33,12 @@ function ContactsPage() {
   const { data: companies } = useSuspenseQuery(companiesQuery);
   const { data: contacts } = useSuspenseQuery(contactsQuery);
   const { data: me } = useSuspenseQuery(currentUserQuery);
-  const navigate = useNavigate();
   const canEdit = me?.role !== "viewer";
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
+  const [companyDialogOpen, setCompanyDialogOpen] = useState(false);
+  const [companyEditing, setCompanyEditing] = useState<any>(null);
   const [q, setQ] = useState("");
 
   const fromOutreach: Row[] = companies
@@ -76,7 +78,8 @@ function ContactsPage() {
 
   function open(row: Row) {
     if (row.kind === "company") {
-      navigate({ to: "/outreach" });
+      setCompanyEditing(row.source);
+      setCompanyDialogOpen(true);
     } else if (canEdit) {
       setEditing(row.source);
       setDialogOpen(true);
@@ -137,6 +140,11 @@ function ContactsPage() {
                   </div>
                 </div>
                 <div className="flex shrink-0 items-center gap-1.5">
+                  {row.email && (
+                    <span className="microlabel mr-1 hidden max-w-52 truncate text-[9.5px] text-muted-foreground md:inline">
+                      {row.email}
+                    </span>
+                  )}
                   <span className="microlabel mr-1.5 hidden text-[9px] text-muted-foreground/60 sm:inline">
                     {row.kind === "company" ? "Outreach" : "Manual"}
                   </span>
@@ -168,6 +176,12 @@ function ContactsPage() {
       </section>
 
       <ContactDialog open={dialogOpen} onOpenChange={setDialogOpen} contact={editing} />
+      <CompanyContactDialog
+        open={companyDialogOpen}
+        onOpenChange={setCompanyDialogOpen}
+        company={companyEditing}
+        canEdit={canEdit}
+      />
     </div>
   );
 }
