@@ -49,6 +49,33 @@ export const meetingsQuery = queryOptions({
   },
 });
 
+export const boardPostsQuery = queryOptions({
+  queryKey: ["boardPosts"],
+  queryFn: async () => {
+    const { data, error } = await supabase
+      .from("board_posts")
+      .select("*, author:profiles(id,name,email,avatar_url)")
+      .order("created_at", { ascending: false });
+    if (error) throw error;
+    return data ?? [];
+  },
+  refetchInterval: 30_000,
+});
+
+export const notificationsQuery = queryOptions({
+  queryKey: ["notifications"],
+  queryFn: async () => {
+    const { data, error } = await supabase
+      .from("notifications")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(30);
+    if (error) throw error;
+    return data ?? [];
+  },
+  refetchInterval: 45_000,
+});
+
 export const contactsQuery = queryOptions({
   queryKey: ["contacts"],
   queryFn: async () => {
