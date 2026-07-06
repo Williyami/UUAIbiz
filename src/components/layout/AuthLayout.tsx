@@ -13,7 +13,9 @@ export function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="grid min-h-screen lg:grid-cols-[1.1fr_1fr]">
+    // "dark" wrapper pins the auth screens to dark tokens regardless of the
+    // visitor's saved theme, so they render identically on every device.
+    <div className="dark grid min-h-screen bg-background text-foreground lg:grid-cols-[1.1fr_1fr]">
       <aside className="relative hidden flex-col justify-between overflow-hidden bg-[oklch(0.218_0.009_50)] p-10 text-[oklch(0.78_0.008_78)] lg:flex">
         <div className="microlabel text-[10px] text-[oklch(0.78_0.008_78)]/50">
           UU AI Society · Uppsala
