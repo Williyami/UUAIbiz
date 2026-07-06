@@ -158,6 +158,22 @@ function RootComponent() {
     return () => sub.subscription.unsubscribe();
   }, [router, queryClient]);
 
+  useEffect(() => {
+    // A failed dynamic import usually means the open tab predates the latest
+    // deploy and its chunk URLs are gone ("Importing a module script failed"
+    // on Safari). Reload once to pick up the new build; the timestamp guard
+    // prevents a reload loop if the import keeps failing for another reason.
+    const onPreloadError = (e: Event) => {
+      const last = Number(sessionStorage.getItem("bh-chunk-reload") || 0);
+      if (Date.now() - last < 30_000) return;
+      sessionStorage.setItem("bh-chunk-reload", String(Date.now()));
+      e.preventDefault();
+      window.location.reload();
+    };
+    window.addEventListener("vite:preloadError", onPreloadError);
+    return () => window.removeEventListener("vite:preloadError", onPreloadError);
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
