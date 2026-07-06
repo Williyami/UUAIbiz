@@ -2,6 +2,7 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   LayoutDashboard,
   Building2,
+  ContactRound,
   CalendarCheck,
   CalendarDays,
   ListChecks,
@@ -33,6 +34,7 @@ import { initials } from "@/lib/format";
 const nav = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Outreach", url: "/outreach", icon: Building2 },
+  { title: "Contacts", url: "/contacts", icon: ContactRound },
   { title: "Meetings", url: "/meetings", icon: CalendarCheck },
   { title: "Events", url: "/events", icon: CalendarDays },
   { title: "Tasks", url: "/tasks", icon: ListChecks },
