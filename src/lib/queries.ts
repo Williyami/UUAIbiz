@@ -37,6 +37,18 @@ export const eventsQuery = queryOptions({
   },
 });
 
+export const meetingsQuery = queryOptions({
+  queryKey: ["meetings"],
+  queryFn: async () => {
+    const { data, error } = await supabase
+      .from("meetings")
+      .select("*, company:companies(id,name,contact_person)")
+      .order("meeting_date", { ascending: true, nullsFirst: false });
+    if (error) throw error;
+    return data ?? [];
+  },
+});
+
 export const tasksQuery = queryOptions({
   queryKey: ["tasks"],
   queryFn: async () => {

@@ -33,7 +33,11 @@ export const createTeamMember = createServerFn({ method: "POST" })
       .from("user_roles")
       .insert({ user_id: created.user.id, role: data.role });
     if (roleErr) throw new Error(roleErr.message);
-    return { id: created.user.id, tempPassword: password };
+    const { sendEmail } = await import("@/lib/email.server");
+    const { welcomeEmail } = await import("@/lib/emails/templates");
+    const { subject, html } = welcomeEmail({ name: data.name, email: data.email });
+    const { sent } = await sendEmail({ to: data.email, subject, html });
+    return { id: created.user.id, emailSent: sent };
   });
 
 export const deleteTeamMember = createServerFn({ method: "POST" })
@@ -74,9 +78,21 @@ export const resetMemberPassword = createServerFn({ method: "POST" })
       user_metadata: { must_change_password: true },
     });
     if (error) throw new Error(error.message);
-    await supabaseAdmin
+    const { data: profile } = await supabaseAdmin
       .from("profiles")
       .update({ must_change_password: true })
-      .eq("id", data.userId);
-    return { tempPassword: password };
+      .eq("id", data.userId)
+      .select("name, email")
+      .single();
+    let emailSent = false;
+    if (profile?.email) {
+      const { sendEmail } = await import("@/lib/email.server");
+      const { passwordResetEmail } = await import("@/lib/emails/templates");
+      const { subject, html } = passwordResetEmail({
+        name: profile.name,
+        email: profile.email,
+      });
+      emailSent = (await sendEmail({ to: profile.email, subject, html })).sent;
+    }
+    return { email: profile?.email ?? null, emailSent };
   });

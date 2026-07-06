@@ -86,9 +86,10 @@ function TeamPage() {
   const { data: requests } = useSuspenseQuery(accessRequestsQuery);
 
   const [addOpen, setAddOpen] = useState(false);
-  const [tempPassword, setTempPassword] = useState<{ email: string; password: string } | null>(
-    null,
-  );
+  const [accountReady, setAccountReady] = useState<{
+    email: string;
+    emailSent: boolean;
+  } | null>(null);
   const [prefill, setPrefill] = useState<{ name: string; email: string; requestId: string } | null>(
     null,
   );
@@ -100,7 +101,7 @@ function TeamPage() {
     mutationFn: (userId: string) => resetMemberPassword({ data: { userId } }),
     onSuccess: (res, userId) => {
       const p = profiles.find((x) => x.id === userId);
-      setTempPassword({ email: p?.email ?? "", password: res.tempPassword });
+      setAccountReady({ email: res.email ?? p?.email ?? "", emailSent: res.emailSent });
     },
     onError: (e: any) => toast.error(e.message),
   });
@@ -292,8 +293,8 @@ function TeamPage() {
           if (!o) setPrefill(null);
         }}
         prefill={prefill}
-        onCreated={(email, password) => {
-          setTempPassword({ email, password });
+        onCreated={(email, emailSent) => {
+          setAccountReady({ email, emailSent });
           if (prefill) {
             supabase
               .from("access_requests")
@@ -304,7 +305,7 @@ function TeamPage() {
           }
         }}
       />
-      <TempPasswordDialog cred={tempPassword} onClose={() => setTempPassword(null)} />
+      <AccountReadyDialog info={accountReady} onClose={() => setAccountReady(null)} />
     </div>
   );
 }
@@ -317,7 +318,7 @@ function AddMemberDialog({
 }: {
   open: boolean;
   onOpenChange: (o: boolean) => void;
-  onCreated: (email: string, password: string) => void;
+  onCreated: (email: string, emailSent: boolean) => void;
   prefill?: { name: string; email: string } | null;
 }) {
   const qc = useQueryClient();
@@ -343,7 +344,7 @@ function AddMemberDialog({
       qc.invalidateQueries({ queryKey: ["userRoles"] });
       toast.success("Account created");
       onOpenChange(false);
-      onCreated(email, res.tempPassword);
+      onCreated(email, res.emailSent);
       setName("");
       setEmail("");
       setRole("member");
@@ -402,35 +403,48 @@ function AddMemberDialog({
   );
 }
 
-function TempPasswordDialog({
-  cred,
+function AccountReadyDialog({
+  info,
   onClose,
 }: {
-  cred: { email: string; password: string } | null;
+  info: { email: string; emailSent: boolean } | null;
   onClose: () => void;
 }) {
   return (
-    <Dialog open={!!cred} onOpenChange={(o) => !o && onClose()}>
+    <Dialog open={!!info} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-sm">
         <DialogHeader>
           <DialogTitle className="font-display text-xl font-medium tracking-tight">
-            Temporary password
+            Ready to set a password
           </DialogTitle>
         </DialogHeader>
         <p className="text-sm text-muted-foreground">
-          Share this with <span className="font-mono text-xs text-foreground">{cred?.email}</span>.
-          They'll be asked to replace it on first login — it won't be shown again.
+          {info?.emailSent ? (
+            <>
+              We emailed <span className="font-mono text-xs text-foreground">{info?.email}</span>{" "}
+              with instructions.
+            </>
+          ) : (
+            <>
+              Couldn't send an email — let{" "}
+              <span className="font-mono text-xs text-foreground">{info?.email}</span> know
+              directly.
+            </>
+          )}{" "}
+          They just need to open the hub, enter their email on the sign-in page, and choose their
+          own password.
         </p>
         <div className="flex items-center justify-between gap-2 border bg-muted/60 px-3 py-2.5">
-          <code className="font-mono text-sm tracking-wide">{cred?.password}</code>
+          <code className="font-mono text-sm tracking-wide">uuaibiz.vercel.app</code>
           <Button
             variant="ghost"
             size="icon"
             className="h-7 w-7"
-            onClick={() => {
-              if (cred)
-                navigator.clipboard.writeText(cred.password).then(() => toast.success("Copied"));
-            }}
+            onClick={() =>
+              navigator.clipboard
+                .writeText("https://uuaibiz.vercel.app")
+                .then(() => toast.success("Copied"))
+            }
           >
             <Copy className="h-3.5 w-3.5" />
           </Button>
