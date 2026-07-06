@@ -9,12 +9,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { initials, timeAgo } from "@/lib/format";
 import { toast } from "sonner";
 import { Pencil, Trash2, Send } from "lucide-react";
+import { ProfileWidget } from "@/components/shared/ProfileWidget";
 
-export const Route = createFileRoute("/_authenticated/board")({
+export const Route = createFileRoute("/_authenticated/ideas")({
   loader: ({ context }) => {
     context.queryClient.ensureQueryData(boardPostsQuery);
   },
-  component: BoardPage,
+  component: IdeasPage,
   errorComponent: ({ error }) => <div className="p-8 text-destructive">Error: {error.message}</div>,
 });
 
@@ -26,7 +27,7 @@ const categoryColor: Record<string, string> = {
   "Event idea": "text-emerald-500",
 };
 
-function BoardPage() {
+function IdeasPage() {
   const qc = useQueryClient();
   const { data: posts } = useSuspenseQuery(boardPostsQuery);
   const { data: me } = useSuspenseQuery(currentUserQuery);
@@ -35,6 +36,7 @@ function BoardPage() {
   const [category, setCategory] = useState<string>("General");
   const [filter, setFilter] = useState<string>("All");
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [viewing, setViewing] = useState<any>(null);
   const [editContent, setEditContent] = useState("");
 
   const create = useMutation({
@@ -80,7 +82,7 @@ function BoardPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-6 p-6 md:p-10">
       <PageHeader
-        title="Board"
+        title="Ideas"
         lede="Shared notes for the whole team — companies worth contacting, event ideas, anything."
       />
 
@@ -142,7 +144,7 @@ function BoardPage() {
 
       {shown.length === 0 ? (
         <div className="border border-dashed bg-card/50 px-6 py-16 text-center">
-          <p className="text-sm text-muted-foreground">Nothing here yet — start the board.</p>
+          <p className="text-sm text-muted-foreground">Nothing here yet — share the first idea.</p>
         </div>
       ) : (
         <ul className="space-y-3">
@@ -153,19 +155,24 @@ function BoardPage() {
             return (
               <li key={p.id} className="border bg-card p-4">
                 <div className="flex items-center gap-2.5">
-                  {p.author?.avatar_url ? (
-                    <img src={p.author.avatar_url} alt="" className="size-7 rounded-full object-cover" />
-                  ) : (
-                    <div className="flex size-7 items-center justify-center rounded-full bg-accent font-mono text-[9px] font-semibold uppercase">
-                      {initials(authorName)}
+                  <button
+                    onClick={() => p.author && setViewing(p.author)}
+                    className="flex min-w-0 flex-1 cursor-pointer items-center gap-2.5 text-left"
+                  >
+                    {p.author?.avatar_url ? (
+                      <img src={p.author.avatar_url} alt="" className="size-7 rounded-full object-cover" />
+                    ) : (
+                      <div className="flex size-7 items-center justify-center rounded-full bg-accent font-mono text-[9px] font-semibold uppercase">
+                        {initials(authorName)}
+                      </div>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <span className="text-xs font-medium">{authorName}</span>
+                      <span className="microlabel ml-2 text-[9px] text-muted-foreground/70">
+                        {timeAgo(p.created_at)}
+                      </span>
                     </div>
-                  )}
-                  <div className="min-w-0 flex-1">
-                    <span className="text-xs font-medium">{authorName}</span>
-                    <span className="microlabel ml-2 text-[9px] text-muted-foreground/70">
-                      {timeAgo(p.created_at)}
-                    </span>
-                  </div>
+                  </button>
                   <span className={`microlabel text-[9px] ${categoryColor[p.category] ?? "text-muted-foreground"}`}>
                     {p.category}
                   </span>
@@ -219,6 +226,7 @@ function BoardPage() {
           })}
         </ul>
       )}
+      <ProfileWidget profile={viewing} onOpenChange={(o) => !o && setViewing(null)} />
     </div>
   );
 }

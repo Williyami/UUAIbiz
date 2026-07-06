@@ -59,7 +59,7 @@ export function NotificationBell() {
         </div>
         {notifications.length === 0 ? (
           <p className="px-3.5 py-8 text-center text-xs text-muted-foreground">
-            Nothing yet — you'll hear about tasks assigned to you and new board posts.
+            Nothing yet — you'll hear about tasks assigned to you and new ideas.
           </p>
         ) : (
           <ul className="max-h-96 divide-y overflow-y-auto">

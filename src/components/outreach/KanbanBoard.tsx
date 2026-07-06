@@ -122,7 +122,8 @@ function Column({
           {String(companies.length).padStart(2, "0")}
         </span>
       </div>
-      <div className="flex-1 space-y-2 p-2">
+      {/* Cap at roughly six cards; longer columns scroll inside themselves. */}
+      <div className="max-h-[560px] flex-1 space-y-2 overflow-y-auto p-2">
         {companies.map((c) => (
           <DraggableCard
             key={c.id}

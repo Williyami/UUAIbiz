@@ -39,7 +39,7 @@ const nav = [
   { title: "Meetings", url: "/meetings", icon: CalendarCheck },
   { title: "Events", url: "/events", icon: CalendarDays },
   { title: "Tasks", url: "/tasks", icon: ListChecks },
-  { title: "Board", url: "/board", icon: StickyNote },
+  { title: "Ideas", url: "/ideas", icon: StickyNote },
   { title: "Team", url: "/team", icon: Users },
   { title: "Info", url: "/info", icon: BookOpen },
   { title: "Contracts", url: "/contracts", icon: FileSignature },
