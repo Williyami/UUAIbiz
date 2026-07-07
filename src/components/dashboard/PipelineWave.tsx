@@ -1,14 +1,14 @@
 import { StatusTag } from "@/components/shared/StatusTag";
 import type { CompanyStatus } from "@/components/outreach/statusStyles";
 
-const STAGES = ["Contacted", "Negotiating", "Booked", "Completed"] as const satisfies readonly CompanyStatus[];
+const STAGES = ["Contacted", "Discussing", "Negotiating", "Booked"] as const satisfies readonly CompanyStatus[];
 // Theme-adaptive: built from status tokens (which already shift per theme)
 // instead of --foreground, which turns these muddy in light mode.
 const STAGE_COLORS: Record<(typeof STAGES)[number], string> = {
   Contacted: "var(--status-neutral)",
-  Negotiating: "color-mix(in oklch, var(--brand-red) 55%, var(--status-neutral))",
-  Booked: "var(--brand-red)",
-  Completed: "var(--status-success)",
+  Discussing: "color-mix(in oklch, var(--brand-red) 40%, var(--status-neutral))",
+  Negotiating: "var(--brand-red)",
+  Booked: "var(--status-success)",
 };
 
 const W = 800;

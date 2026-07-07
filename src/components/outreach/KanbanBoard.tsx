@@ -17,7 +17,7 @@ import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-q
 import { profilesQuery } from "@/lib/queries";
 import { toast } from "sonner";
 
-const MAIN_STATUSES: CompanyStatus[] = ["Contacted", "Negotiating", "Booked", "Completed"];
+const MAIN_STATUSES: CompanyStatus[] = ["Contacted", "Discussing", "Negotiating", "Booked"];
 const SIDE_STATUSES: CompanyStatus[] = ["Declined", "On hold"];
 
 export function KanbanBoard({

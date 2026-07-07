@@ -603,7 +603,7 @@ export type Database = {
         | "Contacted"
         | "Negotiating"
         | "Booked"
-        | "Completed"
+        | "Discussing"
         | "Declined"
         | "On hold"
       event_status: "Planned" | "Confirmed" | "Completed" | "Cancelled"
@@ -758,7 +758,7 @@ export const Constants = {
         "Contacted",
         "Negotiating",
         "Booked",
-        "Completed",
+        "Discussing",
         "Declined",
         "On hold",
       ],

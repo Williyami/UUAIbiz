@@ -26,9 +26,9 @@ import { toast } from "sonner";
 
 const STATUSES = [
   "Contacted",
+  "Discussing",
   "Negotiating",
   "Booked",
-  "Completed",
   "Declined",
   "On hold",
 ] as const;
