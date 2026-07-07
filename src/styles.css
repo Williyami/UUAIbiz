@@ -212,7 +212,14 @@
   }
 
   ::selection {
-    background-color: color-mix(in oklch, var(--brand-red) 18%, transparent);
+    background-color: color-mix(in oklch, var(--brand-red) 25%, transparent);
+  }
+
+  /* On the dark navy background a faint tint disappears — selection needs to
+     read as a solid highlight. */
+  .dark ::selection {
+    background-color: color-mix(in oklch, var(--brand-red) 60%, transparent);
+    color: var(--brand-red-foreground);
   }
 }
 
