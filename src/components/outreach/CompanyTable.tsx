@@ -27,10 +27,8 @@ export function CompanyTable({
   const [q, setQ] = useState("");
   const [status, setStatus] = useState<string>("all");
   const [assignee, setAssignee] = useState<string>("all");
-  const [source, setSource] = useState<string>("all");
   const [industry, setIndustry] = useState<string>("all");
 
-  const sources = Array.from(new Set(companies.map((c) => c.source).filter(Boolean))) as string[];
   const profileMap = new Map(profiles.map((p) => [p.id, p]));
 
   const rows = useMemo(() => {
@@ -38,7 +36,6 @@ export function CompanyTable({
       if (status !== "all" && c.status !== status) return false;
       if (assignee !== "all" && c.assigned_to !== (assignee === "none" ? null : assignee))
         return false;
-      if (source !== "all" && c.source !== source) return false;
       if (industry !== "all" && c.industry !== industry) return false;
       if (
         q &&
@@ -49,7 +46,7 @@ export function CompanyTable({
         return false;
       return true;
     });
-  }, [companies, q, status, assignee, source, industry]);
+  }, [companies, q, status, assignee, industry]);
 
   return (
     <div className="space-y-3">
@@ -80,14 +77,6 @@ export function CompanyTable({
             </SelectItem>
           ))}
         </FilterSelect>
-        <FilterSelect value={source} onChange={setSource} placeholder="Source">
-          <SelectItem value="all">All sources</SelectItem>
-          {sources.map((s) => (
-            <SelectItem key={s} value={s}>
-              {s}
-            </SelectItem>
-          ))}
-        </FilterSelect>
         <FilterSelect value={industry} onChange={setIndustry} placeholder="Industry">
           <SelectItem value="all">All industries</SelectItem>
           {INDUSTRY_ORDER.map((i) => (
@@ -109,7 +98,6 @@ export function CompanyTable({
               <Th>Contact</Th>
               <Th>Status</Th>
               <Th>Assigned</Th>
-              <Th>Source</Th>
               <Th>Industry</Th>
               <Th className="text-right">Last contact</Th>
             </tr>
@@ -141,9 +129,6 @@ export function CompanyTable({
                   </Td>
                   <Td>
                     <MemberChip name={a ? a.name || a.email : null} avatarUrl={a?.avatar_url} />
-                  </Td>
-                  <Td>
-                    <span className="text-xs text-muted-foreground">{c.source || "—"}</span>
                   </Td>
                   <Td>
                     <span className="text-xs text-muted-foreground">{c.industry || "—"}</span>

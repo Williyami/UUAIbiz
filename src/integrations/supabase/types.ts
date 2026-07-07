@@ -116,7 +116,6 @@ export type Database = {
           meeting_date: string | null
           name: string
           notes: string | null
-          source: string | null
           status: Database["public"]["Enums"]["company_status"]
           updated_at: string
         }
@@ -134,7 +133,6 @@ export type Database = {
           meeting_date?: string | null
           name: string
           notes?: string | null
-          source?: string | null
           status?: Database["public"]["Enums"]["company_status"]
           updated_at?: string
         }
@@ -152,7 +150,6 @@ export type Database = {
           meeting_date?: string | null
           name?: string
           notes?: string | null
-          source?: string | null
           status?: Database["public"]["Enums"]["company_status"]
           updated_at?: string
         }

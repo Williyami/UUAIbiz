@@ -57,7 +57,6 @@ export function CompanyDialog({
         contact_email: "",
         contact_phone: "",
         status: "Contacted",
-        source: "",
         industry: null,
         notes: "",
         assigned_to: null,
@@ -141,13 +140,6 @@ export function CompanyDialog({
               <Input
                 value={form.contact_phone || ""}
                 onChange={(e) => setForm({ ...form, contact_phone: e.target.value })}
-              />
-            </Field>
-            <Field label="Source">
-              <Input
-                placeholder="cold LinkedIn, inbound…"
-                value={form.source || ""}
-                onChange={(e) => setForm({ ...form, source: e.target.value })}
               />
             </Field>
             <Field label="Industry">
