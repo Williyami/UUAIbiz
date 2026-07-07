@@ -54,8 +54,11 @@ export const boardPostsQuery = queryOptions({
   queryFn: async () => {
     const { data, error } = await supabase
       .from("board_posts")
-      .select("*, author:profiles(id,name,email,avatar_url)")
-      .order("created_at", { ascending: false });
+      .select(
+        "*, author:profiles!board_posts_author_id_fkey(id,name,email,avatar_url), likes:idea_likes(user_id), comments:idea_comments(id, content, created_at, author_id, author:profiles!idea_comments_author_id_fkey(id,name,email,avatar_url))",
+      )
+      .order("created_at", { ascending: false })
+      .order("created_at", { referencedTable: "idea_comments", ascending: true });
     if (error) throw error;
     return data ?? [];
   },

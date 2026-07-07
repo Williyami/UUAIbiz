@@ -53,6 +53,7 @@ export function CompanyDialog({
       company ?? {
         name: "",
         contact_person: "",
+        contact_title: "",
         contact_email: "",
         contact_phone: "",
         status: "Contacted",
@@ -120,6 +121,13 @@ export function CompanyDialog({
               <Input
                 value={form.contact_person || ""}
                 onChange={(e) => setForm({ ...form, contact_person: e.target.value })}
+              />
+            </Field>
+            <Field label="Contact title">
+              <Input
+                placeholder="e.g. Head of Events"
+                value={form.contact_title || ""}
+                onChange={(e) => setForm({ ...form, contact_title: e.target.value })}
               />
             </Field>
             <Field label="Email">

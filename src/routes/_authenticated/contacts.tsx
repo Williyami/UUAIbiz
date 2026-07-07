@@ -47,7 +47,7 @@ function ContactsPage() {
       id: `company-${c.id}`,
       kind: "company" as const,
       name: c.contact_person || "Unnamed contact",
-      role: null,
+      role: c.contact_title,
       company: c.name,
       email: c.contact_email,
       phone: c.contact_phone,

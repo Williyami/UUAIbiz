@@ -37,6 +37,7 @@ export function CompanyContactDialog({
   useEffect(() => {
     setForm({
       contact_person: company?.contact_person ?? "",
+      contact_title: company?.contact_title ?? "",
       contact_email: company?.contact_email ?? "",
       contact_phone: company?.contact_phone ?? "",
     });
@@ -48,6 +49,7 @@ export function CompanyContactDialog({
         .from("companies")
         .update({
           contact_person: form.contact_person?.trim() || null,
+          contact_title: form.contact_title?.trim() || null,
           contact_email: form.contact_email?.trim() || null,
           contact_phone: form.contact_phone?.trim() || null,
         })
@@ -88,13 +90,23 @@ export function CompanyContactDialog({
             save.mutate();
           }}
         >
-          <Field label="Contact person">
-            <Input
-              value={form.contact_person || ""}
-              disabled={!canEdit}
-              onChange={(e) => setForm({ ...form, contact_person: e.target.value })}
-            />
-          </Field>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <Field label="Contact person">
+              <Input
+                value={form.contact_person || ""}
+                disabled={!canEdit}
+                onChange={(e) => setForm({ ...form, contact_person: e.target.value })}
+              />
+            </Field>
+            <Field label="Title">
+              <Input
+                placeholder="e.g. Head of Events"
+                value={form.contact_title || ""}
+                disabled={!canEdit}
+                onChange={(e) => setForm({ ...form, contact_title: e.target.value })}
+              />
+            </Field>
+          </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <Field label="Email">
               <Input

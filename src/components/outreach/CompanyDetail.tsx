@@ -86,7 +86,14 @@ export function CompanyDetail({
 
         <div className="mt-5 space-y-6 px-4 pb-6 sm:px-0">
           <section className="space-y-2 text-sm">
-            {company.contact_person && <InfoRow icon={User}>{company.contact_person}</InfoRow>}
+            {company.contact_person && (
+              <InfoRow icon={User}>
+                {company.contact_person}
+                {company.contact_title && (
+                  <span className="text-muted-foreground"> · {company.contact_title}</span>
+                )}
+              </InfoRow>
+            )}
             {company.contact_email && (
               <InfoRow icon={Mail}>
                 <a
