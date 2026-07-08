@@ -220,7 +220,7 @@ function EventsPage() {
                     <Money value={n} signed />
                   </Td>
                   <Td>
-                    <MemberChip name={a ? a.name || a.email : null} avatarUrl={a?.avatar_url} />
+                    <MemberChip name={a ? a.name || a.email : null} avatarUrl={a?.avatar_url} profile={a} />
                   </Td>
                   <Td>
                     {e.luma_link && (

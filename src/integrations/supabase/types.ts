@@ -647,6 +647,32 @@ export type Database = {
         }
         Relationships: []
       }
+      user_visits: {
+        Row: {
+          last_visit_at: string | null
+          user_id: string
+          visit_count: number
+        }
+        Insert: {
+          last_visit_at?: string | null
+          user_id: string
+          visit_count?: number
+        }
+        Update: {
+          last_visit_at?: string | null
+          user_id?: string
+          visit_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_visits_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -660,6 +686,7 @@ export type Database = {
         Returns: boolean
       }
       is_editor: { Args: { _user_id: string }; Returns: boolean }
+      record_visit: { Args: never; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "member" | "viewer"

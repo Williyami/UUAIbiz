@@ -158,6 +158,16 @@ export const accessRequestsQuery = queryOptions({
   },
 });
 
+// RLS only returns rows to admins; everyone else gets an empty list.
+export const userVisitsQuery = queryOptions({
+  queryKey: ["userVisits"],
+  queryFn: async () => {
+    const { data, error } = await supabase.from("user_visits").select("*");
+    if (error) throw error;
+    return data ?? [];
+  },
+});
+
 export const currentUserQuery = queryOptions({
   queryKey: ["currentUser"],
   queryFn: async () => {

@@ -33,6 +33,16 @@ function AuthenticatedShell() {
     }
   }, [me, navigate]);
 
+  useEffect(() => {
+    // One visit per browser session, not per SPA navigation.
+    if (!sessionStorage.getItem("bh-visit-logged")) {
+      sessionStorage.setItem("bh-visit-logged", "1");
+      supabase.rpc("record_visit").then(({ error }) => {
+        if (error) console.warn("record_visit failed:", error.message);
+      });
+    }
+  }, []);
+
   return (
     <SidebarProvider
       defaultOpen={false}

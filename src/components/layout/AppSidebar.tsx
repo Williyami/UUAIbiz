@@ -27,6 +27,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Logo } from "./Logo";
+import { useOpenProfile } from "@/components/shared/profile-widget-context";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { currentUserQuery } from "@/lib/queries";
@@ -51,6 +52,7 @@ export function AppSidebar() {
   const qc = useQueryClient();
   const { data: me } = useSuspenseQuery(currentUserQuery);
   const { toggleSidebar } = useSidebar();
+  const openProfile = useOpenProfile();
 
   async function signOut() {
     await qc.cancelQueries();
@@ -124,17 +126,23 @@ export function AppSidebar() {
         {/* Avatar keeps the exact same position in both states; everything to
             its right fades out and is clipped by the shrinking width. */}
         <div className="flex h-10 items-center overflow-hidden">
-          {me?.profile?.avatar_url ? (
-            <img
-              src={me.profile.avatar_url}
-              alt=""
-              className="size-8 shrink-0 rounded-full object-cover"
-            />
-          ) : (
-            <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-sidebar-accent font-mono text-[10px] font-semibold uppercase text-sidebar-accent-foreground">
-              {initials(me?.profile?.name || me?.email)}
-            </div>
-          )}
+          <button
+            onClick={() => me?.profile && openProfile(me.profile)}
+            title="View your profile"
+            className="shrink-0 cursor-pointer"
+          >
+            {me?.profile?.avatar_url ? (
+              <img
+                src={me.profile.avatar_url}
+                alt=""
+                className="size-8 shrink-0 rounded-full object-cover"
+              />
+            ) : (
+              <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-sidebar-accent font-mono text-[10px] font-semibold uppercase text-sidebar-accent-foreground">
+                {initials(me?.profile?.name || me?.email)}
+              </div>
+            )}
+          </button>
           <div className="flex min-w-0 flex-1 items-center gap-1 pl-2.5 transition-opacity duration-200 group-data-[collapsible=icon]:pointer-events-none group-data-[collapsible=icon]:opacity-0">
             <div className="min-w-0 flex-1">
               <div className="truncate text-xs font-medium text-sidebar-accent-foreground">
