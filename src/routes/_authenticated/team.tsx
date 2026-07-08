@@ -19,6 +19,7 @@ import {
 } from "@/lib/team.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { ProfileWidget } from "@/components/shared/ProfileWidget";
+import { OnlineAvatar } from "@/components/shared/OnlineAvatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -215,17 +216,7 @@ function TeamPage() {
                 onClick={() => setViewing(p)}
                 className="flex min-w-0 flex-1 cursor-pointer items-center gap-4 text-left"
               >
-                {p.avatar_url ? (
-                  <img
-                    src={p.avatar_url}
-                    alt=""
-                    className="h-10 w-10 shrink-0 rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-foreground/85 font-mono text-xs font-semibold uppercase text-background">
-                    {initials(p.name || p.email)}
-                  </div>
-                )}
+                <OnlineAvatar profile={p} size="lg" />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <span className="truncate text-sm font-medium">{p.name || p.email}</span>

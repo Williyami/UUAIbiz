@@ -12,7 +12,9 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useOpenProfile } from "@/components/shared/profile-widget-context";
-import { initials, timeAgo } from "@/lib/format";
+import { useOnlineUsers } from "@/components/shared/presence-context";
+import { OnlineAvatar } from "@/components/shared/OnlineAvatar";
+import { timeAgo } from "@/lib/format";
 import { toast } from "sonner";
 import { Send, Trash2 } from "lucide-react";
 
@@ -47,31 +49,23 @@ function ChatPage() {
   const profileMap = new Map(profiles.map((p) => [p.id, p]));
 
   const [draft, setDraft] = useState("");
-  const [online, setOnline] = useState<Set<string>>(new Set());
+  const online = useOnlineUsers();
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  // Presence: everyone with the chat page open shows as online.
+  // Live message stream; presence comes from the app-wide provider.
   useEffect(() => {
-    if (!me?.id) return;
-    const channel = supabase.channel("team-chat", {
-      config: { presence: { key: me.id } },
-    });
-    channel
-      .on("presence", { event: "sync" }, () => {
-        setOnline(new Set(Object.keys(channel.presenceState())));
-      })
+    const channel = supabase
+      .channel("team-chat-stream")
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "chat_messages" },
         () => qc.invalidateQueries({ queryKey: ["chatMessages"] }),
       )
-      .subscribe((status) => {
-        if (status === "SUBSCRIBED") channel.track({ at: Date.now() });
-      });
+      .subscribe();
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [me?.id, qc]);
+  }, [qc]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ block: "end" });
@@ -111,7 +105,7 @@ function ChatPage() {
         <div className="flex items-center gap-2">
           <span className="flex items-center -space-x-1.5">
             {onlineMembers.slice(0, 6).map((p) => (
-              <OnlineAvatar key={p.id} profile={p} online onClick={() => openProfile(p)} size="sm" />
+              <OnlineAvatar key={p.id} profile={p} onClick={() => openProfile(p)} size="sm" />
             ))}
           </span>
           <span className="microlabel text-[9.5px] text-muted-foreground">
@@ -134,11 +128,7 @@ function ChatPage() {
                 const mine = m.author_id === me?.id;
                 return (
                   <li key={m.id} className="group flex items-start gap-2.5">
-                    <OnlineAvatar
-                      profile={author}
-                      online={!!m.author_id && online.has(m.author_id)}
-                      onClick={() => author && openProfile(author)}
-                    />
+                    <OnlineAvatar profile={author} onClick={() => author && openProfile(author)} />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-baseline gap-2">
                         <span className="text-xs font-medium">{name}</span>
@@ -185,44 +175,5 @@ function ChatPage() {
         </div>
       </section>
     </div>
-  );
-}
-
-function OnlineAvatar({
-  profile,
-  online,
-  onClick,
-  size = "md",
-}: {
-  profile: any | null;
-  online: boolean;
-  onClick?: () => void;
-  size?: "sm" | "md";
-}) {
-  const cls = size === "sm" ? "h-6 w-6" : "h-8 w-8";
-  const name = profile?.name || profile?.email || "?";
-  return (
-    <button
-      onClick={onClick}
-      title={`${name}${online ? " · online" : ""}`}
-      className="relative shrink-0 cursor-pointer"
-    >
-      {online && (
-        <>
-          {/* pulsating presence ring */}
-          <span className={`absolute inset-0 animate-ping rounded-full ring-2 ring-emerald-500/60 ${cls}`} />
-          <span className={`absolute inset-0 rounded-full ring-2 ring-emerald-500 ${cls}`} />
-        </>
-      )}
-      {profile?.avatar_url ? (
-        <img src={profile.avatar_url} alt="" className={`${cls} rounded-full object-cover`} />
-      ) : (
-        <span
-          className={`flex ${cls} items-center justify-center rounded-full bg-foreground/85 font-mono text-[9px] font-semibold uppercase text-background`}
-        >
-          {initials(name)}
-        </span>
-      )}
-    </button>
   );
 }

@@ -6,6 +6,7 @@ import { AppSidebar } from "@/components/layout/AppSidebar";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { NotificationBell } from "@/components/layout/NotificationBell";
 import { ProfileWidgetProvider } from "@/components/shared/profile-widget-context";
+import { PresenceProvider } from "@/components/shared/presence-context";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { currentUserQuery } from "@/lib/queries";
 import { isChunkLoadError, useReloadOnChunkError } from "@/lib/chunk-error";
@@ -53,6 +54,7 @@ function AuthenticatedShell() {
       defaultOpen={false}
       style={{ "--sidebar-width": "13.5rem" } as React.CSSProperties}
     >
+      <PresenceProvider userId={me?.id}>
       <ProfileWidgetProvider>
       <div className="flex min-h-screen w-full">
         <AppSidebar />
@@ -70,6 +72,7 @@ function AuthenticatedShell() {
         </div>
       </div>
       </ProfileWidgetProvider>
+      </PresenceProvider>
     </SidebarProvider>
   );
 }
