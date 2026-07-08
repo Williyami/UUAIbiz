@@ -128,7 +128,7 @@ export function CompanyTable({
                     </StatusTag>
                   </Td>
                   <Td>
-                    <MemberChip name={a ? a.name || a.email : null} avatarUrl={a?.avatar_url} />
+                    <MemberChip name={a ? a.name || a.email : null} avatarUrl={a?.avatar_url} profile={a} />
                   </Td>
                   <Td>
                     <span className="text-xs text-muted-foreground">{c.industry || "—"}</span>

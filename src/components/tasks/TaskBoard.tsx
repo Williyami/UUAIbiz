@@ -183,6 +183,7 @@ function Card({
         <MemberChip
           name={assignee ? assignee.name || assignee.email : null}
           avatarUrl={assignee?.avatar_url}
+          profile={assignee}
         />
         <span
           className={`microlabel tnum text-[9.5px] ${overdue ? "font-semibold text-brand" : "text-muted-foreground/80"}`}

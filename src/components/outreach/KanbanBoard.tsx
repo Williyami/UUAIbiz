@@ -188,6 +188,7 @@ function Card({
         <MemberChip
           name={assignee ? assignee.name || assignee.email : null}
           avatarUrl={assignee?.avatar_url}
+          profile={assignee}
         />
         <span className="microlabel tnum text-[9.5px] text-muted-foreground/80">
           {company.last_contact_date ? formatDate(company.last_contact_date) : "—"}

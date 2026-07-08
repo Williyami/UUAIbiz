@@ -170,7 +170,7 @@ function MeetingList({
                       {row.status}
                     </StatusTag>
                   )}
-                  <MemberChip name={a ? a.name || a.email : null} compact />
+                  <MemberChip name={a ? a.name || a.email : null} avatarUrl={a?.avatar_url} profile={a} compact />
                   <span className="microlabel tnum text-muted-foreground">
                     {row.meeting_date ? formatDate(row.meeting_date) : "Date TBD"}
                   </span>

@@ -5,6 +5,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { NotificationBell } from "@/components/layout/NotificationBell";
+import { ProfileWidgetProvider } from "@/components/shared/profile-widget-context";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { currentUserQuery } from "@/lib/queries";
 
@@ -37,6 +38,7 @@ function AuthenticatedShell() {
       defaultOpen={false}
       style={{ "--sidebar-width": "13.5rem" } as React.CSSProperties}
     >
+      <ProfileWidgetProvider>
       <div className="flex min-h-screen w-full">
         <AppSidebar />
         <div className="relative flex min-w-0 flex-1 flex-col">
@@ -52,6 +54,7 @@ function AuthenticatedShell() {
           </main>
         </div>
       </div>
+      </ProfileWidgetProvider>
     </SidebarProvider>
   );
 }
