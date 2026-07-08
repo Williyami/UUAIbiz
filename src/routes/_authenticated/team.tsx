@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import {
@@ -56,6 +56,7 @@ import {
   UserMinus,
   Check,
   X,
+  Settings,
 } from "lucide-react";
 
 type AppRole = "admin" | "member" | "viewer";
@@ -259,6 +260,27 @@ function TeamPage() {
                   </span>
                 )}
               </div>
+              {me?.isAdmin && p.id === me.id && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem asChild>
+                      <Link to="/settings">
+                        <Settings className="h-3.5 w-3.5" /> Edit profile
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/auth/change-password">
+                        <KeyRound className="h-3.5 w-3.5" /> Change password
+                      </Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
               {me?.isAdmin && p.id !== me.id && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>

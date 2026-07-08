@@ -233,3 +233,14 @@
   border-right: 1px solid color-mix(in oklch, var(--sidebar-border) 55%, transparent);
 }
 
+/* On mobile the sidebar sits over the Sheet's flat bg-black/80 overlay, so a
+   light blur already reads as frosted glass. On desktop it sits directly over
+   the busy body background photo with no dimming layer behind it, so the same
+   blur just looks like a hazy tint — push blur/saturation/opacity harder here
+   to match the mobile glassiness. */
+[data-sidebar="sidebar"]:not([data-mobile="true"]) {
+  background-color: color-mix(in oklch, var(--sidebar) 55%, transparent);
+  -webkit-backdrop-filter: blur(22px) saturate(180%);
+  backdrop-filter: blur(22px) saturate(180%);
+}
+
