@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { AuthLayout } from "@/components/layout/AuthLayout";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/auth/change-password")({
+export const Route = createFileRoute("/auth_/change-password")({
   ssr: false,
   beforeLoad: async () => {
     const { data } = await supabase.auth.getSession();

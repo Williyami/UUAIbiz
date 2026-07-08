@@ -12,7 +12,8 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthChangePasswordRouteImport } from './routes/auth.change-password'
+import { Route as AuthSetupProfileRouteImport } from './routes/auth_.setup-profile'
+import { Route as AuthChangePasswordRouteImport } from './routes/auth_.change-password'
 import { Route as AuthenticatedTeamRouteImport } from './routes/_authenticated/team'
 import { Route as AuthenticatedTasksRouteImport } from './routes/_authenticated/tasks'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
@@ -40,10 +41,15 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthSetupProfileRoute = AuthSetupProfileRouteImport.update({
+  id: '/auth_/setup-profile',
+  path: '/auth/setup-profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthChangePasswordRoute = AuthChangePasswordRouteImport.update({
-  id: '/change-password',
-  path: '/change-password',
-  getParentRoute: () => AuthRoute,
+  id: '/auth_/change-password',
+  path: '/auth/change-password',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedTeamRoute = AuthenticatedTeamRouteImport.update({
   id: '/team',
@@ -109,7 +115,7 @@ const AuthenticatedEventsEventIdRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRouteWithChildren
+  '/auth': typeof AuthRoute
   '/contacts': typeof AuthenticatedContactsRoute
   '/contracts': typeof AuthenticatedContractsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -122,11 +128,12 @@ export interface FileRoutesByFullPath {
   '/tasks': typeof AuthenticatedTasksRoute
   '/team': typeof AuthenticatedTeamRoute
   '/auth/change-password': typeof AuthChangePasswordRoute
+  '/auth/setup-profile': typeof AuthSetupProfileRoute
   '/events/$eventId': typeof AuthenticatedEventsEventIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRouteWithChildren
+  '/auth': typeof AuthRoute
   '/contacts': typeof AuthenticatedContactsRoute
   '/contracts': typeof AuthenticatedContractsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -139,13 +146,14 @@ export interface FileRoutesByTo {
   '/tasks': typeof AuthenticatedTasksRoute
   '/team': typeof AuthenticatedTeamRoute
   '/auth/change-password': typeof AuthChangePasswordRoute
+  '/auth/setup-profile': typeof AuthSetupProfileRoute
   '/events/$eventId': typeof AuthenticatedEventsEventIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
-  '/auth': typeof AuthRouteWithChildren
+  '/auth': typeof AuthRoute
   '/_authenticated/contacts': typeof AuthenticatedContactsRoute
   '/_authenticated/contracts': typeof AuthenticatedContractsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
@@ -157,7 +165,8 @@ export interface FileRoutesById {
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/tasks': typeof AuthenticatedTasksRoute
   '/_authenticated/team': typeof AuthenticatedTeamRoute
-  '/auth/change-password': typeof AuthChangePasswordRoute
+  '/auth_/change-password': typeof AuthChangePasswordRoute
+  '/auth_/setup-profile': typeof AuthSetupProfileRoute
   '/_authenticated/events_/$eventId': typeof AuthenticatedEventsEventIdRoute
 }
 export interface FileRouteTypes {
@@ -177,6 +186,7 @@ export interface FileRouteTypes {
     | '/tasks'
     | '/team'
     | '/auth/change-password'
+    | '/auth/setup-profile'
     | '/events/$eventId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -194,6 +204,7 @@ export interface FileRouteTypes {
     | '/tasks'
     | '/team'
     | '/auth/change-password'
+    | '/auth/setup-profile'
     | '/events/$eventId'
   id:
     | '__root__'
@@ -211,14 +222,17 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/_authenticated/tasks'
     | '/_authenticated/team'
-    | '/auth/change-password'
+    | '/auth_/change-password'
+    | '/auth_/setup-profile'
     | '/_authenticated/events_/$eventId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
-  AuthRoute: typeof AuthRouteWithChildren
+  AuthRoute: typeof AuthRoute
+  AuthChangePasswordRoute: typeof AuthChangePasswordRoute
+  AuthSetupProfileRoute: typeof AuthSetupProfileRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -244,12 +258,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/auth/change-password': {
-      id: '/auth/change-password'
-      path: '/change-password'
+    '/auth_/setup-profile': {
+      id: '/auth_/setup-profile'
+      path: '/auth/setup-profile'
+      fullPath: '/auth/setup-profile'
+      preLoaderRoute: typeof AuthSetupProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth_/change-password': {
+      id: '/auth_/change-password'
+      path: '/auth/change-password'
       fullPath: '/auth/change-password'
       preLoaderRoute: typeof AuthChangePasswordRouteImport
-      parentRoute: typeof AuthRoute
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/team': {
       id: '/_authenticated/team'
@@ -371,20 +392,12 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
-interface AuthRouteChildren {
-  AuthChangePasswordRoute: typeof AuthChangePasswordRoute
-}
-
-const AuthRouteChildren: AuthRouteChildren = {
-  AuthChangePasswordRoute: AuthChangePasswordRoute,
-}
-
-const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
-  AuthRoute: AuthRouteWithChildren,
+  AuthRoute: AuthRoute,
+  AuthChangePasswordRoute: AuthChangePasswordRoute,
+  AuthSetupProfileRoute: AuthSetupProfileRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

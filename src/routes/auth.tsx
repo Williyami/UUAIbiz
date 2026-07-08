@@ -95,7 +95,7 @@ function AuthPage() {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw new Error(error.message);
       toast.success("Password set — welcome!");
-      navigate({ to: "/dashboard" });
+      navigate({ to: "/auth/setup-profile" });
     } catch (err: any) {
       toast.error(err.message ?? "Could not set password");
     } finally {

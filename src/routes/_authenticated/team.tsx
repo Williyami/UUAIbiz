@@ -9,6 +9,7 @@ import {
   tasksQuery,
   currentUserQuery,
   accessRequestsQuery,
+  userVisitsQuery,
 } from "@/lib/queries";
 import {
   createTeamMember,
@@ -85,6 +86,8 @@ function TeamPage() {
   const { data: tasks } = useSuspenseQuery(tasksQuery);
   const { data: me } = useSuspenseQuery(currentUserQuery);
   const { data: requests } = useSuspenseQuery(accessRequestsQuery);
+  const { data: visits } = useSuspenseQuery(userVisitsQuery);
+  const visitMap = new Map(visits.map((v: any) => [v.user_id, v]));
 
   const [addOpen, setAddOpen] = useState(false);
   const [viewing, setViewing] = useState<any>(null);
@@ -243,6 +246,18 @@ function TeamPage() {
                 <span>{owned.companies} companies</span>
                 <span>{owned.events} events</span>
                 <span>{owned.tasks} open tasks</span>
+                {me?.isAdmin && (
+                  <span
+                    title={
+                      visitMap.get(p.id)?.last_visit_at
+                        ? `Last visit ${new Date(visitMap.get(p.id)!.last_visit_at).toLocaleString("sv-SE")}`
+                        : "Never visited"
+                    }
+                    className={visitMap.get(p.id) ? "" : "text-muted-foreground/50"}
+                  >
+                    {visitMap.get(p.id)?.visit_count ?? 0} visits
+                  </span>
+                )}
               </div>
               {me?.isAdmin && p.id !== me.id && (
                 <DropdownMenu>
