@@ -233,3 +233,12 @@
   border-right: 1px solid color-mix(in oklch, var(--sidebar-border) 55%, transparent);
 }
 
+/* Desktop pane only: lighter tint and gentler blur so the artwork's linework
+   actually reads through the glass (10px smears it away entirely). Mobile
+   keeps the stronger recipe — it overlays page content, not the artwork. */
+[data-sidebar="sidebar"]:not([data-mobile="true"]) {
+  background-color: color-mix(in oklch, var(--sidebar) 18%, transparent);
+  -webkit-backdrop-filter: blur(3px) saturate(160%);
+  backdrop-filter: blur(3px) saturate(160%);
+}
+
