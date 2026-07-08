@@ -44,6 +44,7 @@ export function MeetingDialog({
         title: "",
         company_id: null,
         meeting_date: new Date().toLocaleDateString("sv-SE"),
+        meeting_time: "",
         notes: "",
         assigned_to: null,
       },
@@ -56,6 +57,7 @@ export function MeetingDialog({
         title: values.title,
         company_id: values.company_id || null,
         meeting_date: values.meeting_date || null,
+        meeting_time: values.meeting_time || null,
         notes: values.notes || null,
         assigned_to: values.assigned_to || null,
       };
@@ -133,6 +135,13 @@ export function MeetingDialog({
                 type="date"
                 value={form.meeting_date || ""}
                 onChange={(e) => setForm({ ...form, meeting_date: e.target.value })}
+              />
+            </Field>
+            <Field label="Time (optional)">
+              <Input
+                type="time"
+                value={(form.meeting_time || "").slice(0, 5)}
+                onChange={(e) => setForm({ ...form, meeting_time: e.target.value })}
               />
             </Field>
             <Field label="Assigned to">

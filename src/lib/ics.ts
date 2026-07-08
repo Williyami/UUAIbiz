@@ -19,8 +19,22 @@ export type IcsEvent = {
   id: string;
   title: string;
   date: string; // YYYY-MM-DD
+  time?: string | null; // HH:MM or HH:MM:SS — omitted = all-day event
   description?: string | null;
 };
+
+// Floating local time (no TZID): correct for a team that all lives in the
+// same timezone, and avoids shipping a VTIMEZONE block.
+function dateTimeValue(isoDate: string, time: string): string {
+  const hhmmss = time.length === 5 ? `${time}:00` : time;
+  return `${dateValue(isoDate)}T${hhmmss.replaceAll(":", "")}`;
+}
+
+function plusOneHour(isoDate: string, time: string): { date: string; time: string } {
+  const d = new Date(`${isoDate}T${time.length === 5 ? `${time}:00` : time}`);
+  d.setHours(d.getHours() + 1);
+  return { date: d.toLocaleDateString("sv-SE"), time: d.toTimeString().slice(0, 8) };
+}
 
 export function buildICS(events: IcsEvent[]): string {
   const stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
@@ -32,12 +46,18 @@ export function buildICS(events: IcsEvent[]): string {
     "METHOD:PUBLISH",
   ];
   for (const e of events) {
+    const timed = !!e.time;
+    const end = timed ? plusOneHour(e.date, e.time!) : null;
     lines.push(
       "BEGIN:VEVENT",
       `UID:${e.id}@uuais-business-hub`,
       `DTSTAMP:${stamp}`,
-      `DTSTART;VALUE=DATE:${dateValue(e.date)}`,
-      `DTEND;VALUE=DATE:${dateValue(nextDay(e.date))}`,
+      timed
+        ? `DTSTART:${dateTimeValue(e.date, e.time!)}`
+        : `DTSTART;VALUE=DATE:${dateValue(e.date)}`,
+      timed
+        ? `DTEND:${dateTimeValue(end!.date, end!.time)}`
+        : `DTEND;VALUE=DATE:${dateValue(nextDay(e.date))}`,
       `SUMMARY:${escapeText(e.title)}`,
       ...(e.description ? [`DESCRIPTION:${escapeText(e.description)}`] : []),
       "END:VEVENT",

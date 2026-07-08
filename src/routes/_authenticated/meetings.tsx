@@ -53,15 +53,17 @@ function MeetingsPage() {
     title: m.title,
     subtitle: m.company?.name || "No linked company",
     meeting_date: m.meeting_date,
+    meeting_time: m.meeting_time,
     status: null,
     assigned_to: m.assigned_to,
     source: m,
   }));
 
   const all = [...fromCompanies, ...manual];
+  const sortKey = (m: any) => `${m.meeting_date || "9999"}T${m.meeting_time || "99"}`;
   const upcoming = all
     .filter((m) => !m.meeting_date || new Date(m.meeting_date) >= today)
-    .sort((a, b) => (a.meeting_date || "9999").localeCompare(b.meeting_date || "9999"));
+    .sort((a, b) => sortKey(a).localeCompare(sortKey(b)));
   const past = all
     .filter((m) => m.meeting_date && new Date(m.meeting_date) < today)
     .sort((a, b) => b.meeting_date!.localeCompare(a.meeting_date!));
@@ -146,6 +148,7 @@ function icsFromRow(row: any): IcsEvent {
     id: row.id,
     title: `Meeting: ${row.title}`,
     date: row.meeting_date,
+    time: row.meeting_time || null,
     description:
       [row.subtitle === "No linked company" ? null : row.subtitle, row.source?.notes]
         .filter(Boolean)
@@ -193,7 +196,14 @@ function NextMeetingHero({
         <div className="flex shrink-0 items-center gap-5">
           <div className="text-right">
             <div className="microlabel text-[10px] text-muted-foreground">{weekday}</div>
-            <div className="tnum font-display text-xl font-medium tracking-tight">{dayMonth}</div>
+            <div className="tnum font-display text-xl font-medium tracking-tight">
+              {dayMonth}
+              {meeting.meeting_time && (
+                <span className="ml-2 text-muted-foreground">
+                  {meeting.meeting_time.slice(0, 5)}
+                </span>
+              )}
+            </div>
           </div>
           {a && (
             <div className="hidden sm:block" title={a.name || a.email}>
@@ -384,6 +394,7 @@ function MeetingList({
                   <MemberChip name={a ? a.name || a.email : null} avatarUrl={a?.avatar_url} profile={a} compact />
                   <span className="microlabel tnum text-muted-foreground">
                     {row.meeting_date ? formatDate(row.meeting_date) : "Date TBD"}
+                    {row.meeting_time && ` · ${row.meeting_time.slice(0, 5)}`}
                   </span>
                   {row.meeting_date && (
                     <button
