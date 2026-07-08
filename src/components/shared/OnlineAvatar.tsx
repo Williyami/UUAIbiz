@@ -32,10 +32,7 @@ export function OnlineAvatar({
       className={`relative inline-block shrink-0 ${onClick ? "cursor-pointer" : ""}`}
     >
       {isOnline && (
-        <>
-          <span className={`absolute inset-0 animate-ping rounded-full ring-2 ring-emerald-500/60 ${cls}`} />
-          <span className={`absolute inset-0 rounded-full ring-2 ring-emerald-500 ${cls}`} />
-        </>
+        <span className={`absolute inset-0 rounded-full ring-2 ring-emerald-500 ${cls}`} />
       )}
       {profile?.avatar_url ? (
         <img src={profile.avatar_url} alt="" className={`${cls} rounded-full object-cover`} />
