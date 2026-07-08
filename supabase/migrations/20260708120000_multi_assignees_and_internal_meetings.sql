@@ -17,6 +17,18 @@ DROP TRIGGER companies_notify_assignment ON public.companies;
 DROP TRIGGER events_notify_assignment ON public.events;
 DROP TRIGGER meetings_notify_assignment ON public.meetings;
 
+-- The personal-task policies reference assigned_to; recreate them on assignees.
+DROP POLICY "Anyone signed in can view tasks" ON public.tasks;
+CREATE POLICY "Anyone signed in can view tasks" ON public.tasks
+  FOR SELECT TO authenticated
+  USING (NOT personal OR auth.uid() = ANY (assignees));
+
+DROP POLICY "Editors can manage tasks" ON public.tasks;
+CREATE POLICY "Editors can manage tasks" ON public.tasks
+  FOR ALL TO authenticated
+  USING (public.is_editor(auth.uid()) AND (NOT personal OR auth.uid() = ANY (assignees)))
+  WITH CHECK (public.is_editor(auth.uid()) AND (NOT personal OR auth.uid() = ANY (assignees)));
+
 ALTER TABLE public.tasks DROP COLUMN assigned_to;
 ALTER TABLE public.meetings DROP COLUMN assigned_to;
 ALTER TABLE public.companies DROP COLUMN assigned_to;

@@ -103,7 +103,7 @@ export type Database = {
       }
       companies: {
         Row: {
-          assigned_to: string | null
+          assignees: string[]
           contact_email: string | null
           contact_person: string | null
           contact_phone: string | null
@@ -120,7 +120,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          assigned_to?: string | null
+          assignees?: string[]
           contact_email?: string | null
           contact_person?: string | null
           contact_phone?: string | null
@@ -137,7 +137,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          assigned_to?: string | null
+          assignees?: string[]
           contact_email?: string | null
           contact_person?: string | null
           contact_phone?: string | null
@@ -153,15 +153,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["company_status"]
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "companies_assigned_to_fkey"
-            columns: ["assigned_to"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       contacts: {
         Row: {
@@ -277,7 +269,7 @@ export type Database = {
       }
       events: {
         Row: {
-          assigned_to: string | null
+          assignees: string[]
           company_id: string | null
           cost_to_us: number
           created_at: string
@@ -296,7 +288,7 @@ export type Database = {
           venue: string | null
         }
         Insert: {
-          assigned_to?: string | null
+          assignees?: string[]
           company_id?: string | null
           cost_to_us?: number
           created_at?: string
@@ -315,7 +307,7 @@ export type Database = {
           venue?: string | null
         }
         Update: {
-          assigned_to?: string | null
+          assignees?: string[]
           company_id?: string | null
           cost_to_us?: number
           created_at?: string
@@ -334,13 +326,6 @@ export type Database = {
           venue?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "events_assigned_to_fkey"
-            columns: ["assigned_to"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "events_company_id_fkey"
             columns: ["company_id"]
@@ -451,10 +436,11 @@ export type Database = {
       }
       meetings: {
         Row: {
-          assigned_to: string | null
+          assignees: string[]
           company_id: string | null
           created_at: string
           id: string
+          internal: boolean
           meeting_date: string | null
           meeting_time: string | null
           notes: string | null
@@ -462,10 +448,11 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          assigned_to?: string | null
+          assignees?: string[]
           company_id?: string | null
           created_at?: string
           id?: string
+          internal?: boolean
           meeting_date?: string | null
           meeting_time?: string | null
           notes?: string | null
@@ -473,10 +460,11 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          assigned_to?: string | null
+          assignees?: string[]
           company_id?: string | null
           created_at?: string
           id?: string
+          internal?: boolean
           meeting_date?: string | null
           meeting_time?: string | null
           notes?: string | null
@@ -484,13 +472,6 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "meetings_assigned_to_fkey"
-            columns: ["assigned_to"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "meetings_company_id_fkey"
             columns: ["company_id"]
@@ -567,7 +548,7 @@ export type Database = {
       }
       tasks: {
         Row: {
-          assigned_to: string | null
+          assignees: string[]
           created_at: string
           description: string | null
           due_date: string | null
@@ -581,7 +562,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          assigned_to?: string | null
+          assignees?: string[]
           created_at?: string
           description?: string | null
           due_date?: string | null
@@ -595,7 +576,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          assigned_to?: string | null
+          assignees?: string[]
           created_at?: string
           description?: string | null
           due_date?: string | null
@@ -609,13 +590,6 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "tasks_assigned_to_fkey"
-            columns: ["assigned_to"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "tasks_related_company_id_fkey"
             columns: ["related_company_id"]

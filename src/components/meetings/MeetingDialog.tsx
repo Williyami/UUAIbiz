@@ -18,6 +18,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
+import { Checkbox } from "@/components/ui/checkbox";
+import { AssigneePicker } from "@/components/shared/AssigneePicker";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { profilesQuery, companiesQuery } from "@/lib/queries";
 import { toast } from "sonner";
@@ -43,10 +45,11 @@ export function MeetingDialog({
       meeting ?? {
         title: "",
         company_id: null,
+        internal: false,
         meeting_date: new Date().toLocaleDateString("sv-SE"),
         meeting_time: "",
         notes: "",
-        assigned_to: null,
+        assignees: [],
       },
     );
   }, [meeting, open]);
@@ -55,11 +58,12 @@ export function MeetingDialog({
     mutationFn: async (values: any) => {
       const payload = {
         title: values.title,
-        company_id: values.company_id || null,
+        internal: !!values.internal,
+        company_id: values.internal ? null : values.company_id || null,
         meeting_date: values.meeting_date || null,
         meeting_time: values.meeting_time || null,
         notes: values.notes || null,
-        assigned_to: values.assigned_to || null,
+        assignees: values.assignees ?? [],
       };
       if (meeting?.id) {
         const { error } = await supabase.from("meetings").update(payload).eq("id", meeting.id);
@@ -111,25 +115,36 @@ export function MeetingDialog({
               required
             />
           </Field>
+          <label className="flex w-fit cursor-pointer items-center gap-2 py-0.5">
+            <Checkbox
+              checked={!!form.internal}
+              onCheckedChange={(v) => setForm({ ...form, internal: !!v, company_id: v ? null : form.company_id })}
+            />
+            <span className="microlabel text-[10px] text-muted-foreground">
+              Internal meeting (no company)
+            </span>
+          </label>
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Company (optional)">
-              <Select
-                value={form.company_id || "none"}
-                onValueChange={(v) => setForm({ ...form, company_id: v === "none" ? null : v })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="None" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">None</SelectItem>
-                  {companies.map((c: any) => (
-                    <SelectItem key={c.id} value={c.id}>
-                      {c.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
+            {!form.internal && (
+              <Field label="Company (optional)">
+                <Select
+                  value={form.company_id || "none"}
+                  onValueChange={(v) => setForm({ ...form, company_id: v === "none" ? null : v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="None" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    {companies.map((c: any) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+            )}
             <Field label="Date">
               <Input
                 type="date"
@@ -145,22 +160,11 @@ export function MeetingDialog({
               />
             </Field>
             <Field label="Assigned to">
-              <Select
-                value={form.assigned_to || "none"}
-                onValueChange={(v) => setForm({ ...form, assigned_to: v === "none" ? null : v })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Unassigned" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Unassigned</SelectItem>
-                  {profiles.map((p) => (
-                    <SelectItem key={p.id} value={p.id}>
-                      {p.name || p.email}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <AssigneePicker
+                value={form.assignees ?? []}
+                onChange={(ids) => setForm({ ...form, assignees: ids })}
+                profiles={profiles}
+              />
             </Field>
           </div>
           <Field label="Notes">
