@@ -64,13 +64,16 @@ export function ProfileWidget({
             <span className="truncate">{profile.email}</span>
           </a>
         )}
-        <div className="space-y-3">
+        {/* min-w-0: DialogContent is a grid, and without it this item's
+            intrinsic width (long task/company titles) widens the whole
+            dialog track past its max-width. */}
+        <div className="min-w-0 space-y-3">
           <WidgetSection
             label={`Companies · ${owned.length}`}
             empty="No companies owned"
             items={owned.slice(0, 5).map((c: any) => (
               <li key={c.id} className="flex items-center justify-between gap-2 py-1.5">
-                <span className="truncate text-xs">{c.name}</span>
+                <span className="min-w-0 flex-1 truncate text-xs">{c.name}</span>
                 <StatusTag color={companyStatusColor[c.status as CompanyStatus]} className="shrink-0 text-[8.5px]">
                   {c.status}
                 </StatusTag>
@@ -83,7 +86,7 @@ export function ProfileWidget({
             empty="No open tasks"
             items={openTasks.slice(0, 5).map((t: any) => (
               <li key={t.id} className="flex items-center justify-between gap-2 py-1.5">
-                <span className="truncate text-xs">{t.title}</span>
+                <span className="min-w-0 flex-1 truncate text-xs">{t.title}</span>
                 <span className="microlabel tnum shrink-0 text-[9px] text-muted-foreground">
                   {t.due_date ? formatDate(t.due_date) : ""}
                 </span>
@@ -96,7 +99,7 @@ export function ProfileWidget({
             empty="No upcoming events"
             items={upcomingEvents.slice(0, 5).map((e: any) => (
               <li key={e.id} className="flex items-center justify-between gap-2 py-1.5">
-                <span className="truncate text-xs">{e.title}</span>
+                <span className="min-w-0 flex-1 truncate text-xs">{e.title}</span>
                 <span className="microlabel tnum shrink-0 text-[9px] text-muted-foreground">
                   {e.date ? formatDate(e.date) : "TBD"}
                 </span>

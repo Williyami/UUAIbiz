@@ -138,6 +138,7 @@ export type Database = {
           contact_phone: string | null
           contact_title: string | null
           created_at: string
+          established_partner: boolean
           id: string
           industry: Database["public"]["Enums"]["company_industry"] | null
           last_contact_date: string | null
@@ -155,6 +156,7 @@ export type Database = {
           contact_phone?: string | null
           contact_title?: string | null
           created_at?: string
+          established_partner?: boolean
           id?: string
           industry?: Database["public"]["Enums"]["company_industry"] | null
           last_contact_date?: string | null
@@ -172,6 +174,7 @@ export type Database = {
           contact_phone?: string | null
           contact_title?: string | null
           created_at?: string
+          established_partner?: boolean
           id?: string
           industry?: Database["public"]["Enums"]["company_industry"] | null
           last_contact_date?: string | null

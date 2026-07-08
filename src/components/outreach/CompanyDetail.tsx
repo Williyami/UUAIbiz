@@ -79,6 +79,12 @@ export function CompanyDetail({
                 {company.industry}
               </span>
             )}
+            {company.established_partner && (
+              <span className="microlabel flex items-center gap-1.5 text-[9px] text-emerald-500">
+                <span className="size-1.5 rounded-full bg-emerald-500 shadow-[0_0_5px_1px] shadow-emerald-500/70" />
+                Established partner
+              </span>
+            )}
           </div>
           <SheetTitle className="mt-1 font-display text-2xl font-medium tracking-tight">
             {company.name}

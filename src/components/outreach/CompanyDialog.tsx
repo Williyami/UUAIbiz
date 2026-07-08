@@ -61,6 +61,7 @@ export function CompanyDialog({
         industry: null,
         notes: "",
         assignees: [],
+        established_partner: false,
         // adding a contact counts as contact — prefill today, still editable
         last_contact_date: new Date().toLocaleDateString("sv-SE"),
         meeting_booked: false,
@@ -197,6 +198,13 @@ export function CompanyDialog({
                 onCheckedChange={(v) => setForm({ ...form, meeting_booked: !!v })}
               />
               <span className="microlabel text-muted-foreground">Meeting booked?</span>
+            </label>
+            <label className="flex cursor-pointer items-center gap-2">
+              <Checkbox
+                checked={!!form.established_partner}
+                onCheckedChange={(v) => setForm({ ...form, established_partner: !!v })}
+              />
+              <span className="microlabel text-muted-foreground">Established partner</span>
             </label>
             {form.meeting_booked && (
               <div className="flex flex-1 items-center gap-2">

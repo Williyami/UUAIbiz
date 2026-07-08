@@ -113,7 +113,15 @@ export function CompanyTable({
                   className="cursor-pointer transition-colors hover:bg-accent/50"
                 >
                   <Td>
-                    <span className="font-medium">{c.name}</span>
+                    <span className="inline-flex items-center gap-1.5">
+                      <span className="font-medium">{c.name}</span>
+                      {c.established_partner && (
+                        <span
+                          title="Established partner"
+                          className="size-1.5 shrink-0 rounded-full bg-emerald-500 shadow-[0_0_5px_1px] shadow-emerald-500/70"
+                        />
+                      )}
+                    </span>
                   </Td>
                   <Td>
                     <div className="text-xs">{c.contact_person || "—"}</div>

@@ -172,7 +172,15 @@ function Card({
       onClick={() => onOpen(company)}
       className="w-full cursor-grab border bg-card p-3 text-left transition-colors hover:border-foreground/30 active:cursor-grabbing"
     >
-      <div className="truncate text-sm font-medium">{company.name}</div>
+      <div className="flex items-center gap-1.5">
+        <span className="truncate text-sm font-medium">{company.name}</span>
+        {company.established_partner && (
+          <span
+            title="Established partner"
+            className="size-1.5 shrink-0 rounded-full bg-emerald-500 shadow-[0_0_5px_1px] shadow-emerald-500/70"
+          />
+        )}
+      </div>
       {company.contact_person && (
         <div className="mt-0.5 truncate text-xs text-muted-foreground">
           {company.contact_person}
