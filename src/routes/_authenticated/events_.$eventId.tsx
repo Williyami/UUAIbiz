@@ -102,7 +102,10 @@ function EventPage() {
 
   const assign = useMutation({
     mutationFn: async ({ id, userId }: { id: string; userId: string | null }) => {
-      const { error } = await supabase.from("tasks").update({ assigned_to: userId }).eq("id", id);
+      const { error } = await supabase
+        .from("tasks")
+        .update({ assignees: userId ? [userId] : [] })
+        .eq("id", id);
       if (error) throw error;
     },
     onSuccess: invalidate,
@@ -136,7 +139,7 @@ function EventPage() {
     .filter((t: any) => t.related_event_id === event.id)
     .sort((a: any, b: any) => (a.due_date || "9999").localeCompare(b.due_date || "9999"));
   const doneCount = eventTasks.filter((t: any) => t.status === "Done").length;
-  const owner = event.assigned_to ? profiles.find((p) => p.id === event.assigned_to) : null;
+  const owners = (event.assignees ?? []).map((id: string) => profiles.find((p) => p.id === id)).filter(Boolean);
   const net =
     Number(event.revenue_from_partner || 0) -
     Number(event.cost_to_us || 0) -
@@ -215,9 +218,12 @@ function EventPage() {
                   <span className="tnum">{event.participant_count}</span> participants
                 </InfoRow>
               )}
-              {owner && (
+              {owners.length > 0 && (
                 <InfoRow icon={Clock}>
-                  Owner: <span className="font-medium">{owner.name || owner.email}</span>
+                  Owner{owners.length > 1 ? "s" : ""}:{" "}
+                  <span className="font-medium">
+                    {owners.map((o: any) => o.name || o.email).join(", ")}
+                  </span>
                 </InfoRow>
               )}
               {event.luma_link && (
@@ -312,7 +318,7 @@ function EventPage() {
                       </div>
                     </div>
                     <Select
-                      value={t.assigned_to || "none"}
+                      value={t.assignees?.[0] || "none"}
                       disabled={!canEdit}
                       onValueChange={(v) =>
                         assign.mutate({ id: t.id, userId: v === "none" ? null : v })

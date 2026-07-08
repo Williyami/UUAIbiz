@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
+import { AssigneePicker } from "@/components/shared/AssigneePicker";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { profilesQuery } from "@/lib/queries";
 import { INDUSTRY_ORDER } from "./industryStyles";
@@ -59,7 +60,7 @@ export function CompanyDialog({
         status: "Contacted",
         industry: null,
         notes: "",
-        assigned_to: null,
+        assignees: [],
         // adding a contact counts as contact — prefill today, still editable
         last_contact_date: new Date().toLocaleDateString("sv-SE"),
         meeting_booked: false,
@@ -73,7 +74,7 @@ export function CompanyDialog({
       const payload = {
         ...values,
         last_contact_date: values.last_contact_date || null,
-        assigned_to: values.assigned_to || null,
+        assignees: values.assignees ?? [],
         industry: values.industry || null,
         meeting_booked: !!values.meeting_booked,
         meeting_date: values.meeting_booked ? values.meeting_date || null : null,
@@ -175,22 +176,11 @@ export function CompanyDialog({
               </Select>
             </Field>
             <Field label="Assigned to">
-              <Select
-                value={form.assigned_to || "none"}
-                onValueChange={(v) => setForm({ ...form, assigned_to: v === "none" ? null : v })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Unassigned" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Unassigned</SelectItem>
-                  {profiles.map((p) => (
-                    <SelectItem key={p.id} value={p.id}>
-                      {p.name || p.email}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <AssigneePicker
+                value={form.assignees ?? []}
+                onChange={(ids) => setForm({ ...form, assignees: ids })}
+                profiles={profiles}
+              />
             </Field>
             <Field label="Last contact date">
               <Input

@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
+import { AssigneePicker } from "@/components/shared/AssigneePicker";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { profilesQuery, companiesQuery, eventsQuery, currentUserQuery } from "@/lib/queries";
 import { toast } from "sonner";
@@ -54,7 +55,7 @@ export function TaskDialog({
         description: "",
         related_company_id: null,
         related_event_id: null,
-        assigned_to: defaultPersonal ? (me?.id ?? null) : null,
+        assignees: defaultPersonal && me?.id ? [me.id] : [],
         due_date: null,
         status: "To do",
         priority: "Medium",
@@ -69,7 +70,7 @@ export function TaskDialog({
         ...values,
         due_date: values.due_date || null,
         // personal tasks always belong to the current user
-        assigned_to: values.personal ? (me?.id ?? null) : values.assigned_to || null,
+        assignees: values.personal ? (me?.id ? [me.id] : []) : (values.assignees ?? []),
         related_company_id: values.related_company_id || null,
         related_event_id: values.related_event_id || null,
         personal: !!values.personal,
@@ -122,7 +123,7 @@ export function TaskDialog({
             <Checkbox
               checked={!!form.personal}
               onCheckedChange={(v) =>
-                setForm({ ...form, personal: !!v, assigned_to: v ? (me?.id ?? null) : form.assigned_to })
+                setForm({ ...form, personal: !!v, assignees: v && me?.id ? [me.id] : form.assignees })
               }
             />
             <span className="microlabel text-muted-foreground">
@@ -177,22 +178,11 @@ export function TaskDialog({
             </Field>
             {!form.personal && (
               <Field label="Assigned to">
-                <Select
-                  value={form.assigned_to || "none"}
-                  onValueChange={(v) => setForm({ ...form, assigned_to: v === "none" ? null : v })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Unassigned" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Unassigned</SelectItem>
-                    {profiles.map((p) => (
-                      <SelectItem key={p.id} value={p.id}>
-                        {p.name || p.email}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <AssigneePicker
+                  value={form.assignees ?? []}
+                  onChange={(ids) => setForm({ ...form, assignees: ids })}
+                  profiles={profiles}
+                />
               </Field>
             )}
             <Field label="Due date">

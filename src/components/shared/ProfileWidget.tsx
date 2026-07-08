@@ -26,10 +26,10 @@ export function ProfileWidget({
   const roleLabel = role === "admin" ? "Admin" : role === "viewer" ? "Viewer" : "Business team";
   const displayName = profile.name || profile.email || "Former member";
 
-  const owned = companies.filter((c: any) => c.assigned_to === profile.id);
-  const openTasks = tasks.filter((t: any) => t.assigned_to === profile.id && t.status !== "Done");
+  const owned = companies.filter((c: any) => (c.assignees ?? []).includes(profile.id));
+  const openTasks = tasks.filter((t: any) => (t.assignees ?? []).includes(profile.id) && t.status !== "Done");
   const upcomingEvents = events.filter(
-    (e: any) => e.assigned_to === profile.id && (!e.date || e.date >= new Date().toLocaleDateString("sv-SE")),
+    (e: any) => (e.assignees ?? []).includes(profile.id) && (!e.date || e.date >= new Date().toLocaleDateString("sv-SE")),
   );
 
   return (

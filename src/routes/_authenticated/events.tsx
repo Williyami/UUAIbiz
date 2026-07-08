@@ -14,7 +14,7 @@ import {
 import { Plus, Search, ExternalLink, ArrowUpDown } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { StatusTag } from "@/components/shared/StatusTag";
-import { MemberChip } from "@/components/shared/MemberChip";
+import { MemberStack } from "@/components/shared/MemberStack";
 import { EventDialog } from "@/components/events/EventDialog";
 import {
   EVENT_STATUS_ORDER,
@@ -75,8 +75,10 @@ function EventsPage() {
     const filtered = events.filter((e) => {
       if (status !== "all" && e.status !== status) return false;
       if (type !== "all" && e.event_type !== type) return false;
-      if (assignee !== "all" && e.assigned_to !== (assignee === "none" ? null : assignee))
-        return false;
+      if (assignee !== "all") {
+        const ids: string[] = e.assignees ?? [];
+        if (assignee === "none" ? ids.length > 0 : !ids.includes(assignee)) return false;
+      }
       if (
         q &&
         !`${e.title} ${(e as any).company?.name ?? ""} ${e.venue ?? ""}`
@@ -182,7 +184,6 @@ function EventsPage() {
           </thead>
           <tbody className="divide-y">
             {rows.map((e) => {
-              const a = e.assigned_to ? profileMap.get(e.assigned_to) : null;
               const n = net(e);
               return (
                 <tr
@@ -220,7 +221,7 @@ function EventsPage() {
                     <Money value={n} signed />
                   </Td>
                   <Td>
-                    <MemberChip name={a ? a.name || a.email : null} avatarUrl={a?.avatar_url} profile={a} />
+                    <MemberStack ids={e.assignees} profileMap={profileMap} />
                   </Td>
                   <Td>
                     {e.luma_link && (

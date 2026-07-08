@@ -37,12 +37,12 @@ function TasksPage() {
   // Personal tasks are private to their assignee (enforced by RLS too);
   // the team board never shows them.
   const teamTasks = tasks.filter((t: any) => !t.personal);
-  const personalTasks = tasks.filter((t: any) => t.personal && t.assigned_to === me?.id);
+  const personalTasks = tasks.filter((t: any) => t.personal && me?.id && (t.assignees ?? []).includes(me.id));
   const visible =
     scope === "personal"
       ? personalTasks
       : mineOnly
-        ? teamTasks.filter((t) => t.assigned_to === me?.id)
+        ? teamTasks.filter((t) => me?.id && (t.assignees ?? []).includes(me.id))
         : teamTasks;
 
   return (

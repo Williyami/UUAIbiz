@@ -11,7 +11,7 @@ import {
 import { useState } from "react";
 import { STATUS_ORDER, CompanyStatus, companyStatusColor } from "./statusStyles";
 import { formatDate } from "@/lib/format";
-import { MemberChip } from "@/components/shared/MemberChip";
+import { MemberStack } from "@/components/shared/MemberStack";
 import { supabase } from "@/integrations/supabase/client";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { profilesQuery } from "@/lib/queries";
@@ -167,7 +167,6 @@ function Card({
   profileMap: Map<string, any>;
   onOpen: (c: any) => void;
 }) {
-  const assignee = company.assigned_to ? profileMap.get(company.assigned_to) : null;
   return (
     <button
       onClick={() => onOpen(company)}
@@ -185,11 +184,7 @@ function Card({
         </div>
       )}
       <div className="mt-2.5 flex items-center justify-between gap-2">
-        <MemberChip
-          name={assignee ? assignee.name || assignee.email : null}
-          avatarUrl={assignee?.avatar_url}
-          profile={assignee}
-        />
+        <MemberStack ids={company.assignees} profileMap={profileMap} />
         <span className="microlabel tnum text-[9.5px] text-muted-foreground/80">
           {company.last_contact_date ? formatDate(company.last_contact_date) : "—"}
         </span>

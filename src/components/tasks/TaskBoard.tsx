@@ -17,7 +17,7 @@ import {
   priorityColor,
 } from "./taskStyles";
 import { formatDate } from "@/lib/format";
-import { MemberChip } from "@/components/shared/MemberChip";
+import { MemberStack } from "@/components/shared/MemberStack";
 import { StatusTag } from "@/components/shared/StatusTag";
 import { supabase } from "@/integrations/supabase/client";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
@@ -163,7 +163,6 @@ function Card({
   profileMap: Map<string, any>;
   onOpen: (t: any) => void;
 }) {
-  const assignee = task.assigned_to ? profileMap.get(task.assigned_to) : null;
   const overdue = isOverdue(task);
   return (
     <button
@@ -180,11 +179,7 @@ function Card({
         {overdue && <span className="microlabel text-[9.5px] text-brand">Overdue</span>}
       </div>
       <div className="mt-2.5 flex items-center justify-between gap-2">
-        <MemberChip
-          name={assignee ? assignee.name || assignee.email : null}
-          avatarUrl={assignee?.avatar_url}
-          profile={assignee}
-        />
+        <MemberStack ids={task.assignees} profileMap={profileMap} />
         <span
           className={`microlabel tnum text-[9.5px] ${overdue ? "font-semibold text-brand" : "text-muted-foreground/80"}`}
         >

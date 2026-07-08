@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
+import { AssigneePicker } from "@/components/shared/AssigneePicker";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { profilesQuery, companiesQuery } from "@/lib/queries";
 import { toast } from "sonner";
@@ -55,7 +56,7 @@ export function EventDialog({
         food_cost: 0,
         participant_count: null,
         luma_link: "",
-        assigned_to: null,
+        assignees: [],
         notes: "",
       },
     );
@@ -68,7 +69,7 @@ export function EventDialog({
         ...rest,
         date: values.date || null,
         company_id: values.company_id || null,
-        assigned_to: values.assigned_to || null,
+        assignees: values.assignees ?? [],
         participant_count:
           values.participant_count === "" || values.participant_count == null
             ? null
@@ -234,22 +235,11 @@ export function EventDialog({
               />
             </Field>
             <Field label="Assigned to">
-              <Select
-                value={form.assigned_to || "none"}
-                onValueChange={(v) => setForm({ ...form, assigned_to: v === "none" ? null : v })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Unassigned" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Unassigned</SelectItem>
-                  {profiles.map((p) => (
-                    <SelectItem key={p.id} value={p.id}>
-                      {p.name || p.email}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <AssigneePicker
+                value={form.assignees ?? []}
+                onChange={(ids) => setForm({ ...form, assignees: ids })}
+                profiles={profiles}
+              />
             </Field>
             <Field label="Luma link">
               <Input

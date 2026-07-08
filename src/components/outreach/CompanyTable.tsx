@@ -11,7 +11,7 @@ import {
 import { STATUS_ORDER, CompanyStatus, companyStatusColor } from "./statusStyles";
 import { INDUSTRY_ORDER } from "./industryStyles";
 import { StatusTag } from "@/components/shared/StatusTag";
-import { MemberChip } from "@/components/shared/MemberChip";
+import { MemberStack } from "@/components/shared/MemberStack";
 import { formatDate } from "@/lib/format";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { profilesQuery } from "@/lib/queries";
@@ -34,8 +34,10 @@ export function CompanyTable({
   const rows = useMemo(() => {
     return companies.filter((c) => {
       if (status !== "all" && c.status !== status) return false;
-      if (assignee !== "all" && c.assigned_to !== (assignee === "none" ? null : assignee))
-        return false;
+      if (assignee !== "all") {
+        const ids: string[] = c.assignees ?? [];
+        if (assignee === "none" ? ids.length > 0 : !ids.includes(assignee)) return false;
+      }
       if (industry !== "all" && c.industry !== industry) return false;
       if (
         q &&
@@ -104,7 +106,6 @@ export function CompanyTable({
           </thead>
           <tbody className="divide-y">
             {rows.map((c) => {
-              const a = c.assigned_to ? profileMap.get(c.assigned_to) : null;
               return (
                 <tr
                   key={c.id}
@@ -128,7 +129,7 @@ export function CompanyTable({
                     </StatusTag>
                   </Td>
                   <Td>
-                    <MemberChip name={a ? a.name || a.email : null} avatarUrl={a?.avatar_url} profile={a} />
+                    <MemberStack ids={c.assignees} profileMap={profileMap} />
                   </Td>
                   <Td>
                     <span className="text-xs text-muted-foreground">{c.industry || "—"}</span>

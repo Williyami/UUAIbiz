@@ -11,6 +11,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { profilesQuery, eventsQuery } from "@/lib/queries";
+import { AssigneePicker } from "@/components/shared/AssigneePicker";
 import { STATUS_ORDER, CompanyStatus, companyStatusColor } from "./statusStyles";
 import { StatusTag } from "@/components/shared/StatusTag";
 import { useEffect, useState } from "react";
@@ -145,22 +146,13 @@ export function CompanyDetail({
               </div>
               <div>
                 <label className="microlabel text-muted-foreground">Assigned to</label>
-                <Select
-                  value={company.assigned_to || "none"}
-                  onValueChange={(v) => update.mutate({ assigned_to: v === "none" ? null : v })}
-                >
-                  <SelectTrigger className="mt-1.5">
-                    <SelectValue placeholder="Unassigned" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Unassigned</SelectItem>
-                    {profiles.map((p) => (
-                      <SelectItem key={p.id} value={p.id}>
-                        {p.name || p.email}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="mt-1.5">
+                  <AssigneePicker
+                    value={company.assignees ?? []}
+                    onChange={(ids) => update.mutate({ assignees: ids })}
+                    profiles={profiles}
+                  />
+                </div>
               </div>
             </section>
 

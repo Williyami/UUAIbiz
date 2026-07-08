@@ -205,9 +205,9 @@ function TeamPage() {
         {profiles.map((p) => {
           const role = roleMap.get(p.id);
           const owned = {
-            companies: companies.filter((c) => c.assigned_to === p.id).length,
-            events: events.filter((e) => e.assigned_to === p.id).length,
-            tasks: tasks.filter((t) => t.assigned_to === p.id && t.status !== "Done").length,
+            companies: companies.filter((c) => (c.assignees ?? []).includes(p.id)).length,
+            events: events.filter((e) => (e.assignees ?? []).includes(p.id)).length,
+            tasks: tasks.filter((t) => (t.assignees ?? []).includes(p.id) && t.status !== "Done").length,
           };
           return (
             <div key={p.id} className="flex items-center gap-4 px-4 py-4">

@@ -4,7 +4,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { companiesQuery, profilesQuery, meetingsQuery } from "@/lib/queries";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { StatusTag } from "@/components/shared/StatusTag";
-import { MemberChip } from "@/components/shared/MemberChip";
+import { MemberStack } from "@/components/shared/MemberStack";
 import { Button } from "@/components/ui/button";
 import { companyStatusColor, type CompanyStatus } from "@/components/outreach/statusStyles";
 import { formatDate, initials } from "@/lib/format";
@@ -43,7 +43,7 @@ function MeetingsPage() {
       subtitle: c.contact_person || "No contact person",
       meeting_date: c.meeting_date,
       status: c.status,
-      assigned_to: c.assigned_to,
+      assignees: c.assignees,
       source: c,
     }));
 
@@ -51,11 +51,11 @@ function MeetingsPage() {
     id: m.id,
     kind: "manual" as const,
     title: m.title,
-    subtitle: m.company?.name || "No linked company",
+    subtitle: m.internal ? "Internal" : m.company?.name || "No linked company",
     meeting_date: m.meeting_date,
     meeting_time: m.meeting_time,
     status: null,
-    assigned_to: m.assigned_to,
+    assignees: m.assignees,
     source: m,
   }));
 
@@ -175,7 +175,6 @@ function NextMeetingHero({
       </section>
     );
   }
-  const a = meeting.assigned_to ? profileMap.get(meeting.assigned_to) : null;
   const d = new Date(meeting.meeting_date + "T00:00:00");
   const weekday = d.toLocaleDateString("en-GB", { weekday: "long" });
   const dayMonth = d.toLocaleDateString("en-GB", { day: "numeric", month: "long" });
@@ -205,16 +204,12 @@ function NextMeetingHero({
               )}
             </div>
           </div>
-          {a && (
-            <div className="hidden sm:block" title={a.name || a.email}>
-              {a.avatar_url ? (
-                <img src={a.avatar_url} alt="" className="size-9 rounded-full object-cover" />
-              ) : (
-                <div className="flex size-9 items-center justify-center rounded-full bg-foreground/85 font-mono text-[10px] font-semibold uppercase text-background">
-                  {initials(a.name || a.email)}
-                </div>
-              )}
-            </div>
+          {(meeting.assignees?.length ?? 0) > 0 && (
+            <MemberStack
+              ids={meeting.assignees}
+              profileMap={profileMap}
+              className="hidden sm:inline-flex"
+            />
           )}
           <Button
             variant="outline"
@@ -369,7 +364,6 @@ function MeetingList({
       ) : (
         <ul className="divide-y">
           {rows.map((row) => {
-            const a = row.assigned_to ? profileMap.get(row.assigned_to) : null;
             return (
               <li
                 key={row.id}
@@ -391,7 +385,7 @@ function MeetingList({
                       {row.status}
                     </StatusTag>
                   )}
-                  <MemberChip name={a ? a.name || a.email : null} avatarUrl={a?.avatar_url} profile={a} compact />
+                  <MemberStack ids={row.assignees} profileMap={profileMap} />
                   <span className="microlabel tnum text-muted-foreground">
                     {row.meeting_date ? formatDate(row.meeting_date) : "Date TBD"}
                     {row.meeting_time && ` · ${row.meeting_time.slice(0, 5)}`}

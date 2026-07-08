@@ -89,7 +89,7 @@ function Dashboard() {
       new Date(t.due_date) <= in7,
   ).length;
   const myTasks = tasks
-    .filter((t) => t.assigned_to === me?.id && t.status !== "Done")
+    .filter((t) => me?.id && (t.assignees ?? []).includes(me.id) && t.status !== "Done")
     .sort((a, b) => ((a.due_date || "9999") < (b.due_date || "9999") ? -1 : 1));
 
   return (
@@ -229,9 +229,9 @@ function Dashboard() {
             <ul className="divide-y">
               {profiles.slice(0, 5).map((p) => {
                 const owned = {
-                  c: companies.filter((c) => c.assigned_to === p.id).length,
-                  e: events.filter((e) => e.assigned_to === p.id).length,
-                  t: tasks.filter((t) => t.assigned_to === p.id && t.status !== "Done").length,
+                  c: companies.filter((c) => (c.assignees ?? []).includes(p.id)).length,
+                  e: events.filter((e) => (e.assignees ?? []).includes(p.id)).length,
+                  t: tasks.filter((t) => (t.assignees ?? []).includes(p.id) && t.status !== "Done").length,
                 };
                 return (
                   <li key={p.id} className="flex items-center justify-between gap-3 px-4 py-3">
