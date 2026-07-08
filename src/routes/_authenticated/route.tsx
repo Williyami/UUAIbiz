@@ -8,6 +8,7 @@ import { NotificationBell } from "@/components/layout/NotificationBell";
 import { ProfileWidgetProvider } from "@/components/shared/profile-widget-context";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { currentUserQuery } from "@/lib/queries";
+import { isChunkLoadError, useReloadOnChunkError } from "@/lib/chunk-error";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -18,10 +19,16 @@ export const Route = createFileRoute("/_authenticated")({
     return { user: data.user };
   },
   component: AuthenticatedShell,
-  errorComponent: ({ error }) => (
-    <div className="p-8 text-sm text-destructive">Failed to load: {error.message}</div>
-  ),
+  errorComponent: ShellError,
 });
+
+function ShellError({ error }: { error: Error }) {
+  useReloadOnChunkError(error);
+  if (isChunkLoadError(error)) {
+    return <div className="p-8 text-sm text-muted-foreground">Updating to the latest version…</div>;
+  }
+  return <div className="p-8 text-sm text-destructive">Failed to load: {error.message}</div>;
+}
 
 function AuthenticatedShell() {
   const { data: me } = useSuspenseQuery(currentUserQuery);
@@ -34,13 +41,11 @@ function AuthenticatedShell() {
   }, [me, navigate]);
 
   useEffect(() => {
-    // One visit per browser session, not per SPA navigation.
-    if (!sessionStorage.getItem("bh-visit-logged")) {
-      sessionStorage.setItem("bh-visit-logged", "1");
-      supabase.rpc("record_visit").then(({ error }) => {
-        if (error) console.warn("record_visit failed:", error.message);
-      });
-    }
+    // Counts every full page load of the app (fresh open, refresh, new tab) —
+    // SPA navigation doesn't remount the shell, so it never inflates this.
+    supabase.rpc("record_visit").then(({ error }) => {
+      if (error) console.warn("record_visit failed:", error.message);
+    });
   }, []);
 
   return (

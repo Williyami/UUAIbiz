@@ -11,6 +11,11 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import {
+  isChunkLoadError,
+  reloadOnceForStaleChunk,
+  useReloadOnChunkError,
+} from "../lib/chunk-error";
 import { supabase } from "../integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -39,9 +44,18 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
+  useReloadOnChunkError(error);
   useEffect(() => {
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
   }, [error]);
+
+  if (isChunkLoadError(error)) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background px-4">
+        <p className="text-sm text-muted-foreground">Updating to the latest version…</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -164,11 +178,7 @@ function RootComponent() {
     // on Safari). Reload once to pick up the new build; the timestamp guard
     // prevents a reload loop if the import keeps failing for another reason.
     const onPreloadError = (e: Event) => {
-      const last = Number(sessionStorage.getItem("bh-chunk-reload") || 0);
-      if (Date.now() - last < 30_000) return;
-      sessionStorage.setItem("bh-chunk-reload", String(Date.now()));
-      e.preventDefault();
-      window.location.reload();
+      if (reloadOnceForStaleChunk()) e.preventDefault();
     };
     window.addEventListener("vite:preloadError", onPreloadError);
     return () => window.removeEventListener("vite:preloadError", onPreloadError);
