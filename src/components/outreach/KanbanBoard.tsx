@@ -123,7 +123,7 @@ function Column({
         </span>
       </div>
       {/* Cap at roughly six cards; longer columns scroll inside themselves. */}
-      <div className="max-h-[560px] flex-1 space-y-2 overflow-y-auto p-2">
+      <ScrollList className="max-h-[560px] flex-1 space-y-2 p-2" fadeFrom="from-card">
         {companies.map((c) => (
           <DraggableCard
             key={c.id}
