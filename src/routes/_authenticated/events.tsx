@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { eventsQuery, profilesQuery, companiesQuery, tasksQuery, currentUserQuery } from "@/lib/queries";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Search, ExternalLink, ArrowUpDown } from "lucide-react";
+import { Plus, Search, ExternalLink, ArrowUpDown, CalendarPlus } from "lucide-react";
+import { downloadICS, type IcsEvent } from "@/lib/ics";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { StatusTag } from "@/components/shared/StatusTag";
 import { MemberStack } from "@/components/shared/MemberStack";
@@ -19,7 +20,6 @@ import { EventDialog } from "@/components/events/EventDialog";
 import {
   EVENT_STATUS_ORDER,
   EVENT_TYPE_ORDER,
-  EventStatus,
   eventStatusColor,
   semesterBounds,
 } from "@/components/events/eventStyles";
@@ -36,6 +36,24 @@ export const Route = createFileRoute("/_authenticated/events")({
   component: EventsPage,
   errorComponent: ({ error }) => <div className="p-8 text-destructive">Error: {error.message}</div>,
 });
+
+/** Display order for the grouped table — confirmed work sits above planning. */
+const EVENT_GROUP_ORDER = ["Confirmed", "Planned", "Completed", "Cancelled"] as const;
+
+/** Events store a date but no clock time, so these export as all-day entries. */
+function icsFromEvent(e: any): IcsEvent {
+  const details = [
+    e.company?.name ? `Company: ${e.company.name}` : null,
+    e.event_type ? `Type: ${e.event_type}` : null,
+    `Status: ${e.status}`,
+    e.venue ? `Venue: ${e.venue}` : null,
+    e.duration ? `Duration: ${e.duration}` : null,
+    e.luma_link ? `Luma: ${e.luma_link}` : null,
+  ]
+    .filter(Boolean)
+    .join("\n");
+  return { id: e.id, title: e.title, date: e.date, description: details };
+}
 
 function net(e: any) {
   return Number(e.revenue_from_partner || 0) - Number(e.cost_to_us || 0) - Number(e.food_cost || 0);
@@ -95,12 +113,39 @@ function EventsPage() {
     });
   }, [events, q, status, type, assignee, sortAsc]);
 
+  // Export follows the filters, so "Confirmed only" exports just those. Undated
+  // events can't be placed on a calendar, so they're left out.
+  const datedRows = useMemo(() => rows.filter((e) => e.date), [rows]);
+
+  // Grouped by status rather than one flat list: what's locked in comes first,
+  // what still needs work next, and finished/dead events sink to the bottom.
+  const groups = useMemo(
+    () =>
+      EVENT_GROUP_ORDER.map((s) => ({
+        status: s,
+        items: rows.filter((e) => e.status === s),
+      })).filter((g) => g.items.length > 0),
+    [rows],
+  );
+
   return (
     <div className="mx-auto max-w-[1400px] space-y-6 p-6 md:p-10">
       <PageHeader
         title="Events"
         lede="Every event we've run or booked — dates, money and ownership."
       >
+        <Button
+          variant="outline"
+          disabled={datedRows.length === 0}
+          title={
+            datedRows.length === 0
+              ? "No dated events in the current filter"
+              : `Export ${datedRows.length} event${datedRows.length === 1 ? "" : "s"} as .ics`
+          }
+          onClick={() => downloadICS("uuais-events.ics", datedRows.map(icsFromEvent))}
+        >
+          <CalendarPlus className="h-4 w-4" /> Export calendar
+        </Button>
         {canEdit && (
           <Button
             onClick={() => {
@@ -174,7 +219,6 @@ function EventsPage() {
                 </button>
               </Th>
               <Th>Type</Th>
-              <Th>Status</Th>
               <Th className="text-right">Revenue</Th>
               <Th className="text-right">Costs</Th>
               <Th className="text-right">Net</Th>
@@ -183,66 +227,77 @@ function EventsPage() {
             </tr>
           </thead>
           <tbody className="divide-y">
-            {rows.map((e) => {
-              const n = net(e);
-              return (
-                <tr
-                  key={e.id}
-                  onClick={() => navigate({ to: "/events/$eventId", params: { eventId: e.id } })}
-                  className="cursor-pointer transition-colors hover:bg-accent/50"
-                >
-                  <Td>
-                    <div className="font-medium">{e.title}</div>
-                    <div className="microlabel mt-0.5 text-[9.5px] text-muted-foreground/80">
-                      {(e as any).company?.name || "No company"}
-                      {e.venue ? ` · ${e.venue}` : ""}
-                    </div>
-                  </Td>
-                  <Td>
-                    <span className="microlabel tnum text-[10px] text-muted-foreground">
-                      {formatDate(e.date)}
+            {groups.map((g) => (
+              <Fragment key={g.status}>
+                <tr className="border-t bg-muted/40">
+                  <td colSpan={9} className="px-4 py-2">
+                    <span className="inline-flex items-center gap-2">
+                      <StatusTag color={eventStatusColor[g.status]}>{g.status}</StatusTag>
+                      <span className="microlabel tnum text-[9.5px] text-muted-foreground">
+                        {String(g.items.length).padStart(2, "0")}
+                      </span>
                     </span>
-                  </Td>
-                  <Td>
-                    <span className="text-xs text-muted-foreground">{e.event_type}</span>
-                  </Td>
-                  <Td>
-                    <StatusTag color={eventStatusColor[e.status as EventStatus]}>
-                      {e.status}
-                    </StatusTag>
-                  </Td>
-                  <Td className="text-right">
-                    <Money value={Number(e.revenue_from_partner || 0)} />
-                  </Td>
-                  <Td className="text-right">
-                    <Money value={Number(e.cost_to_us || 0) + Number(e.food_cost || 0)} />
-                  </Td>
-                  <Td className="text-right">
-                    <Money value={n} signed />
-                  </Td>
-                  <Td>
-                    <MemberStack ids={e.assignees} profileMap={profileMap} />
-                  </Td>
-                  <Td>
-                    {e.luma_link && (
-                      <a
-                        href={e.luma_link}
-                        target="_blank"
-                        rel="noreferrer"
-                        onClick={(ev) => ev.stopPropagation()}
-                        className="inline-flex items-center gap-1 text-muted-foreground transition-colors hover:text-brand"
-                        title="Open Luma event"
-                      >
-                        <ExternalLink className="h-3.5 w-3.5" />
-                      </a>
-                    )}
-                  </Td>
+                  </td>
                 </tr>
-              );
-            })}
+                {g.items.map((e) => {
+                  const n = net(e);
+                  return (
+                    <tr
+                      key={e.id}
+                      onClick={() =>
+                        navigate({ to: "/events/$eventId", params: { eventId: e.id } })
+                      }
+                      className="cursor-pointer transition-colors hover:bg-accent/50"
+                    >
+                      <Td>
+                        <div className="font-medium">{e.title}</div>
+                        <div className="microlabel mt-0.5 text-[9.5px] text-muted-foreground/80">
+                          {(e as any).company?.name || "No company"}
+                          {e.venue ? ` · ${e.venue}` : ""}
+                        </div>
+                      </Td>
+                      <Td>
+                        <span className="microlabel tnum text-[10px] text-muted-foreground">
+                          {formatDate(e.date)}
+                        </span>
+                      </Td>
+                      <Td>
+                        <span className="text-xs text-muted-foreground">{e.event_type}</span>
+                      </Td>
+                      <Td className="text-right">
+                        <Money value={Number(e.revenue_from_partner || 0)} />
+                      </Td>
+                      <Td className="text-right">
+                        <Money value={Number(e.cost_to_us || 0) + Number(e.food_cost || 0)} />
+                      </Td>
+                      <Td className="text-right">
+                        <Money value={n} signed />
+                      </Td>
+                      <Td>
+                        <MemberStack ids={e.assignees} profileMap={profileMap} />
+                      </Td>
+                      <Td>
+                        {e.luma_link && (
+                          <a
+                            href={e.luma_link}
+                            target="_blank"
+                            rel="noreferrer"
+                            onClick={(ev) => ev.stopPropagation()}
+                            className="inline-flex items-center gap-1 text-muted-foreground transition-colors hover:text-brand"
+                            title="Open Luma event"
+                          >
+                            <ExternalLink className="h-3.5 w-3.5" />
+                          </a>
+                        )}
+                      </Td>
+                    </tr>
+                  );
+                })}
+              </Fragment>
+            ))}
             {rows.length === 0 && (
               <tr>
-                <td colSpan={9} className="p-10 text-center text-sm text-muted-foreground">
+                <td colSpan={8} className="p-10 text-center text-sm text-muted-foreground">
                   No events match your filters
                 </td>
               </tr>
