@@ -10,6 +10,7 @@ import { PresenceProvider } from "@/components/shared/presence-context";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { currentUserQuery } from "@/lib/queries";
 import { checkStaleCompanies } from "@/lib/stale.functions";
+import { CommandPalette, CommandPaletteTrigger } from "@/components/shared/CommandPalette";
 import { isChunkLoadError, useReloadOnChunkError } from "@/lib/chunk-error";
 
 export const Route = createFileRoute("/_authenticated")({
@@ -74,6 +75,7 @@ function AuthenticatedShell() {
           <div className="flex items-center justify-between gap-2 border-b border-border/70 bg-card/85 px-3 py-2 md:absolute md:right-3 md:top-3 md:z-10 md:justify-start md:rounded-[3px] md:border md:px-2.5 md:py-1.5 md:shadow-sm md:backdrop-blur-sm">
             <SidebarTrigger className="text-muted-foreground md:hidden" />
             <div className="flex items-center gap-2">
+              <CommandPaletteTrigger />
               <NotificationBell />
               <ThemeToggle />
             </div>
@@ -81,6 +83,7 @@ function AuthenticatedShell() {
           <main className="flex-1 overflow-auto">
             <Outlet />
           </main>
+          <CommandPalette />
         </div>
       </div>
       </ProfileWidgetProvider>
