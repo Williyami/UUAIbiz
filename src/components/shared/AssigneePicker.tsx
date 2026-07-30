@@ -58,10 +58,7 @@ export function AssigneePicker({
         </button>
       </PopoverTrigger>
       <PopoverContent align="start" className="w-64 p-1">
-        {/* Rows are 32px. The cap is a half-row multiple (12.5 rows) so an
-            overflowing list always clips one row in half — macOS hides overlay
-            scrollbars, and a flush cut reads as the end of the list. */}
-        <ul className="max-h-[25rem] overflow-y-auto">
+        <ScrollList as="ul" className="max-h-[25rem]">
           {profiles.map((p) => {
             const active = value.includes(p.id);
             return (
@@ -78,7 +75,7 @@ export function AssigneePicker({
               </li>
             );
           })}
-        </ul>
+        </ScrollList>
       </PopoverContent>
     </Popover>
   );

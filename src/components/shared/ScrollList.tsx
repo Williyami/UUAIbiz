@@ -65,21 +65,29 @@ export function ScrollList({
       >
         {children}
       </Tag>
-      <Edge side="top" show={edges.top} />
-      <Edge side="bottom" show={edges.bottom} />
+      <Edge side="top" show={edges.top} fadeFrom={fadeFrom} />
+      <Edge side="bottom" show={edges.bottom} fadeFrom={fadeFrom} />
     </div>
   );
 }
 
-function Edge({ side, show }: { side: "top" | "bottom"; show: boolean }) {
+function Edge({
+  side,
+  show,
+  fadeFrom,
+}: {
+  side: "top" | "bottom";
+  show: boolean;
+  fadeFrom: string;
+}) {
   return (
     <span
       aria-hidden
       className={cn(
         "pointer-events-none absolute inset-x-0 h-6 transition-opacity duration-150",
-        side === "top"
-          ? "top-0 bg-gradient-to-b from-popover to-transparent"
-          : "bottom-0 bg-gradient-to-t from-popover to-transparent",
+        side === "top" ? "top-0 bg-gradient-to-b" : "bottom-0 bg-gradient-to-t",
+        fadeFrom,
+        "to-transparent",
         show ? "opacity-100" : "opacity-0",
       )}
     />
