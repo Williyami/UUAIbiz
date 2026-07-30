@@ -3,6 +3,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { supabase } from "@/integrations/supabase/client";
+import { ScrollList } from "@/components/shared/ScrollList";
 import { notificationsQuery } from "@/lib/queries";
 import { timeAgo } from "@/lib/format";
 import { Bell } from "lucide-react";
@@ -62,7 +63,7 @@ export function NotificationBell() {
             Nothing yet — you'll hear about tasks assigned to you and new ideas.
           </p>
         ) : (
-          <ul className="max-h-96 divide-y overflow-y-auto">
+          <ScrollList as="ul" className="max-h-96 divide-y">
             {notifications.map((n: any) => (
               <li key={n.id}>
                 <button
@@ -83,7 +84,7 @@ export function NotificationBell() {
                 </button>
               </li>
             ))}
-          </ul>
+          </ScrollList>
         )}
       </PopoverContent>
     </Popover>
