@@ -13,12 +13,15 @@ import { cn } from "@/lib/utils";
 export function ScrollList({
   as: Tag = "div",
   className,
+  wrapperClassName,
   fadeFrom = "from-popover",
   children,
   ...rest
 }: {
   as?: "div" | "ul";
   className?: string;
+  /** Layout classes for the positioning wrapper (flex sizing lives here). */
+  wrapperClassName?: string;
   /** Tailwind `from-*` colour matching the surface behind the list. */
   fadeFrom?: string;
   children: React.ReactNode;
@@ -56,7 +59,7 @@ export function ScrollList({
   }, [measure]);
 
   return (
-    <div className="relative min-h-0">
+    <div className={cn("relative min-h-0", wrapperClassName)}>
       <Tag
         {...rest}
         ref={ref as never}

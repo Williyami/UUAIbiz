@@ -7,8 +7,9 @@ import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { NotificationBell } from "@/components/layout/NotificationBell";
 import { ProfileWidgetProvider } from "@/components/shared/profile-widget-context";
 import { PresenceProvider } from "@/components/shared/presence-context";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { currentUserQuery } from "@/lib/queries";
+import { checkStaleCompanies } from "@/lib/stale.functions";
 import { isChunkLoadError, useReloadOnChunkError } from "@/lib/chunk-error";
 
 export const Route = createFileRoute("/_authenticated")({
@@ -34,6 +35,7 @@ function ShellError({ error }: { error: Error }) {
 function AuthenticatedShell() {
   const { data: me } = useSuspenseQuery(currentUserQuery);
   const navigate = useNavigate();
+  const qc = useQueryClient();
 
   useEffect(() => {
     if (me?.profile?.must_change_password) {
@@ -48,6 +50,16 @@ function AuthenticatedShell() {
       if (error) console.warn("record_visit failed:", error.message);
     });
   }, []);
+
+  useEffect(() => {
+    // Stale-outreach digest. Self-limits to one notification per person per
+    // day, so running it on load is cheaper than standing up a cron job.
+    checkStaleCompanies()
+      .then((r) => {
+        if (r.notified) qc.invalidateQueries({ queryKey: ["notifications"] });
+      })
+      .catch((e) => console.warn("stale check failed:", e.message));
+  }, [qc]);
 
   return (
     <SidebarProvider

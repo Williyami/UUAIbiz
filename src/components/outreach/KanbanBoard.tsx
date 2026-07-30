@@ -12,6 +12,8 @@ import { useState } from "react";
 import { STATUS_ORDER, CompanyStatus, companyStatusColor } from "./statusStyles";
 import { formatDate } from "@/lib/format";
 import { MemberStack } from "@/components/shared/MemberStack";
+import { ScrollList } from "@/components/shared/ScrollList";
+import { StaleBadge } from "./StaleBadge";
 import { supabase } from "@/integrations/supabase/client";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { profilesQuery } from "@/lib/queries";
@@ -123,7 +125,11 @@ function Column({
         </span>
       </div>
       {/* Cap at roughly six cards; longer columns scroll inside themselves. */}
-      <ScrollList className="max-h-[560px] flex-1 space-y-2 p-2" fadeFrom="from-card">
+      <ScrollList
+        wrapperClassName="flex-1"
+        className="h-full max-h-[560px] space-y-2 p-2"
+        fadeFrom="from-card"
+      >
         {companies.map((c) => (
           <DraggableCard
             key={c.id}
@@ -191,8 +197,11 @@ function Card({
       )}
       <div className="mt-2.5 flex items-center justify-between gap-2">
         <MemberStack ids={company.assignees} profileMap={profileMap} />
-        <span className="microlabel tnum text-[9.5px] text-muted-foreground/80">
-          {company.last_contact_date ? formatDate(company.last_contact_date) : "—"}
+        <span className="flex min-w-0 items-center gap-1.5">
+          <StaleBadge company={company} />
+          <span className="microlabel tnum text-[9.5px] text-muted-foreground/80">
+            {company.last_contact_date ? formatDate(company.last_contact_date) : "—"}
+          </span>
         </span>
       </div>
     </button>

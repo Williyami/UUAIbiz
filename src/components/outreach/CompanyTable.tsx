@@ -12,6 +12,9 @@ import { STATUS_ORDER, CompanyStatus, companyStatusColor } from "./statusStyles"
 import { INDUSTRY_ORDER } from "./industryStyles";
 import { StatusTag } from "@/components/shared/StatusTag";
 import { MemberStack } from "@/components/shared/MemberStack";
+import { StaleBadge } from "./StaleBadge";
+import { isStale, STALE_AFTER_DAYS } from "@/lib/stale";
+import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/format";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { profilesQuery } from "@/lib/queries";
@@ -28,11 +31,14 @@ export function CompanyTable({
   const [status, setStatus] = useState<string>("all");
   const [assignee, setAssignee] = useState<string>("all");
   const [industry, setIndustry] = useState<string>("all");
+  const [quietOnly, setQuietOnly] = useState(false);
 
   const profileMap = new Map(profiles.map((p) => [p.id, p]));
+  const quietCount = useMemo(() => companies.filter(isStale).length, [companies]);
 
   const rows = useMemo(() => {
     return companies.filter((c) => {
+      if (quietOnly && !isStale(c)) return false;
       if (status !== "all" && c.status !== status) return false;
       if (assignee !== "all") {
         const ids: string[] = c.assignees ?? [];
@@ -48,7 +54,7 @@ export function CompanyTable({
         return false;
       return true;
     });
-  }, [companies, q, status, assignee, industry]);
+  }, [companies, q, status, assignee, industry, quietOnly]);
 
   return (
     <div className="space-y-3">
@@ -87,6 +93,22 @@ export function CompanyTable({
             </SelectItem>
           ))}
         </FilterSelect>
+        {quietCount > 0 && (
+          <button
+            type="button"
+            onClick={() => setQuietOnly((v) => !v)}
+            title={`${quietCount} with no contact in ${STALE_AFTER_DAYS}+ days`}
+            className={cn(
+              "microlabel inline-flex h-9 items-center gap-1.5 rounded-[3px] border px-2.5 text-[10px] transition-colors",
+              quietOnly
+                ? "border-amber-500/60 bg-amber-500/15 text-amber-600 dark:text-amber-400"
+                : "border-input text-muted-foreground hover:bg-accent",
+            )}
+          >
+            <span className="size-1.5 rounded-full bg-amber-500" />
+            Quiet {quietCount}
+          </button>
+        )}
         <span className="microlabel tnum ml-auto text-[10px] text-muted-foreground">
           {rows.length} / {companies.length}
         </span>
@@ -143,8 +165,11 @@ export function CompanyTable({
                     <span className="text-xs text-muted-foreground">{c.industry || "—"}</span>
                   </Td>
                   <Td className="text-right">
-                    <span className="microlabel tnum text-[10px] text-muted-foreground">
-                      {formatDate(c.last_contact_date)}
+                    <span className="inline-flex items-center justify-end gap-1.5">
+                      <StaleBadge company={c} />
+                      <span className="microlabel tnum text-[10px] text-muted-foreground">
+                        {formatDate(c.last_contact_date)}
+                      </span>
                     </span>
                   </Td>
                 </tr>
