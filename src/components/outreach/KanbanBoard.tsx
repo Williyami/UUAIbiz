@@ -136,7 +136,7 @@ function Column({
         {companies.length === 0 && (
           <div className="microlabel py-6 text-center text-[9.5px] text-muted-foreground/50">—</div>
         )}
-      </div>
+      </ScrollList>
     </div>
   );
 }
