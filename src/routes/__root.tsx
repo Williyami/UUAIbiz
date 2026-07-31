@@ -114,27 +114,22 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content:
           "Internal ops tool for the UUAI Society Business team: outreach, events, tasks, and contracts.",
       },
-      {
-        property: "og:image",
-        content:
-          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/e05abc6d-a50b-4b9e-a097-339a73d4d59e/id-preview-719cbbf6--a8d82f26-dae5-4f37-ab50-a2e73c1dc547.lovable.app-1783184290173.png",
-      },
-      {
-        name: "twitter:image",
-        content:
-          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/e05abc6d-a50b-4b9e-a097-339a73d4d59e/id-preview-719cbbf6--a8d82f26-dae5-4f37-ab50-a2e73c1dc547.lovable.app-1783184290173.png",
-      },
+      { property: "og:image", content: "/icon-512.png" },
+      { name: "twitter:image", content: "/icon-512.png" },
     ],
     links: [
       {
         rel: "stylesheet",
         href: appCss,
       },
-      // SVG first for browsers that support it; the .ico stays as the fallback
-      // for older ones, which ignore the type they can't render.
+      // SVG first for browsers that support it; the .ico (16/32/48) is the
+      // fallback for older ones, which ignore the type they can't render.
       { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
-      { rel: "icon", href: "/favicon.ico", sizes: "32x32" },
+      { rel: "icon", href: "/favicon.ico", sizes: "16x16 32x32 48x48" },
       { rel: "mask-icon", href: "/favicon.svg", color: "#C41E3A" },
+      // iOS ignores SVG here and renders transparency as black, so this one is
+      // a PNG flattened onto white.
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png", sizes: "180x180" },
     ],
   }),
   shellComponent: RootShell,
