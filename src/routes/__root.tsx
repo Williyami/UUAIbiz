@@ -130,7 +130,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      // SVG first for browsers that support it; the .ico stays as the fallback
+      // for older ones, which ignore the type they can't render.
+      { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
+      { rel: "icon", href: "/favicon.ico", sizes: "32x32" },
+      { rel: "mask-icon", href: "/favicon.svg", color: "#C41E3A" },
     ],
   }),
   shellComponent: RootShell,
