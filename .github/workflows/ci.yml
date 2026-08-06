@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# A newer push to the same branch makes the in-flight run irrelevant.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Lint, typecheck, build
+    runs-on: ubuntu-latest
+
+    env:
+      # The Supabase client is constructed at module load and throws when these
+      # are missing, which would fail the build. CI never talks to Supabase, so
+      # these are placeholders purely to get past that guard.
+      VITE_SUPABASE_URL: https://placeholder.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: placeholder-anon-key
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20 # matches the Vercel runtime
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Not yet blocking — the existing tree has not been verified clean against
+      # this config. Drop continue-on-error once it passes on main.
+      - name: Lint
+        run: npm run lint
+        continue-on-error: true
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
