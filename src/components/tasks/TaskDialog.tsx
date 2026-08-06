@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
+import { SearchableSelect } from "@/components/shared/SearchableSelect";
 import { AssigneePicker } from "@/components/shared/AssigneePicker";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { profilesQuery, companiesQuery, eventsQuery, currentUserQuery } from "@/lib/queries";
@@ -119,120 +120,117 @@ export function TaskDialog({
           }}
         >
           <fieldset disabled={!canEdit} className="contents">
-          <label className="flex w-fit cursor-pointer items-center gap-2 border px-3 py-2">
-            <Checkbox
-              checked={!!form.personal}
-              onCheckedChange={(v) =>
-                setForm({ ...form, personal: !!v, assignees: v && me?.id ? [me.id] : form.assignees })
-              }
-            />
-            <span className="microlabel text-muted-foreground">
-              Personal task — only visible to you
-            </span>
-          </label>
-          <Field label="Title">
-            <Input
-              value={form.title || ""}
-              onChange={(e) => setForm({ ...form, title: e.target.value })}
-              required
-            />
-          </Field>
-          <Field label="Description">
-            <Textarea
-              rows={3}
-              value={form.description || ""}
-              onChange={(e) => setForm({ ...form, description: e.target.value })}
-            />
-          </Field>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Status">
-              <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v })}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {TASK_STATUS_ORDER.map((s) => (
-                    <SelectItem key={s} value={s}>
-                      {s}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
-            <Field label="Priority">
-              <Select
-                value={form.priority}
-                onValueChange={(v) => setForm({ ...form, priority: v })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {TASK_PRIORITY_ORDER.map((p) => (
-                    <SelectItem key={p} value={p}>
-                      {p}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
-            {!form.personal && (
-              <Field label="Assigned to">
-                <AssigneePicker
-                  value={form.assignees ?? []}
-                  onChange={(ids) => setForm({ ...form, assignees: ids })}
-                  profiles={profiles}
-                />
-              </Field>
-            )}
-            <Field label="Due date">
+            <label className="flex w-fit cursor-pointer items-center gap-2 border px-3 py-2">
+              <Checkbox
+                checked={!!form.personal}
+                onCheckedChange={(v) =>
+                  setForm({
+                    ...form,
+                    personal: !!v,
+                    assignees: v && me?.id ? [me.id] : form.assignees,
+                  })
+                }
+              />
+              <span className="microlabel text-muted-foreground">
+                Personal task — only visible to you
+              </span>
+            </label>
+            <Field label="Title">
               <Input
-                type="date"
-                value={form.due_date || ""}
-                onChange={(e) => setForm({ ...form, due_date: e.target.value })}
+                value={form.title || ""}
+                onChange={(e) => setForm({ ...form, title: e.target.value })}
+                required
               />
             </Field>
-            <Field label="Related company">
-              <Select
-                value={form.related_company_id || "none"}
-                onValueChange={(v) =>
-                  setForm({ ...form, related_company_id: v === "none" ? null : v })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="None" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">None</SelectItem>
-                  {companies.map((c: any) => (
-                    <SelectItem key={c.id} value={c.id}>
-                      {c.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <Field label="Description">
+              <Textarea
+                rows={3}
+                value={form.description || ""}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
+              />
             </Field>
-            <Field label="Related event">
-              <Select
-                value={form.related_event_id || "none"}
-                onValueChange={(v) =>
-                  setForm({ ...form, related_event_id: v === "none" ? null : v })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="None" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">None</SelectItem>
-                  {events.map((ev: any) => (
-                    <SelectItem key={ev.id} value={ev.id}>
-                      {ev.title}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
-          </div>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Status">
+                <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {TASK_STATUS_ORDER.map((s) => (
+                      <SelectItem key={s} value={s}>
+                        {s}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+              <Field label="Priority">
+                <Select
+                  value={form.priority}
+                  onValueChange={(v) => setForm({ ...form, priority: v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {TASK_PRIORITY_ORDER.map((p) => (
+                      <SelectItem key={p} value={p}>
+                        {p}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+              {!form.personal && (
+                <Field label="Assigned to">
+                  <AssigneePicker
+                    value={form.assignees ?? []}
+                    onChange={(ids) => setForm({ ...form, assignees: ids })}
+                    profiles={profiles}
+                  />
+                </Field>
+              )}
+              <Field label="Due date">
+                <Input
+                  type="date"
+                  value={form.due_date || ""}
+                  onChange={(e) => setForm({ ...form, due_date: e.target.value })}
+                />
+              </Field>
+              <Field label="Related company">
+                <SearchableSelect
+                  value={form.related_company_id}
+                  onChange={(v) => setForm({ ...form, related_company_id: v })}
+                  options={companies.map((c: any) => ({
+                    value: c.id,
+                    label: c.name,
+                    keywords: c.contact_person ?? "",
+                    hint: c.status,
+                  }))}
+                  searchPlaceholder="Search companies…"
+                />
+              </Field>
+              <Field label="Related event">
+                <Select
+                  value={form.related_event_id || "none"}
+                  onValueChange={(v) =>
+                    setForm({ ...form, related_event_id: v === "none" ? null : v })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="None" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    {events.map((ev: any) => (
+                      <SelectItem key={ev.id} value={ev.id}>
+                        {ev.title}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+            </div>
           </fieldset>
           <DialogFooter className="sm:justify-between">
             {canEdit && task?.id ? (

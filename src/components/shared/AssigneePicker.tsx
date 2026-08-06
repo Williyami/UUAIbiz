@@ -3,7 +3,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { ScrollList } from "@/components/shared/ScrollList";
 import { initials } from "@/lib/format";
 import { cn } from "@/lib/utils";
-import { Check, ChevronDown } from "lucide-react";
+import { Check, ChevronDown, Search } from "lucide-react";
 
 /** Multi-select of team members, styled like the other form controls. */
 export function AssigneePicker({
@@ -20,7 +20,11 @@ export function AssigneePicker({
   placeholder?: string;
 }) {
   const [open, setOpen] = useState(false);
+  const [q, setQ] = useState("");
   const selected = profiles.filter((p) => value.includes(p.id));
+  const shown = profiles.filter((p) =>
+    `${p.name ?? ""} ${p.email ?? ""}`.toLowerCase().includes(q.trim().toLowerCase()),
+  );
 
   function toggle(id: string) {
     onChange(value.includes(id) ? value.filter((v) => v !== id) : [...value, id]);
@@ -59,8 +63,23 @@ export function AssigneePicker({
         </button>
       </PopoverTrigger>
       <PopoverContent align="start" className="w-64 p-1">
+        {profiles.length > 6 && (
+          <div className="relative mb-1">
+            <Search className="absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
+            <input
+              autoFocus
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Search people…"
+              className="h-7 w-full rounded-[3px] border border-input bg-transparent pl-7 pr-2 text-xs outline-none placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring"
+            />
+          </div>
+        )}
         <ScrollList as="ul" className="max-h-[25rem]">
-          {profiles.map((p) => {
+          {shown.length === 0 && (
+            <li className="px-2 py-3 text-center text-xs text-muted-foreground">No matches.</li>
+          )}
+          {shown.map((p) => {
             const active = value.includes(p.id);
             return (
               <li key={p.id}>
@@ -84,7 +103,11 @@ export function AssigneePicker({
 
 function Avatar({ p }: { p: any }) {
   return p.avatar_url ? (
-    <img src={p.avatar_url} alt="" className="h-5 w-5 shrink-0 rounded-full object-cover ring-2 ring-card" />
+    <img
+      src={p.avatar_url}
+      alt=""
+      className="h-5 w-5 shrink-0 rounded-full object-cover ring-2 ring-card"
+    />
   ) : (
     <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-foreground/85 font-mono text-[8px] font-semibold uppercase text-background ring-2 ring-card">
       {initials(p.name || p.email)}

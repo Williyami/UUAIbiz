@@ -10,14 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
+import { SearchableSelect } from "@/components/shared/SearchableSelect";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { companiesQuery } from "@/lib/queries";
 import { toast } from "sonner";
@@ -135,22 +129,17 @@ export function ContactDialog({
             </Field>
           </div>
           <Field label="Company (from Outreach)">
-            <Select
-              value={form.company_id || "none"}
-              onValueChange={(v) => setForm({ ...form, company_id: v === "none" ? null : v })}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="None" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">None</SelectItem>
-                {companies.map((c: any) => (
-                  <SelectItem key={c.id} value={c.id}>
-                    {c.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <SearchableSelect
+              value={form.company_id}
+              onChange={(v) => setForm({ ...form, company_id: v })}
+              options={companies.map((c: any) => ({
+                value: c.id,
+                label: c.name,
+                keywords: c.contact_person ?? "",
+                hint: c.status,
+              }))}
+              searchPlaceholder="Search companies…"
+            />
           </Field>
           {!form.company_id && (
             <Field label="Company name (if not in Outreach)">

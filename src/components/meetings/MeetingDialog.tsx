@@ -10,14 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
+import { SearchableSelect } from "@/components/shared/SearchableSelect";
 import { Checkbox } from "@/components/ui/checkbox";
 import { AssigneePicker } from "@/components/shared/AssigneePicker";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
@@ -118,7 +112,9 @@ export function MeetingDialog({
           <label className="flex w-fit cursor-pointer items-center gap-2 py-0.5">
             <Checkbox
               checked={!!form.internal}
-              onCheckedChange={(v) => setForm({ ...form, internal: !!v, company_id: v ? null : form.company_id })}
+              onCheckedChange={(v) =>
+                setForm({ ...form, internal: !!v, company_id: v ? null : form.company_id })
+              }
             />
             <span className="microlabel text-[10px] text-muted-foreground">
               Internal meeting (no company)
@@ -127,22 +123,17 @@ export function MeetingDialog({
           <div className="grid grid-cols-2 gap-3">
             {!form.internal && (
               <Field label="Company (optional)">
-                <Select
-                  value={form.company_id || "none"}
-                  onValueChange={(v) => setForm({ ...form, company_id: v === "none" ? null : v })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="None" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">None</SelectItem>
-                    {companies.map((c: any) => (
-                      <SelectItem key={c.id} value={c.id}>
-                        {c.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <SearchableSelect
+                  value={form.company_id}
+                  onChange={(v) => setForm({ ...form, company_id: v })}
+                  options={companies.map((c: any) => ({
+                    value: c.id,
+                    label: c.name,
+                    keywords: c.contact_person ?? "",
+                    hint: c.status,
+                  }))}
+                  searchPlaceholder="Search companies…"
+                />
               </Field>
             )}
             <Field label="Date">

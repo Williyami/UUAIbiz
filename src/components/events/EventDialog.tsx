@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
+import { SearchableSelect } from "@/components/shared/SearchableSelect";
 import { AssigneePicker } from "@/components/shared/AssigneePicker";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { profilesQuery, companiesQuery } from "@/lib/queries";
@@ -125,138 +126,133 @@ export function EventDialog({
           }}
         >
           <fieldset disabled={!canEdit} className="contents">
-          <Field label="Title">
-            <Input
-              value={form.title || ""}
-              onChange={(e) => setForm({ ...form, title: e.target.value })}
-              required
-            />
-          </Field>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Company">
-              <Select
-                value={form.company_id || "none"}
-                onValueChange={(v) => setForm({ ...form, company_id: v === "none" ? null : v })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="None" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">None</SelectItem>
-                  {companies.map((c: any) => (
-                    <SelectItem key={c.id} value={c.id}>
-                      {c.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
-            <Field label="Type">
-              <Select
-                value={form.event_type}
-                onValueChange={(v) => setForm({ ...form, event_type: v })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {EVENT_TYPE_ORDER.map((t) => (
-                    <SelectItem key={t} value={t}>
-                      {t}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
-            <Field label="Date">
+            <Field label="Title">
               <Input
-                type="date"
-                value={form.date || ""}
-                onChange={(e) => setForm({ ...form, date: e.target.value })}
+                value={form.title || ""}
+                onChange={(e) => setForm({ ...form, title: e.target.value })}
+                required
               />
             </Field>
-            <Field label="Duration">
-              <Input
-                placeholder="e.g. 2 hours"
-                value={form.duration || ""}
-                onChange={(e) => setForm({ ...form, duration: e.target.value })}
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Company">
+                <SearchableSelect
+                  value={form.company_id}
+                  onChange={(v) => setForm({ ...form, company_id: v })}
+                  options={companies.map((c: any) => ({
+                    value: c.id,
+                    label: c.name,
+                    keywords: c.contact_person ?? "",
+                    hint: c.status,
+                  }))}
+                  searchPlaceholder="Search companies…"
+                />
+              </Field>
+              <Field label="Type">
+                <Select
+                  value={form.event_type}
+                  onValueChange={(v) => setForm({ ...form, event_type: v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {EVENT_TYPE_ORDER.map((t) => (
+                      <SelectItem key={t} value={t}>
+                        {t}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+              <Field label="Date">
+                <Input
+                  type="date"
+                  value={form.date || ""}
+                  onChange={(e) => setForm({ ...form, date: e.target.value })}
+                />
+              </Field>
+              <Field label="Duration">
+                <Input
+                  placeholder="e.g. 2 hours"
+                  value={form.duration || ""}
+                  onChange={(e) => setForm({ ...form, duration: e.target.value })}
+                />
+              </Field>
+              <Field label="Venue">
+                <Input
+                  value={form.venue || ""}
+                  onChange={(e) => setForm({ ...form, venue: e.target.value })}
+                />
+              </Field>
+              <Field label="Status">
+                <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {EVENT_STATUS_ORDER.map((s) => (
+                      <SelectItem key={s} value={s}>
+                        {s}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+              <Field label="Revenue from partner (SEK)">
+                <Input
+                  type="number"
+                  min="0"
+                  value={form.revenue_from_partner ?? 0}
+                  onChange={(e) => setForm({ ...form, revenue_from_partner: e.target.value })}
+                />
+              </Field>
+              <Field label="Cost to us (SEK)">
+                <Input
+                  type="number"
+                  min="0"
+                  value={form.cost_to_us ?? 0}
+                  onChange={(e) => setForm({ ...form, cost_to_us: e.target.value })}
+                />
+              </Field>
+              <Field label="Food cost (SEK)">
+                <Input
+                  type="number"
+                  min="0"
+                  value={form.food_cost ?? 0}
+                  onChange={(e) => setForm({ ...form, food_cost: e.target.value })}
+                />
+              </Field>
+              <Field label="Participants">
+                <Input
+                  type="number"
+                  min="0"
+                  value={form.participant_count ?? ""}
+                  onChange={(e) => setForm({ ...form, participant_count: e.target.value })}
+                />
+              </Field>
+              <Field label="Assigned to">
+                <AssigneePicker
+                  value={form.assignees ?? []}
+                  onChange={(ids) => setForm({ ...form, assignees: ids })}
+                  profiles={profiles}
+                />
+              </Field>
+              <Field label="Luma link">
+                <Input
+                  type="url"
+                  placeholder="https://lu.ma/…"
+                  value={form.luma_link || ""}
+                  onChange={(e) => setForm({ ...form, luma_link: e.target.value })}
+                />
+              </Field>
+            </div>
+            <Field label="Notes">
+              <Textarea
+                rows={3}
+                value={form.notes || ""}
+                onChange={(e) => setForm({ ...form, notes: e.target.value })}
               />
             </Field>
-            <Field label="Venue">
-              <Input
-                value={form.venue || ""}
-                onChange={(e) => setForm({ ...form, venue: e.target.value })}
-              />
-            </Field>
-            <Field label="Status">
-              <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v })}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {EVENT_STATUS_ORDER.map((s) => (
-                    <SelectItem key={s} value={s}>
-                      {s}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
-            <Field label="Revenue from partner (SEK)">
-              <Input
-                type="number"
-                min="0"
-                value={form.revenue_from_partner ?? 0}
-                onChange={(e) => setForm({ ...form, revenue_from_partner: e.target.value })}
-              />
-            </Field>
-            <Field label="Cost to us (SEK)">
-              <Input
-                type="number"
-                min="0"
-                value={form.cost_to_us ?? 0}
-                onChange={(e) => setForm({ ...form, cost_to_us: e.target.value })}
-              />
-            </Field>
-            <Field label="Food cost (SEK)">
-              <Input
-                type="number"
-                min="0"
-                value={form.food_cost ?? 0}
-                onChange={(e) => setForm({ ...form, food_cost: e.target.value })}
-              />
-            </Field>
-            <Field label="Participants">
-              <Input
-                type="number"
-                min="0"
-                value={form.participant_count ?? ""}
-                onChange={(e) => setForm({ ...form, participant_count: e.target.value })}
-              />
-            </Field>
-            <Field label="Assigned to">
-              <AssigneePicker
-                value={form.assignees ?? []}
-                onChange={(ids) => setForm({ ...form, assignees: ids })}
-                profiles={profiles}
-              />
-            </Field>
-            <Field label="Luma link">
-              <Input
-                type="url"
-                placeholder="https://lu.ma/…"
-                value={form.luma_link || ""}
-                onChange={(e) => setForm({ ...form, luma_link: e.target.value })}
-              />
-            </Field>
-          </div>
-          <Field label="Notes">
-            <Textarea
-              rows={3}
-              value={form.notes || ""}
-              onChange={(e) => setForm({ ...form, notes: e.target.value })}
-            />
-          </Field>
           </fieldset>
           <DialogFooter className="sm:justify-between">
             {canEdit && event?.id ? (

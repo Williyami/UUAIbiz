@@ -8,7 +8,9 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { STATUS_ORDER, CompanyStatus, companyStatusColor } from "./statusStyles";
 import { formatDate } from "@/lib/format";
 import { MemberStack } from "@/components/shared/MemberStack";
@@ -35,6 +37,7 @@ export function KanbanBoard({
   const { data: profiles } = useSuspenseQuery(profilesQuery);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [q, setQ] = useState("");
 
   const move = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: CompanyStatus }) => {
@@ -57,6 +60,18 @@ export function KanbanBoard({
   const profileMap = new Map(profiles.map((p) => [p.id, p]));
   const active = companies.find((c) => c.id === activeId);
 
+  // Columns scroll internally, so without a filter a name in a long column is
+  // effectively unfindable — the board holds dozens of cards per status.
+  const visible = useMemo(() => {
+    const needle = q.trim().toLowerCase();
+    if (!needle) return companies;
+    return companies.filter((c) =>
+      `${c.name} ${c.contact_person ?? ""} ${c.contact_email ?? ""} ${c.industry ?? ""}`
+        .toLowerCase()
+        .includes(needle),
+    );
+  }, [companies, q]);
+
   return (
     <DndContext
       sensors={sensors}
@@ -64,12 +79,28 @@ export function KanbanBoard({
       onDragEnd={onDragEnd}
       onDragCancel={() => setActiveId(null)}
     >
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <div className="relative max-w-xs flex-1">
+          <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Search companies…"
+            className="h-9 pl-8"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+          />
+        </div>
+        {q && (
+          <span className="microlabel tnum text-[10px] text-muted-foreground">
+            {visible.length} / {companies.length}
+          </span>
+        )}
+      </div>
       <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
         {MAIN_STATUSES.map((s) => (
           <Column
             key={s}
             status={s}
-            companies={companies.filter((c) => c.status === s)}
+            companies={visible.filter((c) => c.status === s)}
             profileMap={profileMap}
             onOpen={onOpen}
             canEdit={canEdit}
@@ -81,7 +112,7 @@ export function KanbanBoard({
           <Column
             key={s}
             status={s}
-            companies={companies.filter((c) => c.status === s)}
+            companies={visible.filter((c) => c.status === s)}
             profileMap={profileMap}
             onOpen={onOpen}
             canEdit={canEdit}
