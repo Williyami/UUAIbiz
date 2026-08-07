@@ -214,10 +214,3 @@ supabase db push
 > shipping code that depends on it, or production breaks in the window between the two.
 
 ---
-
-## Lovable
-
-This project syncs with [Lovable](https://lovable.dev) — commits pushed to the connected
-branch appear in the Lovable editor, so keep that branch working. Avoid force-pushing,
-rebasing or amending anything already pushed; it rewrites history on Lovable's side and
-can cost you project history.
