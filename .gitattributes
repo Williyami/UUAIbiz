@@ -1,0 +1,17 @@
+# Normalise line endings. Without this a Windows checkout can commit CRLF and
+# produce a whole-file diff that reviews as a rewrite.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.pdf binary
+
+# Collapse lockfiles in review — a dependency bump otherwise opens as thousands
+# of lines and buries the two that matter.
+package-lock.json linguist-generated=true
+bun.lock linguist-generated=true
