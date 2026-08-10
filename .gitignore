@@ -34,3 +34,12 @@ dist-ssr
 *.sln
 *.sw?
 .vercel
+
+# Claude Code local settings (per-machine, not shared)
+.claude/settings.local.json
+
+# Interna arbetsdokument: innehåller riktiga kontaktpersoner hos partnerföretag.
+# Repot är publikt — dessa hålls lokala tills de redigerats eller repot blir privat.
+docs/seed-data.md
+docs/outreach-email-example.md
+docs/handover.md
