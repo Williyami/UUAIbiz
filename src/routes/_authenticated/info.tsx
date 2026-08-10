@@ -21,6 +21,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { PageHeader } from "@/components/shared/PageHeader";
+import { DocumentCard } from "@/components/shared/DocumentCard";
 import { Markdown } from "@/lib/markdown";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, ArrowUp, ArrowDown } from "lucide-react";
@@ -90,6 +91,16 @@ function InfoPage() {
           </Button>
         )}
       </PageHeader>
+
+      <div className="space-y-2">
+        <h2 className="microlabel text-[10px] text-muted-foreground">Documents</h2>
+        <DocumentCard
+          title="Partnership Overview"
+          description="The one-pager we send to prospective partners — who we are, what we offer, and the two ways to work with us."
+          href="/UUAIS-Partnership-Overview.pdf"
+          meta="PDF · 3 pages · 205 KB"
+        />
+      </div>
 
       {sections.length === 0 ? (
         <div className="border border-dashed bg-card/50 px-6 py-16 text-center">
