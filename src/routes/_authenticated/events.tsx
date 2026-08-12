@@ -21,6 +21,7 @@ import {
   EVENT_STATUS_ORDER,
   EVENT_TYPE_ORDER,
   eventStatusColor,
+  isEventActive,
   semesterBounds,
 } from "@/components/events/eventStyles";
 import { formatSEK, formatDate } from "@/lib/format";
@@ -37,8 +38,9 @@ export const Route = createFileRoute("/_authenticated/events")({
   errorComponent: ({ error }) => <div className="p-8 text-destructive">Error: {error.message}</div>,
 });
 
-/** Display order for the grouped table — confirmed work sits above planning. */
-const EVENT_GROUP_ORDER = ["Confirmed", "Planned", "Completed", "Cancelled"] as const;
+/** Display order for the grouped table — confirmed work sits above planning,
+ *  paused work below it, and finished or dead events sink to the bottom. */
+const EVENT_GROUP_ORDER = ["Confirmed", "Planned", "On hold", "Completed", "Cancelled"] as const;
 
 /** Events store a date but no clock time, so these export as all-day entries. */
 function icsFromEvent(e: any): IcsEvent {
@@ -77,11 +79,7 @@ function EventsPage() {
   const sem = semesterBounds();
 
   const semesterEvents = events.filter(
-    (e) =>
-      e.status !== "Cancelled" &&
-      e.date &&
-      new Date(e.date) >= sem.start &&
-      new Date(e.date) <= sem.end,
+    (e) => isEventActive(e.status) && e.date && new Date(e.date) >= sem.start && new Date(e.date) <= sem.end,
   );
   const revenue = semesterEvents.reduce((s, e) => s + Number(e.revenue_from_partner || 0), 0);
   const costs = semesterEvents.reduce(
