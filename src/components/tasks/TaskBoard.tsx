@@ -21,7 +21,8 @@ import { MemberStack } from "@/components/shared/MemberStack";
 import { StatusTag } from "@/components/shared/StatusTag";
 import { supabase } from "@/integrations/supabase/client";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
-import { profilesQuery } from "@/lib/queries";
+import { profilesQuery, eventsQuery } from "@/lib/queries";
+import { CalendarDays } from "lucide-react";
 import { toast } from "sonner";
 
 function isOverdue(task: any) {
@@ -43,6 +44,7 @@ export function TaskBoard({
 }) {
   const qc = useQueryClient();
   const { data: profiles } = useSuspenseQuery(profilesQuery);
+  const { data: events } = useSuspenseQuery(eventsQuery);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
   const [activeId, setActiveId] = useState<string | null>(null);
 
@@ -65,6 +67,7 @@ export function TaskBoard({
   }
 
   const profileMap = new Map(profiles.map((p) => [p.id, p]));
+  const eventMap = new Map(events.map((e: any) => [e.id, e]));
   const active = tasks.find((t) => t.id === activeId);
 
   return (
@@ -81,13 +84,16 @@ export function TaskBoard({
             status={s}
             tasks={tasks.filter((t) => t.status === s)}
             profileMap={profileMap}
+            eventMap={eventMap}
             onOpen={onOpen}
             canEdit={canEdit}
           />
         ))}
       </div>
       <DragOverlay>
-        {active ? <Card task={active} profileMap={profileMap} onOpen={() => {}} /> : null}
+        {active ? (
+          <Card task={active} profileMap={profileMap} eventMap={eventMap} onOpen={() => {}} />
+        ) : null}
       </DragOverlay>
     </DndContext>
   );
@@ -97,12 +103,14 @@ function Column({
   status,
   tasks,
   profileMap,
+  eventMap,
   onOpen,
   canEdit,
 }: {
   status: TaskStatus;
   tasks: any[];
   profileMap: Map<string, any>;
+  eventMap: Map<string, any>;
   onOpen: (t: any) => void;
   canEdit: boolean;
 }) {
@@ -125,6 +133,7 @@ function Column({
             key={t.id}
             task={t}
             profileMap={profileMap}
+            eventMap={eventMap}
             onOpen={onOpen}
             canEdit={canEdit}
           />
@@ -137,7 +146,7 @@ function Column({
   );
 }
 
-function DraggableCard({ task, profileMap, onOpen, canEdit }: any) {
+function DraggableCard({ task, profileMap, eventMap, onOpen, canEdit }: any) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: task.id,
     disabled: !canEdit,
@@ -149,7 +158,7 @@ function DraggableCard({ task, profileMap, onOpen, canEdit }: any) {
       {...attributes}
       style={{ opacity: isDragging ? 0.3 : 1 }}
     >
-      <Card task={task} profileMap={profileMap} onOpen={onOpen} />
+      <Card task={task} profileMap={profileMap} eventMap={eventMap} onOpen={onOpen} />
     </div>
   );
 }
@@ -157,13 +166,16 @@ function DraggableCard({ task, profileMap, onOpen, canEdit }: any) {
 function Card({
   task,
   profileMap,
+  eventMap,
   onOpen,
 }: {
   task: any;
   profileMap: Map<string, any>;
+  eventMap: Map<string, any>;
   onOpen: (t: any) => void;
 }) {
   const overdue = isOverdue(task);
+  const event = task.related_event_id ? eventMap.get(task.related_event_id) : null;
   return (
     <button
       onClick={() => onOpen(task)}
@@ -172,6 +184,12 @@ function Card({
       }`}
     >
       <div className="truncate text-sm font-medium">{task.title}</div>
+      {event && (
+        <div className="microlabel mt-1.5 flex items-center gap-1 text-[9.5px] text-muted-foreground">
+          <CalendarDays className="h-3 w-3 shrink-0" />
+          <span className="truncate">{event.title}</span>
+        </div>
+      )}
       <div className="mt-2 flex items-center gap-3">
         <StatusTag color={priorityColor[task.priority as TaskPriority]} className="text-[9.5px]">
           {task.priority}

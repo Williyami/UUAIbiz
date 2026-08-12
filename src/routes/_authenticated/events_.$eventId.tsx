@@ -5,6 +5,7 @@ import { eventsQuery, profilesQuery, companiesQuery, tasksQuery, currentUserQuer
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -29,6 +30,7 @@ import {
   ExternalLink,
   ListChecks,
   Pencil,
+  Plus,
   Trash2,
 } from "lucide-react";
 
@@ -54,6 +56,8 @@ function EventPage() {
   const { data: me } = useSuspenseQuery(currentUserQuery);
   const canEdit = me?.role !== "viewer";
   const [editOpen, setEditOpen] = useState(false);
+  const [newItem, setNewItem] = useState("");
+  const [newDue, setNewDue] = useState("");
 
   const event: any = events.find((e) => e.id === eventId);
 
@@ -84,6 +88,32 @@ function EventPage() {
     onSuccess: (n) => {
       invalidate();
       toast.success(n === 0 ? "Checklist already added" : `${n} checklist tasks added to team tasks`);
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const addItem = useMutation({
+    mutationFn: async () => {
+      const title = newItem.trim();
+      if (!title) throw new Error("Give the item a title first.");
+      const { error } = await supabase.from("tasks").insert({
+        title,
+        related_event_id: event.id,
+        related_company_id: event.company_id ?? null,
+        // Falls back to the event date so a custom item still sorts sensibly
+        // among the generated ones, which are all dated relative to it.
+        due_date: newDue || event.date || null,
+        status: "To do" as const,
+        priority: "Medium" as const,
+        personal: false,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      invalidate();
+      setNewItem("");
+      setNewDue("");
+      toast.success("Item added to checklist");
     },
     onError: (e: any) => toast.error(e.message),
   });
@@ -341,6 +371,39 @@ function EventPage() {
                 );
               })}
             </ul>
+          )}
+          {canEdit && (
+            <form
+              className="flex items-center gap-2 border-t bg-muted/30 px-4 py-2.5"
+              onSubmit={(e) => {
+                e.preventDefault();
+                addItem.mutate();
+              }}
+            >
+              <Plus className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+              <Input
+                value={newItem}
+                onChange={(e) => setNewItem(e.target.value)}
+                placeholder="Add your own item…"
+                className="h-7 flex-1 border-0 bg-transparent px-0 text-xs shadow-none focus-visible:ring-0"
+              />
+              <Input
+                type="date"
+                value={newDue}
+                onChange={(e) => setNewDue(e.target.value)}
+                title="Due date — defaults to the event date"
+                className="tnum h-7 w-[125px] shrink-0 text-[11px]"
+              />
+              <Button
+                type="submit"
+                size="sm"
+                variant="outline"
+                className="h-7 shrink-0 text-xs"
+                disabled={!newItem.trim() || addItem.isPending}
+              >
+                Add
+              </Button>
+            </form>
           )}
         </section>
       </div>
