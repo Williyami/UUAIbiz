@@ -9,7 +9,7 @@ import {
   currentUserQuery,
 } from "@/lib/queries";
 import { Button } from "@/components/ui/button";
-import { Plus, Users, Lock } from "lucide-react";
+import { Plus, Users, User } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { TaskBoard } from "@/components/tasks/TaskBoard";
 import { TaskDialog } from "@/components/tasks/TaskDialog";
@@ -31,51 +31,36 @@ function TasksPage() {
   const canEdit = me?.role !== "viewer";
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<any | null>(null);
-  const [scope, setScope] = useState<"team" | "personal">("team");
-  const [mineOnly, setMineOnly] = useState(false);
+  // Defaults to your own list — the board opens on what you're responsible for
+  // rather than everything the team has.
+  const [mineOnly, setMineOnly] = useState(true);
 
-  // Personal tasks are private to their assignee (enforced by RLS too);
-  // the team board never shows them.
+  // Anything assigned to me, personal items included. Someone else's personal
+  // task never matches, since it isn't assigned to me (and RLS blocks it too).
+  const myTasks = tasks.filter((t: any) => me?.id && (t.assignees ?? []).includes(me.id));
+  // The team board excludes personal items entirely, whoever owns them.
   const teamTasks = tasks.filter((t: any) => !t.personal);
-  const personalTasks = tasks.filter((t: any) => t.personal && me?.id && (t.assignees ?? []).includes(me.id));
-  const visible =
-    scope === "personal"
-      ? personalTasks
-      : mineOnly
-        ? teamTasks.filter((t) => me?.id && (t.assignees ?? []).includes(me.id))
-        : teamTasks;
+  const visible = mineOnly ? myTasks : teamTasks;
 
   return (
     <div className="mx-auto max-w-[1400px] space-y-6 p-6 md:p-10">
       <PageHeader
         title="Tasks"
         lede={
-          scope === "team"
-            ? "Team to-dos. Drag between columns to update status."
-            : "Your private list — only you can see these."
+          mineOnly
+            ? "Everything assigned to you, private items included. Drag between columns to update status."
+            : "All team to-dos. Personal items stay hidden."
         }
       >
         <div className="inline-flex border bg-card p-0.5">
-          <ScopeButton active={scope === "team"} onClick={() => setScope("team")} icon={Users} label="Team" />
+          <ScopeButton active={mineOnly} onClick={() => setMineOnly(true)} icon={User} label="My tasks" />
           <ScopeButton
-            active={scope === "personal"}
-            onClick={() => setScope("personal")}
-            icon={Lock}
-            label="Personal"
+            active={!mineOnly}
+            onClick={() => setMineOnly(false)}
+            icon={Users}
+            label="All team"
           />
         </div>
-        {scope === "team" && (
-          <button
-            onClick={() => setMineOnly((v) => !v)}
-            className={`microlabel inline-flex h-9 items-center border px-3 text-[10px] transition-colors ${
-              mineOnly
-                ? "border-foreground bg-foreground text-background"
-                : "bg-card text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            My tasks
-          </button>
-        )}
         {canEdit && (
           <Button
             onClick={() => {
@@ -102,7 +87,7 @@ function TasksPage() {
         onOpenChange={setDialogOpen}
         task={editing}
         canEdit={canEdit}
-        defaultPersonal={scope === "personal"}
+        defaultPersonal={false}
       />
     </div>
   );
