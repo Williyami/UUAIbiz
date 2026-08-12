@@ -714,7 +714,7 @@ export type Database = {
         | "Discussing"
         | "Declined"
         | "On hold"
-      event_status: "Planned" | "Confirmed" | "Completed" | "Cancelled"
+      event_status: "Planned" | "Confirmed" | "On hold" | "Completed" | "Cancelled"
       event_type:
         | "Lunch lecture"
         | "Evening event"
@@ -870,7 +870,7 @@ export const Constants = {
         "Declined",
         "On hold",
       ],
-      event_status: ["Planned", "Confirmed", "Completed", "Cancelled"],
+      event_status: ["Planned", "Confirmed", "On hold", "Completed", "Cancelled"],
       event_type: [
         "Lunch lecture",
         "Evening event",

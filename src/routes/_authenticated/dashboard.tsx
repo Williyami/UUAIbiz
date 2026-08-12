@@ -15,6 +15,7 @@ import { CashflowChart } from "@/components/dashboard/CashflowChart";
 import { PipelineWave } from "@/components/dashboard/PipelineWave";
 import {
   eventStatusColor,
+  isEventActive,
   semesterBounds,
   type EventStatus,
 } from "@/components/events/eventStyles";
@@ -58,16 +59,12 @@ function Dashboard() {
   const upcoming = events
     .filter(
       (e) =>
-        e.date && new Date(e.date) >= today && new Date(e.date) <= in30 && e.status !== "Cancelled",
+        e.date && new Date(e.date) >= today && new Date(e.date) <= in30 && isEventActive(e.status),
     )
     .sort((a, b) => (a.date! < b.date! ? -1 : 1));
   const nextEvent = upcoming[0];
   const semesterEvents = events.filter(
-    (e) =>
-      e.status !== "Cancelled" &&
-      e.date &&
-      new Date(e.date) >= sem.start &&
-      new Date(e.date) <= sem.end,
+    (e) => isEventActive(e.status) && e.date && new Date(e.date) >= sem.start && new Date(e.date) <= sem.end,
   );
   const revenue = semesterEvents.reduce((s, e) => s + Number(e.revenue_from_partner || 0), 0);
   const costs = semesterEvents.reduce(
