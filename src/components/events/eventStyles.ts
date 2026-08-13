@@ -42,6 +42,9 @@ export function semesterBounds(now = new Date()) {
   return {
     label: `${ht ? "HT" : "VT"}${String(y).slice(2)}`,
     start: new Date(y, ht ? 6 : 0, 1),
-    end: new Date(y, ht ? 11 : 5, 31, 23, 59, 59),
+    // Day 0 of the following month resolves to the last day of this one, so
+    // this stays correct regardless of month length. Writing day 31 directly
+    // overflowed June into 1 July, putting that date in both semesters.
+    end: new Date(y, ht ? 12 : 6, 0, 23, 59, 59),
   };
 }

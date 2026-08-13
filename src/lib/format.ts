@@ -9,15 +9,26 @@ export function initials(name: string | null | undefined): string {
   return (parts[0]?.[0] ?? "") + (parts[1]?.[0] ?? "");
 }
 
+const DATE_ONLY = /^\d{4}-\d{2}-\d{2}$/;
+
+/**
+ * `new Date("2026-03-15")` is parsed as UTC midnight, which renders as the
+ * previous day anywhere west of UTC. Appending a time forces a local parse.
+ * Timestamps that already carry a time are passed through untouched.
+ */
+export function parseLocalDate(value: string | Date): Date {
+  if (value instanceof Date) return value;
+  return new Date(DATE_ONLY.test(value) ? `${value}T00:00:00` : value);
+}
+
 export function formatDate(d: string | Date | null | undefined): string {
   if (!d) return "—";
-  const date = typeof d === "string" ? new Date(d) : d;
-  return date.toLocaleDateString("sv-SE");
+  return parseLocalDate(d).toLocaleDateString("sv-SE");
 }
 
 export function timeAgo(d: string | Date | null | undefined): string {
   if (!d) return "";
-  const date = typeof d === "string" ? new Date(d) : d;
+  const date = parseLocalDate(d);
   const s = Math.max(0, (Date.now() - date.getTime()) / 1000);
   if (s < 60) return "just now";
   if (s < 3600) return `${Math.floor(s / 60)}m ago`;
