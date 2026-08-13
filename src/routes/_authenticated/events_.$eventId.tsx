@@ -17,7 +17,7 @@ import { StatusTag } from "@/components/shared/StatusTag";
 import { EventDialog } from "@/components/events/EventDialog";
 import { eventStatusColor, type EventStatus } from "@/components/events/eventStyles";
 import { EVENT_CHECKLIST, checklistDueDate } from "@/components/events/eventChecklist";
-import { formatSEK, formatDate } from "@/lib/format";
+import { formatSEK, formatDate, parseLocalDate } from "@/lib/format";
 import { toast } from "sonner";
 import {
   ArrowLeft,
@@ -360,7 +360,7 @@ function EventPage() {
             <ul className="divide-y">
               {eventTasks.map((t: any) => {
                 const done = t.status === "Done";
-                const overdue = !done && t.due_date && new Date(t.due_date) < today;
+                const overdue = !done && t.due_date && parseLocalDate(t.due_date) < today;
                 return (
                   <li key={t.id} className="flex items-center gap-2.5 px-4 py-2.5">
                     <Checkbox

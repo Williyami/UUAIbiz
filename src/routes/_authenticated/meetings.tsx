@@ -7,7 +7,7 @@ import { StatusTag } from "@/components/shared/StatusTag";
 import { MemberStack } from "@/components/shared/MemberStack";
 import { Button } from "@/components/ui/button";
 import { companyStatusColor, type CompanyStatus } from "@/components/outreach/statusStyles";
-import { formatDate, initials } from "@/lib/format";
+import { formatDate, initials, parseLocalDate } from "@/lib/format";
 import { MeetingDialog } from "@/components/meetings/MeetingDialog";
 import { downloadICS, type IcsEvent } from "@/lib/ics";
 import { Plus, CalendarPlus, ChevronLeft, ChevronRight } from "lucide-react";
@@ -62,10 +62,10 @@ function MeetingsPage() {
   const all = [...fromCompanies, ...manual];
   const sortKey = (m: any) => `${m.meeting_date || "9999"}T${m.meeting_time || "99"}`;
   const upcoming = all
-    .filter((m) => !m.meeting_date || new Date(m.meeting_date) >= today)
+    .filter((m) => !m.meeting_date || parseLocalDate(m.meeting_date) >= today)
     .sort((a, b) => sortKey(a).localeCompare(sortKey(b)));
   const past = all
-    .filter((m) => m.meeting_date && new Date(m.meeting_date) < today)
+    .filter((m) => m.meeting_date && parseLocalDate(m.meeting_date) < today)
     .sort((a, b) => b.meeting_date!.localeCompare(a.meeting_date!));
 
   function open(row: any) {

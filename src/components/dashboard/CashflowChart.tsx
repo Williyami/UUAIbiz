@@ -6,7 +6,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { semesterBounds } from "@/components/events/eventStyles";
-import { formatSEK } from "@/lib/format";
+import { formatSEK, parseLocalDate } from "@/lib/format";
 
 const chartConfig = {
   revenue: { label: "Revenue", color: "var(--status-success)" },
@@ -23,7 +23,7 @@ export function CashflowChart({ events }: { events: any[] }) {
     const month = startMonth + i;
     const inMonth = events.filter((e) => {
       if (!e.date || e.status === "Cancelled") return false;
-      const d = new Date(e.date);
+      const d = parseLocalDate(e.date);
       return d.getFullYear() === year && d.getMonth() === month;
     });
     return {

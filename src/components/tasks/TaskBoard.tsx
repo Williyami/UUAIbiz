@@ -16,7 +16,7 @@ import {
   taskStatusColor,
   priorityColor,
 } from "./taskStyles";
-import { formatDate } from "@/lib/format";
+import { formatDate, parseLocalDate } from "@/lib/format";
 import { MemberStack } from "@/components/shared/MemberStack";
 import { StatusTag } from "@/components/shared/StatusTag";
 import { supabase } from "@/integrations/supabase/client";
@@ -29,7 +29,7 @@ function isOverdue(task: any) {
   return (
     task.status !== "Done" &&
     task.due_date &&
-    new Date(task.due_date) < new Date(new Date().toDateString())
+    parseLocalDate(task.due_date) < new Date(new Date().toDateString())
   );
 }
 

@@ -3,6 +3,8 @@
  * "Event checklist — standard procedure" section. `offset` is days
  * relative to the event date (negative = before).
  */
+import { parseLocalDate } from "@/lib/format";
+
 export type ChecklistItem = { offset: number; title: string };
 
 export const EVENT_CHECKLIST: ChecklistItem[] = [
@@ -22,7 +24,7 @@ export const EVENT_CHECKLIST: ChecklistItem[] = [
 ];
 
 export function checklistDueDate(eventDate: string, offset: number): string {
-  const d = new Date(eventDate);
+  const d = parseLocalDate(eventDate);
   d.setDate(d.getDate() + offset);
   return d.toLocaleDateString("sv-SE");
 }

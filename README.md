@@ -105,7 +105,7 @@ erDiagram
         text industry
         text status "pipeline stage"
         bool established_partner
-        timestamptz last_contacted "drives stale flag"
+        date last_contact_date "drives stale flag"
     }
     profiles {
         uuid id PK

@@ -24,7 +24,7 @@ import {
   isEventActive,
   semesterBounds,
 } from "@/components/events/eventStyles";
-import { formatSEK, formatDate } from "@/lib/format";
+import { formatSEK, formatDate, parseLocalDate } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/events")({
   loader: ({ context }) => {
@@ -79,7 +79,11 @@ function EventsPage() {
   const sem = semesterBounds();
 
   const semesterEvents = events.filter(
-    (e) => isEventActive(e.status) && e.date && new Date(e.date) >= sem.start && new Date(e.date) <= sem.end,
+    (e) =>
+      isEventActive(e.status) &&
+      e.date &&
+      parseLocalDate(e.date) >= sem.start &&
+      parseLocalDate(e.date) <= sem.end,
   );
   const revenue = semesterEvents.reduce((s, e) => s + Number(e.revenue_from_partner || 0), 0);
   const costs = semesterEvents.reduce(
