@@ -98,7 +98,7 @@ function InfoPage() {
           title="Partnership Overview"
           description="The one-pager we send to prospective partners — who we are, what we offer, and the two ways to work with us."
           href="/UUAIS-Partnership-Overview.pdf"
-          meta="PDF · 3 pages · 205 KB"
+          meta="PDF · 3 pages · 387 KB"
         />
       </div>
 
