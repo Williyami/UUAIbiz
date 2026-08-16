@@ -1,11 +1,17 @@
 export function formatSEK(amount: number | null | undefined): string {
-  const n = Number(amount ?? 0);
+  // ?? only catches null/undefined — a value that fails to coerce would other-
+  // wise render as "NaN SEK" or "∞ SEK" on a dashboard tile.
+  const raw = Number(amount ?? 0);
+  const n = Number.isFinite(raw) ? raw : 0;
   return new Intl.NumberFormat("sv-SE", { maximumFractionDigits: 0 }).format(n) + " SEK";
 }
 
 export function initials(name: string | null | undefined): string {
-  if (!name) return "?";
-  const parts = name.trim().split(/\s+/);
+  // Checked after trimming: a whitespace-only name passes a plain falsy guard
+  // but yields no letters, rendering a blank avatar instead of the fallback.
+  const trimmed = name?.trim();
+  if (!trimmed) return "?";
+  const parts = trimmed.split(/\s+/);
   return (parts[0]?.[0] ?? "") + (parts[1]?.[0] ?? "");
 }
 
