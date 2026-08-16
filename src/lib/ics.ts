@@ -2,7 +2,47 @@
 // event is an all-day VEVENT — iOS/Google/Outlook all open .ics natively.
 
 function escapeText(s: string): string {
-  return s.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
+  return (
+    s
+      // CRLF is the line delimiter, so a raw CR left inside a value can
+      // terminate the content line early in a strict parser. Normalise every
+      // line-ending form to \n first, then escape it.
+      .replace(/\r\n?/g, "\n")
+      .replace(/\\/g, "\\\\")
+      .replace(/;/g, "\\;")
+      .replace(/,/g, "\\,")
+      .replace(/\n/g, "\\n")
+  );
+}
+
+const encoder = new TextEncoder();
+const decoder = new TextDecoder();
+
+/**
+ * RFC 5545 §3.1: content lines are limited to 75 **octets**, with overflow
+ * continued on following lines that begin with a single space.
+ *
+ * The limit is octets rather than characters, so Swedish venue names are
+ * shorter than they look, and a cut must land on a UTF-8 lead byte or the
+ * output is mojibake. The leading space on a continuation counts toward the
+ * 75, leaving 74 octets of payload.
+ */
+function foldLine(line: string): string {
+  const bytes = encoder.encode(line);
+  if (bytes.length <= 75) return line;
+
+  const parts: string[] = [];
+  let start = 0;
+  let limit = 75;
+  while (start < bytes.length) {
+    let end = Math.min(start + limit, bytes.length);
+    // 0b10xxxxxx marks a UTF-8 continuation byte — walk back off it.
+    while (end < bytes.length && end > start && (bytes[end] & 0xc0) === 0x80) end--;
+    parts.push(decoder.decode(bytes.subarray(start, end)));
+    start = end;
+    limit = 74;
+  }
+  return parts.join("\r\n ");
 }
 
 function dateValue(isoDate: string): string {
@@ -64,7 +104,7 @@ export function buildICS(events: IcsEvent[]): string {
     );
   }
   lines.push("END:VCALENDAR");
-  return lines.join("\r\n") + "\r\n";
+  return lines.map(foldLine).join("\r\n") + "\r\n";
 }
 
 export function downloadICS(filename: string, events: IcsEvent[]) {
