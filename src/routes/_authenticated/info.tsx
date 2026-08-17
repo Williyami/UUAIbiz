@@ -96,9 +96,15 @@ function InfoPage() {
         <h2 className="microlabel text-[10px] text-muted-foreground">Documents</h2>
         <DocumentCard
           title="Partnership Overview"
-          description="The one-pager we send to prospective partners — who we are, what we offer, and the two ways to work with us."
+          description="The deck we send to prospective partners — who we are, who our members are, what we offer, and the two ways to work with us."
           href="/UUAIS-Partnership-Overview.pdf"
-          meta="PDF · 3 pages · 387 KB"
+          meta="PDF · 4 pages · 234 KB"
+        />
+        <DocumentCard
+          title="Partnership Tiers"
+          description="Alfa and Beta pricing and what each level includes, with a side-by-side comparison. Sent once a company has shown interest in an ongoing partnership."
+          href="/UUAIS-Partnership-Tiers.pdf"
+          meta="PDF · 3 pages · 84 KB"
         />
       </div>
 
