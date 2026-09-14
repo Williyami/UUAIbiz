@@ -1,0 +1,995 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - link "Skip to content" [ref=e4] [cursor=pointer]:
+      - /url: "#start-of-content"
+    - banner [ref=e9]:
+      - heading "Navigation Menu" [level=2] [ref=e10]
+      - generic [ref=e11]:
+        - link "Homepage" [ref=e13] [cursor=pointer]:
+          - /url: /
+        - generic [ref=e16]:
+          - navigation "Global" [ref=e17]:
+            - list [ref=e18]:
+              - listitem [ref=e19]:
+                - button "Platform" [ref=e21] [cursor=pointer]
+              - listitem [ref=e24]:
+                - button "Solutions" [ref=e26] [cursor=pointer]
+              - listitem [ref=e29]:
+                - button "Resources" [ref=e31] [cursor=pointer]
+              - listitem [ref=e34]:
+                - button "Open Source" [ref=e36] [cursor=pointer]
+              - listitem [ref=e39]:
+                - button "Enterprise" [ref=e41] [cursor=pointer]
+              - listitem [ref=e44]:
+                - link "Pricing" [ref=e45] [cursor=pointer]:
+                  - /url: https://github.com/pricing
+          - generic [ref=e46]:
+            - button "Search or jump to, type / to search" [ref=e48] [cursor=pointer]
+            - link "Sign in" [ref=e55] [cursor=pointer]:
+              - /url: /login?return_to=https%3A%2F%2Fgithub.com%2FWilliyami
+            - link "Sign up" [ref=e58] [cursor=pointer]:
+              - /url: /signup?ref_cta=Sign+up&ref_loc=header+logged+out&ref_page=%2F%3Cuser-name%3E&source=header
+            - button "Appearance settings" [ref=e61] [cursor=pointer]
+  - main [ref=e67]:
+    - generic [ref=e70]:
+      - generic [ref=e71]:
+        - generic:
+          - generic:
+            - generic:
+              - img "@Williyami"
+            - generic:
+              - strong: Williyami
+              - generic:
+                - generic:
+                  - link "Follow":
+                    - /url: /login?return_to=https%3A%2F%2Fgithub.com%2FWilliyami
+      - navigation "User profile" [ref=e74]:
+        - link "Overview" [ref=e75] [cursor=pointer]:
+          - /url: /Williyami
+        - link "Repositories 6" [ref=e78] [cursor=pointer]:
+          - /url: /Williyami?tab=repositories
+          - text: Repositories
+          - generic "6" [ref=e81]
+        - link "Projects" [ref=e82] [cursor=pointer]:
+          - /url: /Williyami?tab=projects
+        - link "Packages" [ref=e85] [cursor=pointer]:
+          - /url: /Williyami?tab=packages
+        - link "Stars 5" [ref=e88] [cursor=pointer]:
+          - /url: /Williyami?tab=stars
+          - text: Stars
+          - generic "5" [ref=e91]
+    - generic [ref=e93]:
+      - generic [ref=e95]:
+        - generic:
+          - generic:
+            - generic:
+              - img "@Williyami"
+            - generic:
+              - generic:
+                - strong: Williyami
+            - generic:
+              - generic:
+                - generic:
+                  - link "Follow":
+                    - /url: /login?return_to=https%3A%2F%2Fgithub.com%2FWilliyami
+        - generic [ref=e96]:
+          - generic [ref=e97]:
+            - generic [ref=e98]:
+              - link [ref=e99] [cursor=pointer]:
+                - /url: https://avatars.githubusercontent.com/u/34352288?v=4
+                - img "View Williyami's full-sized avatar" [ref=e100]
+              - generic: 🐎
+            - heading "William Eklund Williyami" [level=1] [ref=e107]:
+              - generic [ref=e108]: William Eklund
+              - generic [ref=e109]: Williyami
+          - generic [ref=e110]:
+            - link "Follow" [ref=e117] [cursor=pointer]:
+              - /url: /login?return_to=https%3A%2F%2Fgithub.com%2FWilliyami
+            - generic [ref=e118]:
+              - generic [ref=e119]: Intern @ Morningstar | BSc Business & Economics | UUAI | UEAM
+              - generic [ref=e122]:
+                - link "1 follower" [ref=e123] [cursor=pointer]:
+                  - /url: https://github.com/Williyami?tab=followers
+                - text: ·
+                - link "2 following" [ref=e126] [cursor=pointer]:
+                  - /url: https://github.com/Williyami?tab=following
+              - list [ref=e127]:
+                - 'listitem "Organization: Morningstar" [ref=e128]':
+                  - generic [ref=e131]: Morningstar
+                - 'listitem "Home location: Sweden" [ref=e133]':
+                  - generic [ref=e136]: Sweden
+                - listitem [ref=e137]:
+                  - generic [ref=e140]: 15:56 - same time
+                - listitem [ref=e141]:
+                  - link "https://orcid.org/0009-0001-0155-3235" [ref=e144] [cursor=pointer]:
+                    - /url: https://orcid.org/0009-0001-0155-3235
+                - listitem [ref=e145]:
+                  - img "LinkedIn" [ref=e146]
+                  - link "in/williameklund" [ref=e149] [cursor=pointer]:
+                    - /url: https://www.linkedin.com/in/williameklund/
+          - generic [ref=e150]:
+            - heading [level=2] [ref=e151]:
+              - link "Achievements" [ref=e152] [cursor=pointer]:
+                - /url: /Williyami?tab=achievements
+            - generic [ref=e153]:
+              - 'link "Achievement: Pull Shark x2" [ref=e154] [cursor=pointer]':
+                - /url: /Williyami?achievement=pull-shark&tab=achievements
+                - 'img "Achievement: Pull Shark" [ref=e155]'
+                - generic [ref=e156]: x2
+              - link [ref=e157] [cursor=pointer]:
+                - /url: /Williyami?achievement=pair-extraordinaire&tab=achievements
+                - 'img "Achievement: Pair Extraordinaire" [ref=e158]'
+              - link [ref=e159] [cursor=pointer]:
+                - /url: /Williyami?achievement=yolo&tab=achievements
+                - 'img "Achievement: YOLO" [ref=e160]'
+              - link [ref=e161] [cursor=pointer]:
+                - /url: /Williyami?achievement=quickdraw&tab=achievements
+                - 'img "Achievement: Quickdraw" [ref=e162]'
+          - button "Block or report user" [ref=e164] [cursor=pointer]
+      - generic [ref=e169]:
+        - generic [ref=e171]:
+          - generic [ref=e173]:
+            - link "Williyami" [ref=e174] [cursor=pointer]:
+              - /url: /Williyami/Williyami
+            - generic [ref=e175]: /
+            - text: README.md
+          - article [ref=e176]:
+            - generic [ref=e177]:
+              - generic [ref=e178]:
+                - code [ref=e180]: "*****+++++++++============------===+####%##*+=----================++++++++++++++********** *****++++++++=========--------=+*###*#%%@@@@@%*=-------============++++++++++++++********* *****++++++++=======--------=+#%%@%##%%%%%%%@@@@#=--------===========+++++++++++++******** *****++++++++=====---------+#*#%@@%@@@@@%%%%@%@@@@+----------==========+++++++++++******** *****++++++++=====--------=#**%%@@%%%###%%#%%@@@@@@+-----------=========++++++++++******** *****+++++++======-------:*%**%%+=-:-::--=+*#%@@@@@*:------------=======+++++++++++******* *****+++++++=====-------::*%*##=:...:::::--=**%@@@@*:-------------=======++++++++++******* ****+++++++======-----::::=%#@+::...:::::::-=+*%@@@+:--------------=======+++++++++******* ****+++++++=====-----::::::*%@+:::::::-=++*++=+#@@%=::::-------------=====++++++++++****** ****+++++++=====----::::::::=%*+*#*=:-=*###*+==+%#+:::::::------------====++++++++++****** ****++++++======---::::::::::-===++=::===-----==*+-::::::::-----------=====+++++++++****** ****++++++=====----:::::::::::::::::::-=--::--=+=-::::::::::-----------=====++++++++****** ****++++++=====---:::::::::::::::::--=++=----==+-::::::::::::----------=====+++++++++***** ****++++++=====---::::::::::::::-:::-==-----===-::::::::::::::---------======++++++++***** ****+++++=====----:::::::::::::::---==++++====+-::::::::::::::----------=====++++++++***** ****+++++=====----::::::::::::::::--=+++=====++=::::::::::::::----------=====++++++++***** ***++++++=====---::::::::::::::::::------==++==+-=::::::::::::----------======+++++++***** ****+++++=====----::::::::::::::::::--=+++++===:.#%+-:::::::::-----------=====+++++++***** ****+++++=====----::::::::::::::-+===:-====-=-:.-@@@@#+-::::::-----------=====+++++++***** ****++++++=====---::::::::::-+*%%@-:*=::----:..:%@@@@@@@%#+=-:::--------======+++++++***** ****++++++=====---:::::-=+#%@@@@@@::=*=---:: ..+@@@@@@@@@@@@@%*+=-------=====++++++++***** ****++++++=====-----:=#%@@@@@@@@@#-+-:==-::--.-@@@@@@@@@@@@@@@@@@%#+----=====++++++++***** ****++++++======---:-@@@@@@@@@@@@#-.. .=-..:::#@@@@@@@@@@@@@@@@@@@@@*--======++++++++***** ****+++++++=====---:*@%%%%%@@%@@@*. .--.::.=@@@@@@@@@@@@@@@@@@@@@@@=-=====+++++++++***** ****+++++++=====----%@%%%%%%%%@@@+. .::-.:#@@@@@@@@@@@@@@@@@@@@@@@#-=====++++++++****** ****+++++++======--=@@@%%%%%%%@@@+. ..::..+@@@@@@@@@@@@@@@@@@@@@@@@@+-===+++++++++****** ****+++++++======--*@@@%%%%%%%@@@=....:::. :%@@@@@@@@@@@@@@@@@@@@@@@@@%-==++++++++++****** ****+++++++======--%@@@@%%%%@@@@@=....... .*@@@@@@@@@@@@@@@@@@@@@@@@@@@*==++++++++++******"
+                - button "Copy code to clipboard" [ref=e182] [cursor=pointer]
+              - generic [ref=e186]:
+                - heading "William Eklund" [level=1] [ref=e187]
+                - 'link "Permalink: William Eklund" [ref=e188] [cursor=pointer]':
+                  - /url: "#william-eklund"
+              - paragraph [ref=e191]:
+                - strong [ref=e192]: Intern
+                - text: "@ Morningstar ·"
+                - strong [ref=e193]: Equity Research Analyst
+                - text: "@ UEAM ·"
+                - strong [ref=e194]: Head of Business
+                - text: "@ UU AI Society · BSc Business & Economics"
+              - paragraph [ref=e195]:
+                - link [ref=e196] [cursor=pointer]:
+                  - /url: https://www.linkedin.com/in/williameklund/
+                  - img "LinkedIn" [ref=e197]
+              - img "Contribution snake" [ref=e200]
+            - separator [ref=e201]
+            - generic [ref=e202]:
+              - heading "Tech Stack" [level=3] [ref=e203]
+              - 'link "Permalink: Tech Stack" [ref=e204] [cursor=pointer]':
+                - /url: "#tech-stack"
+            - paragraph [ref=e207]:
+              - link [ref=e208] [cursor=pointer]:
+                - /url: https://camo.githubusercontent.com/4e39004843387226e83eaacfb24a8df02adb769152f2f7f3db1926cb04500f6d/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f68746d6c352d2532334533344632362e7376673f7374796c653d666f722d7468652d6261646765266c6f676f3d68746d6c35266c6f676f436f6c6f723d7768697465
+                - img "HTML5" [ref=e209]
+              - link [ref=e210] [cursor=pointer]:
+                - /url: https://camo.githubusercontent.com/c40c14f1c1bba5b3aac3281799882be1612b4c217d0340623f26f071739aac84/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f6a6176612d2532334544384230302e7376673f7374796c653d666f722d7468652d6261646765266c6f676f3d6f70656e6a646b266c6f676f436f6c6f723d7768697465
+                - img "Java" [ref=e211]
+              - link [ref=e212] [cursor=pointer]:
+                - /url: https://camo.githubusercontent.com/dc050359857b187d9f7a075b1a03dccb9606b32b30f3178a1ba5973ac17d1c08/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f6a6176617363726970742d2532333332333333302e7376673f7374796c653d666f722d7468652d6261646765266c6f676f3d6a617661736372697074266c6f676f436f6c6f723d253233463744463145
+                - img "JavaScript" [ref=e213]
+              - link [ref=e214] [cursor=pointer]:
+                - /url: https://camo.githubusercontent.com/43de341c9b8b09764cc735349316e938d77a1da3751ae8bfaec066e3c3450bec/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f707974686f6e2d3336373041303f7374796c653d666f722d7468652d6261646765266c6f676f3d707974686f6e266c6f676f436f6c6f723d666664643534
+                - img "Python" [ref=e215]
+              - link [ref=e216] [cursor=pointer]:
+                - /url: https://camo.githubusercontent.com/17f8c6b5aea674b3a28cfb961815b469b4a398f0c584d82d4c9af79c2975e5da/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f722d2532333237364443332e7376673f7374796c653d666f722d7468652d6261646765266c6f676f3d72266c6f676f436f6c6f723d7768697465
+                - img "R" [ref=e217]
+              - link [ref=e218] [cursor=pointer]:
+                - /url: https://camo.githubusercontent.com/5d71b4908b5ba1d6c748aab2a16b7c7e72cf900bad26535272301e68c98b220b/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f506f7765725368656c6c2d2532333533393146452e7376673f7374796c653d666f722d7468652d6261646765266c6f676f3d706f7765727368656c6c266c6f676f436f6c6f723d7768697465
+                - img "PowerShell" [ref=e219]
+              - link [ref=e220] [cursor=pointer]:
+                - /url: https://camo.githubusercontent.com/68592fcb6016b11a73b775f35694b74d28d0f2f30feded7f5fe92f03aa405412/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f747970657363726970742d2532333030374143432e7376673f7374796c653d666f722d7468652d6261646765266c6f676f3d74797065736372697074266c6f676f436f6c6f723d7768697465
+                - img "TypeScript" [ref=e221]
+              - link [ref=e222] [cursor=pointer]:
+                - /url: https://camo.githubusercontent.com/ef2b7d0db96aa537dfc682bc36181a27a9152e23378bd002a4331e9e2b27da5b/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f6e6f64652e6a732d3644413535463f7374796c653d666f722d7468652d6261646765266c6f676f3d6e6f64652e6a73266c6f676f436f6c6f723d7768697465
+                - img "NodeJS" [ref=e223]
+              - link [ref=e224] [cursor=pointer]:
+                - /url: https://camo.githubusercontent.com/27d6a3309ed5f3f77b44d6363633e947c37cd5470610cf3d264ce9dcde5a1049/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f72656163742d2532333230323332612e7376673f7374796c653d666f722d7468652d6261646765266c6f676f3d7265616374266c6f676f436f6c6f723d253233363144414642
+                - img "React" [ref=e225]
+              - link [ref=e226] [cursor=pointer]:
+                - /url: https://camo.githubusercontent.com/6aaad38510e8f539877a91da7a2ab7ccf3a8c6babd94bdcabfc4bf501a55aa83/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f736e6f77666c616b652d2532333239423545382e7376673f7374796c653d666f722d7468652d6261646765266c6f676f3d736e6f77666c616b65266c6f676f436f6c6f723d7768697465
+                - img "Snowflake" [ref=e227]
+              - link [ref=e228] [cursor=pointer]:
+                - /url: https://camo.githubusercontent.com/2b646cc1f71ad946bf47bd817fb768ea11e59318ee1c83d55f41676e84f503b4/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f4d6963726f736f667425323053514c2532305365727665722d4343323932373f7374796c653d666f722d7468652d6261646765266c6f676f3d6d6963726f736f667425323073716c253230736572766572266c6f676f436f6c6f723d7768697465
+                - img "MicrosoftSQLServer" [ref=e229]
+              - link [ref=e230] [cursor=pointer]:
+                - /url: https://camo.githubusercontent.com/1b3c1f020909d47c98e2a00b9e5484c252c84684ed3573ffff1e9ee721421887/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f6d7973716c2d3434373941312e7376673f7374796c653d666f722d7468652d6261646765266c6f676f3d6d7973716c266c6f676f436f6c6f723d7768697465
+                - img "MySQL" [ref=e231]
+              - link [ref=e232] [cursor=pointer]:
+                - /url: https://camo.githubusercontent.com/b1586e306af6c7b327cbec5cf88f8093bef26ea820078574b4f78c53a968c6e6/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f706f7765725f62692d4632433831313f7374796c653d666f722d7468652d6261646765266c6f676f3d706f7765726269266c6f676f436f6c6f723d626c61636b
+                - img "Power Bi" [ref=e233]
+              - link [ref=e234] [cursor=pointer]:
+                - /url: https://camo.githubusercontent.com/97af73d098e049bf2d11e027500814d62dd2c840ce11d1cb5270607ae9949b2f/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f646f636b65722d2532333064623765642e7376673f7374796c653d666f722d7468652d6261646765266c6f676f3d646f636b6572266c6f676f436f6c6f723d7768697465
+                - img "Docker" [ref=e235]
+              - link [ref=e236] [cursor=pointer]:
+                - /url: https://camo.githubusercontent.com/1cc02666772b3b7e7d6c6cd6c25c8b35eed0d8ac43db9bcd9115b86158788d8a/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f6a6972612d2532333041304646462e7376673f7374796c653d666f722d7468652d6261646765266c6f676f3d6a697261266c6f676f436f6c6f723d7768697465
+                - img "Jira" [ref=e237]
+            - generic [ref=e238]:
+              - heading "About Me" [level=3] [ref=e239]
+              - 'link "Permalink: About Me" [ref=e240] [cursor=pointer]':
+                - /url: "#about-me"
+            - paragraph [ref=e243]: I'm a Business & Economics student at Uppsala University (Corporate Finance specialization, graduating 2027), currently interning at Morningstar. I lead the Business side (events & partnerships) at UU AI Society, where I work on connecting companies with Uppsala's AI-focused student community.
+            - list [ref=e244]:
+              - listitem [ref=e245]: 🎓 BSc Business & Economics, Uppsala University
+              - listitem [ref=e246]: 📊 Equity Research Analyst, UEAM
+              - listitem [ref=e247]: 💼 Head of Business, UU AI Society
+              - listitem [ref=e248]: 📊 Intern, Morningstar
+              - listitem [ref=e249]: 📍 Based in Sweden
+            - generic [ref=e250]:
+              - heading "What I'm Into" [level=3] [ref=e251]
+              - 'link "Permalink: What I''m Into" [ref=e252] [cursor=pointer]':
+                - /url: "#what-im-into"
+            - list [ref=e255]:
+              - listitem [ref=e256]: Equity research & fund flow analysis
+              - listitem [ref=e257]: Building and scaling student-industry partnerships
+              - listitem [ref=e258]: AI applications in finance
+            - separator [ref=e259]
+            - paragraph [ref=e261]:
+              - text: 📫 Reach me on
+              - link "LinkedIn" [ref=e262] [cursor=pointer]:
+                - /url: https://www.linkedin.com/in/williameklund/
+        - generic [ref=e264]:
+          - heading "Pinned Loading" [level=2] [ref=e265]:
+            - text: Pinned
+            - generic: Loading
+            - status
+          - list [ref=e267]:
+            - listitem [ref=e268]:
+              - generic [ref=e270]:
+                - generic [ref=e272]:
+                  - link "macro-place-challenge-2026" [ref=e276] [cursor=pointer]:
+                    - /url: /Williyami/macro-place-challenge-2026
+                  - text: Public
+                - paragraph [ref=e277]: Hudson River Trading Macro Placement Challenge 2026
+                - paragraph [ref=e278]:
+                  - generic [ref=e279]: Python
+                  - link [ref=e281] [cursor=pointer]:
+                    - /url: /Williyami/macro-place-challenge-2026/stargazers
+                    - img "stars" [ref=e282]
+                    - text: "2"
+            - listitem [ref=e284]:
+              - generic [ref=e286]:
+                - generic [ref=e288]:
+                  - link "polymarket-kalshi-arbitrage" [ref=e292] [cursor=pointer]:
+                    - /url: /Williyami/polymarket-kalshi-arbitrage
+                  - text: Public
+                - paragraph [ref=e293]: Cross-platform arbitrage scanner for Polymarket and Kalshi prediction markets
+                - paragraph [ref=e294]:
+                  - generic [ref=e295]: Python
+            - listitem [ref=e297]:
+              - generic [ref=e299]:
+                - generic [ref=e301]:
+                  - link "UUAIbiz" [ref=e305] [cursor=pointer]:
+                    - /url: /Williyami/UUAIbiz
+                  - text: Public
+                - paragraph [ref=e306]: UUAI's CRM
+                - paragraph [ref=e307]:
+                  - generic [ref=e308]: TypeScript
+                  - link [ref=e310] [cursor=pointer]:
+                    - /url: /Williyami/UUAIbiz/stargazers
+                    - img "star" [ref=e311]
+                    - text: "1"
+            - listitem [ref=e313]:
+              - generic [ref=e315]:
+                - generic [ref=e317]:
+                  - link "Terminal" [ref=e321] [cursor=pointer]:
+                    - /url: /Williyami/Terminal
+                  - text: Public
+                - paragraph [ref=e322]: bb-style terminal
+                - paragraph [ref=e323]:
+                  - generic [ref=e324]: TypeScript
+                  - link [ref=e326] [cursor=pointer]:
+                    - /url: /Williyami/Terminal/stargazers
+                    - img "star" [ref=e327]
+                    - text: "1"
+        - generic [ref=e330]:
+          - generic [ref=e331]:
+            - generic [ref=e332]:
+              - generic [ref=e333]:
+                - heading "687 contributions in the last year" [level=2] [ref=e334]
+                - link "Skip to contributions year list" [ref=e335] [cursor=pointer]:
+                  - /url: "#year-link-2026"
+                - generic [ref=e337]:
+                  - grid [ref=e339]:
+                    - caption [ref=e340]: Contribution Graph
+                    - rowgroup [ref=e341]:
+                      - row [ref=e342]:
+                        - gridcell "Day of Week" [ref=e343]
+                        - gridcell "August" [ref=e345]:
+                          - generic [ref=e347]: Aug
+                        - gridcell "September" [ref=e348]:
+                          - generic [ref=e350]: Sep
+                        - gridcell "October" [ref=e351]:
+                          - generic [ref=e353]: Oct
+                        - gridcell "November" [ref=e354]:
+                          - generic [ref=e356]: Nov
+                        - gridcell "December" [ref=e357]:
+                          - generic [ref=e359]: Dec
+                        - gridcell "January" [ref=e360]:
+                          - generic [ref=e362]: Jan
+                        - gridcell "February" [ref=e363]:
+                          - generic [ref=e365]: Feb
+                        - gridcell "March" [ref=e366]:
+                          - generic [ref=e368]: Mar
+                        - gridcell "April" [ref=e369]:
+                          - generic [ref=e371]: Apr
+                        - gridcell "May" [ref=e372]
+                        - gridcell "June" [ref=e375]:
+                          - generic [ref=e377]: Jun
+                        - gridcell "July" [ref=e378]:
+                          - generic [ref=e380]: Jul
+                        - gridcell "August" [ref=e381]:
+                          - generic [ref=e383]: Aug
+                    - rowgroup [ref=e384]:
+                      - row [ref=e385]:
+                        - gridcell "Sunday" [ref=e386]:
+                          - generic [ref=e388]: Sun
+                        - gridcell "No contributions on August 17th." [ref=e389]
+                        - gridcell "No contributions on August 24th." [ref=e390]
+                        - gridcell "No contributions on August 31st." [ref=e391]
+                        - gridcell "No contributions on September 7th." [ref=e392]
+                        - gridcell "No contributions on September 14th." [ref=e393]
+                        - gridcell "No contributions on September 21st." [ref=e394]
+                        - gridcell "No contributions on September 28th." [ref=e395]
+                        - gridcell "No contributions on October 5th." [ref=e396]
+                        - gridcell "No contributions on October 12th." [ref=e397]
+                        - gridcell "7 contributions on October 19th." [ref=e398]
+                        - gridcell "No contributions on October 26th." [ref=e399]
+                        - gridcell "No contributions on November 2nd." [ref=e400]
+                        - gridcell "No contributions on November 9th." [ref=e401]
+                        - gridcell "No contributions on November 16th." [ref=e402]
+                        - gridcell "13 contributions on November 23rd." [ref=e403]
+                        - gridcell "No contributions on November 30th." [ref=e404]
+                        - gridcell "No contributions on December 7th." [ref=e405]
+                        - gridcell "No contributions on December 14th." [ref=e406]
+                        - gridcell "No contributions on December 21st." [ref=e407]
+                        - gridcell "No contributions on December 28th." [ref=e408]
+                        - gridcell "No contributions on January 4th." [ref=e409]
+                        - gridcell "No contributions on January 11th." [ref=e410]
+                        - gridcell "No contributions on January 18th." [ref=e411]
+                        - gridcell "No contributions on January 25th." [ref=e412]
+                        - gridcell "No contributions on February 1st." [ref=e413]
+                        - gridcell "No contributions on February 8th." [ref=e414]
+                        - gridcell "No contributions on February 15th." [ref=e415]
+                        - gridcell "No contributions on February 22nd." [ref=e416]
+                        - gridcell "No contributions on March 1st." [ref=e417]
+                        - gridcell "No contributions on March 8th." [ref=e418]
+                        - gridcell "3 contributions on March 15th." [ref=e419]
+                        - gridcell "No contributions on March 22nd." [ref=e420]
+                        - gridcell "No contributions on March 29th." [ref=e421]
+                        - gridcell "8 contributions on April 5th." [ref=e422]
+                        - gridcell "No contributions on April 12th." [ref=e423]
+                        - gridcell "2 contributions on April 19th." [ref=e424]
+                        - gridcell "35 contributions on April 26th." [ref=e425]
+                        - gridcell "15 contributions on May 3rd." [ref=e426]
+                        - gridcell "1 contribution on May 10th." [ref=e427]
+                        - gridcell "No contributions on May 17th." [ref=e428]
+                        - gridcell "No contributions on May 24th." [ref=e429]
+                        - gridcell "No contributions on May 31st." [ref=e430]
+                        - gridcell "No contributions on June 7th." [ref=e431]
+                        - gridcell "No contributions on June 14th." [ref=e432]
+                        - gridcell "No contributions on June 21st." [ref=e433]
+                        - gridcell "No contributions on June 28th." [ref=e434]
+                        - gridcell "8 contributions on July 5th." [ref=e435]
+                        - gridcell "No contributions on July 12th." [ref=e436]
+                        - gridcell "No contributions on July 19th." [ref=e437]
+                        - gridcell "No contributions on July 26th." [ref=e438]
+                        - gridcell "7 contributions on August 2nd." [ref=e439]
+                        - gridcell "39 contributions on August 9th." [ref=e440]
+                        - gridcell "11 contributions on August 16th." [ref=e441]
+                      - row [ref=e442]:
+                        - gridcell "Monday" [ref=e443]:
+                          - generic [ref=e445]: Mon
+                        - gridcell "No contributions on August 18th." [ref=e446]
+                        - gridcell "No contributions on August 25th." [ref=e447]
+                        - gridcell "No contributions on September 1st." [ref=e448]
+                        - gridcell "No contributions on September 8th." [ref=e449]
+                        - gridcell "No contributions on September 15th." [ref=e450]
+                        - gridcell "No contributions on September 22nd." [ref=e451]
+                        - gridcell "No contributions on September 29th." [ref=e452]
+                        - gridcell "No contributions on October 6th." [ref=e453]
+                        - gridcell "No contributions on October 13th." [ref=e454]
+                        - gridcell "17 contributions on October 20th." [ref=e455]
+                        - gridcell "No contributions on October 27th." [ref=e456]
+                        - gridcell "No contributions on November 3rd." [ref=e457]
+                        - gridcell "No contributions on November 10th." [ref=e458]
+                        - gridcell "No contributions on November 17th." [ref=e459]
+                        - gridcell "8 contributions on November 24th." [ref=e460]
+                        - gridcell "No contributions on December 1st." [ref=e461]
+                        - gridcell "No contributions on December 8th." [ref=e462]
+                        - gridcell "No contributions on December 15th." [ref=e463]
+                        - gridcell "No contributions on December 22nd." [ref=e464]
+                        - gridcell "No contributions on December 29th." [ref=e465]
+                        - gridcell "No contributions on January 5th." [ref=e466]
+                        - gridcell "No contributions on January 12th." [ref=e467]
+                        - gridcell "No contributions on January 19th." [ref=e468]
+                        - gridcell "No contributions on January 26th." [ref=e469]
+                        - gridcell "No contributions on February 2nd." [ref=e470]
+                        - gridcell "No contributions on February 9th." [ref=e471]
+                        - gridcell "No contributions on February 16th." [ref=e472]
+                        - gridcell "No contributions on February 23rd." [ref=e473]
+                        - gridcell "5 contributions on March 2nd." [ref=e474]
+                        - gridcell "No contributions on March 9th." [ref=e475]
+                        - gridcell "No contributions on March 16th." [ref=e476]
+                        - gridcell "No contributions on March 23rd." [ref=e477]
+                        - gridcell "1 contribution on March 30th." [ref=e478]
+                        - gridcell "31 contributions on April 6th." [ref=e479]
+                        - gridcell "No contributions on April 13th." [ref=e480]
+                        - gridcell "No contributions on April 20th." [ref=e481]
+                        - gridcell "2 contributions on April 27th." [ref=e482]
+                        - gridcell "13 contributions on May 4th." [ref=e483]
+                        - gridcell "2 contributions on May 11th." [ref=e484]
+                        - gridcell "No contributions on May 18th." [ref=e485]
+                        - gridcell "No contributions on May 25th." [ref=e486]
+                        - gridcell "No contributions on June 1st." [ref=e487]
+                        - gridcell "No contributions on June 8th." [ref=e488]
+                        - gridcell "No contributions on June 15th." [ref=e489]
+                        - gridcell "No contributions on June 22nd." [ref=e490]
+                        - gridcell "No contributions on June 29th." [ref=e491]
+                        - gridcell "7 contributions on July 6th." [ref=e492]
+                        - gridcell "No contributions on July 13th." [ref=e493]
+                        - gridcell "No contributions on July 20th." [ref=e494]
+                        - gridcell "No contributions on July 27th." [ref=e495]
+                        - gridcell "8 contributions on August 3rd." [ref=e496]
+                        - gridcell "24 contributions on August 10th." [ref=e497]
+                        - gridcell "3 contributions on August 17th." [ref=e498]
+                      - row [ref=e499]:
+                        - gridcell "Tuesday" [ref=e500]:
+                          - generic [ref=e502]: Tue
+                        - gridcell "No contributions on August 19th." [ref=e503]
+                        - gridcell "No contributions on August 26th." [ref=e504]
+                        - gridcell "No contributions on September 2nd." [ref=e505]
+                        - gridcell "No contributions on September 9th." [ref=e506]
+                        - gridcell "No contributions on September 16th." [ref=e507]
+                        - gridcell "No contributions on September 23rd." [ref=e508]
+                        - gridcell "No contributions on September 30th." [ref=e509]
+                        - gridcell "No contributions on October 7th." [ref=e510]
+                        - gridcell "No contributions on October 14th." [ref=e511]
+                        - gridcell "No contributions on October 21st." [ref=e512]
+                        - gridcell "No contributions on October 28th." [ref=e513]
+                        - gridcell "No contributions on November 4th." [ref=e514]
+                        - gridcell "No contributions on November 11th." [ref=e515]
+                        - gridcell "No contributions on November 18th." [ref=e516]
+                        - gridcell "No contributions on November 25th." [ref=e517]
+                        - gridcell "No contributions on December 2nd." [ref=e518]
+                        - gridcell "No contributions on December 9th." [ref=e519]
+                        - gridcell "No contributions on December 16th." [ref=e520]
+                        - gridcell "No contributions on December 23rd." [ref=e521]
+                        - gridcell "No contributions on December 30th." [ref=e522]
+                        - gridcell "No contributions on January 6th." [ref=e523]
+                        - gridcell "No contributions on January 13th." [ref=e524]
+                        - gridcell "No contributions on January 20th." [ref=e525]
+                        - gridcell "No contributions on January 27th." [ref=e526]
+                        - gridcell "No contributions on February 3rd." [ref=e527]
+                        - gridcell "2 contributions on February 10th." [ref=e528]
+                        - gridcell "No contributions on February 17th." [ref=e529]
+                        - gridcell "No contributions on February 24th." [ref=e530]
+                        - gridcell "No contributions on March 3rd." [ref=e531]
+                        - gridcell "No contributions on March 10th." [ref=e532]
+                        - gridcell "No contributions on March 17th." [ref=e533]
+                        - gridcell "No contributions on March 24th." [ref=e534]
+                        - gridcell "No contributions on March 31st." [ref=e535]
+                        - gridcell "6 contributions on April 7th." [ref=e536]
+                        - gridcell "No contributions on April 14th." [ref=e537]
+                        - gridcell "1 contribution on April 21st." [ref=e538]
+                        - gridcell "No contributions on April 28th." [ref=e539]
+                        - gridcell "3 contributions on May 5th." [ref=e540]
+                        - gridcell "1 contribution on May 12th." [ref=e541]
+                        - gridcell "No contributions on May 19th." [ref=e542]
+                        - gridcell "No contributions on May 26th." [ref=e543]
+                        - gridcell "No contributions on June 2nd." [ref=e544]
+                        - gridcell "No contributions on June 9th." [ref=e545]
+                        - gridcell "No contributions on June 16th." [ref=e546]
+                        - gridcell "No contributions on June 23rd." [ref=e547]
+                        - gridcell "No contributions on June 30th." [ref=e548]
+                        - gridcell "7 contributions on July 7th." [ref=e549]
+                        - gridcell "No contributions on July 14th." [ref=e550]
+                        - gridcell "No contributions on July 21st." [ref=e551]
+                        - gridcell "1 contribution on July 28th." [ref=e552]
+                        - gridcell "4 contributions on August 4th." [ref=e553]
+                        - gridcell "No contributions on August 11th." [ref=e554]
+                        - gridcell [ref=e555]
+                      - row [ref=e556]:
+                        - gridcell "Wednesday" [ref=e557]:
+                          - generic [ref=e559]: Wed
+                        - gridcell "No contributions on August 20th." [ref=e560]
+                        - gridcell "No contributions on August 27th." [ref=e561]
+                        - gridcell "No contributions on September 3rd." [ref=e562]
+                        - gridcell "No contributions on September 10th." [ref=e563]
+                        - gridcell "No contributions on September 17th." [ref=e564]
+                        - gridcell "No contributions on September 24th." [ref=e565]
+                        - gridcell "No contributions on October 1st." [ref=e566]
+                        - gridcell "No contributions on October 8th." [ref=e567]
+                        - gridcell "No contributions on October 15th." [ref=e568]
+                        - gridcell "No contributions on October 22nd." [ref=e569]
+                        - gridcell "No contributions on October 29th." [ref=e570]
+                        - gridcell "No contributions on November 5th." [ref=e571]
+                        - gridcell "No contributions on November 12th." [ref=e572]
+                        - gridcell "No contributions on November 19th." [ref=e573]
+                        - gridcell "No contributions on November 26th." [ref=e574]
+                        - gridcell "No contributions on December 3rd." [ref=e575]
+                        - gridcell "No contributions on December 10th." [ref=e576]
+                        - gridcell "No contributions on December 17th." [ref=e577]
+                        - gridcell "No contributions on December 24th." [ref=e578]
+                        - gridcell "No contributions on December 31st." [ref=e579]
+                        - gridcell "No contributions on January 7th." [ref=e580]
+                        - gridcell "No contributions on January 14th." [ref=e581]
+                        - gridcell "No contributions on January 21st." [ref=e582]
+                        - gridcell "No contributions on January 28th." [ref=e583]
+                        - gridcell "No contributions on February 4th." [ref=e584]
+                        - gridcell "1 contribution on February 11th." [ref=e585]
+                        - gridcell "No contributions on February 18th." [ref=e586]
+                        - gridcell "No contributions on February 25th." [ref=e587]
+                        - gridcell "No contributions on March 4th." [ref=e588]
+                        - gridcell "No contributions on March 11th." [ref=e589]
+                        - gridcell "1 contribution on March 18th." [ref=e590]
+                        - gridcell "13 contributions on March 25th." [ref=e591]
+                        - gridcell "No contributions on April 1st." [ref=e592]
+                        - gridcell "No contributions on April 8th." [ref=e593]
+                        - gridcell "No contributions on April 15th." [ref=e594]
+                        - gridcell "No contributions on April 22nd." [ref=e595]
+                        - gridcell "No contributions on April 29th." [ref=e596]
+                        - gridcell "6 contributions on May 6th." [ref=e597]
+                        - gridcell "No contributions on May 13th." [ref=e598]
+                        - gridcell "No contributions on May 20th." [ref=e599]
+                        - gridcell "No contributions on May 27th." [ref=e600]
+                        - gridcell "No contributions on June 3rd." [ref=e601]
+                        - gridcell "No contributions on June 10th." [ref=e602]
+                        - gridcell "No contributions on June 17th." [ref=e603]
+                        - gridcell "No contributions on June 24th." [ref=e604]
+                        - gridcell "No contributions on July 1st." [ref=e605]
+                        - gridcell "20 contributions on July 8th." [ref=e606]
+                        - gridcell "No contributions on July 15th." [ref=e607]
+                        - gridcell "No contributions on July 22nd." [ref=e608]
+                        - gridcell "8 contributions on July 29th." [ref=e609]
+                        - gridcell "No contributions on August 5th." [ref=e610]
+                        - gridcell "10 contributions on August 12th." [ref=e611]
+                        - gridcell [ref=e612]
+                      - row [ref=e613]:
+                        - gridcell "Thursday" [ref=e614]:
+                          - generic [ref=e616]: Thu
+                        - gridcell "No contributions on August 21st." [ref=e617]
+                        - gridcell "No contributions on August 28th." [ref=e618]
+                        - gridcell "No contributions on September 4th." [ref=e619]
+                        - gridcell "No contributions on September 11th." [ref=e620]
+                        - gridcell "No contributions on September 18th." [ref=e621]
+                        - gridcell "No contributions on September 25th." [ref=e622]
+                        - gridcell "No contributions on October 2nd." [ref=e623]
+                        - gridcell "No contributions on October 9th." [ref=e624]
+                        - gridcell "No contributions on October 16th." [ref=e625]
+                        - gridcell "No contributions on October 23rd." [ref=e626]
+                        - gridcell "No contributions on October 30th." [ref=e627]
+                        - gridcell "No contributions on November 6th." [ref=e628]
+                        - gridcell "No contributions on November 13th." [ref=e629]
+                        - gridcell "No contributions on November 20th." [ref=e630]
+                        - gridcell "No contributions on November 27th." [ref=e631]
+                        - gridcell "No contributions on December 4th." [ref=e632]
+                        - gridcell "No contributions on December 11th." [ref=e633]
+                        - gridcell "No contributions on December 18th." [ref=e634]
+                        - gridcell "No contributions on December 25th." [ref=e635]
+                        - gridcell "No contributions on January 1st." [ref=e636]
+                        - gridcell "No contributions on January 8th." [ref=e637]
+                        - gridcell "No contributions on January 15th." [ref=e638]
+                        - gridcell "No contributions on January 22nd." [ref=e639]
+                        - gridcell "No contributions on January 29th." [ref=e640]
+                        - gridcell "No contributions on February 5th." [ref=e641]
+                        - gridcell "No contributions on February 12th." [ref=e642]
+                        - gridcell "No contributions on February 19th." [ref=e643]
+                        - gridcell "No contributions on February 26th." [ref=e644]
+                        - gridcell "No contributions on March 5th." [ref=e645]
+                        - gridcell "44 contributions on March 12th." [ref=e646]
+                        - gridcell "No contributions on March 19th." [ref=e647]
+                        - gridcell "7 contributions on March 26th." [ref=e648]
+                        - gridcell "No contributions on April 2nd." [ref=e649]
+                        - gridcell "No contributions on April 9th." [ref=e650]
+                        - gridcell "No contributions on April 16th." [ref=e651]
+                        - gridcell "No contributions on April 23rd." [ref=e652]
+                        - gridcell "No contributions on April 30th." [ref=e653]
+                        - gridcell "7 contributions on May 7th." [ref=e654]
+                        - gridcell "No contributions on May 14th." [ref=e655]
+                        - gridcell "No contributions on May 21st." [ref=e656]
+                        - gridcell "No contributions on May 28th." [ref=e657]
+                        - gridcell "No contributions on June 4th." [ref=e658]
+                        - gridcell "No contributions on June 11th." [ref=e659]
+                        - gridcell "No contributions on June 18th." [ref=e660]
+                        - gridcell "No contributions on June 25th." [ref=e661]
+                        - gridcell "No contributions on July 2nd." [ref=e662]
+                        - gridcell "No contributions on July 9th." [ref=e663]
+                        - gridcell "No contributions on July 16th." [ref=e664]
+                        - gridcell "No contributions on July 23rd." [ref=e665]
+                        - gridcell "5 contributions on July 30th." [ref=e666]
+                        - gridcell "71 contributions on August 6th." [ref=e667]
+                        - gridcell "7 contributions on August 13th." [ref=e668]
+                        - gridcell [ref=e669]
+                      - row [ref=e670]:
+                        - gridcell "Friday" [ref=e671]:
+                          - generic [ref=e673]: Fri
+                        - gridcell "No contributions on August 22nd." [ref=e674]
+                        - gridcell "No contributions on August 29th." [ref=e675]
+                        - gridcell "No contributions on September 5th." [ref=e676]
+                        - gridcell "No contributions on September 12th." [ref=e677]
+                        - gridcell "No contributions on September 19th." [ref=e678]
+                        - gridcell "No contributions on September 26th." [ref=e679]
+                        - gridcell "No contributions on October 3rd." [ref=e680]
+                        - gridcell "No contributions on October 10th." [ref=e681]
+                        - gridcell "No contributions on October 17th." [ref=e682]
+                        - gridcell "No contributions on October 24th." [ref=e683]
+                        - gridcell "No contributions on October 31st." [ref=e684]
+                        - gridcell "No contributions on November 7th." [ref=e685]
+                        - gridcell "No contributions on November 14th." [ref=e686]
+                        - gridcell "No contributions on November 21st." [ref=e687]
+                        - gridcell "No contributions on November 28th." [ref=e688]
+                        - gridcell "No contributions on December 5th." [ref=e689]
+                        - gridcell "No contributions on December 12th." [ref=e690]
+                        - gridcell "No contributions on December 19th." [ref=e691]
+                        - gridcell "No contributions on December 26th." [ref=e692]
+                        - gridcell "No contributions on January 2nd." [ref=e693]
+                        - gridcell "No contributions on January 9th." [ref=e694]
+                        - gridcell "No contributions on January 16th." [ref=e695]
+                        - gridcell "No contributions on January 23rd." [ref=e696]
+                        - gridcell "No contributions on January 30th." [ref=e697]
+                        - gridcell "No contributions on February 6th." [ref=e698]
+                        - gridcell "No contributions on February 13th." [ref=e699]
+                        - gridcell "No contributions on February 20th." [ref=e700]
+                        - gridcell "2 contributions on February 27th." [ref=e701]
+                        - gridcell "No contributions on March 6th." [ref=e702]
+                        - gridcell "5 contributions on March 13th." [ref=e703]
+                        - gridcell "No contributions on March 20th." [ref=e704]
+                        - gridcell "No contributions on March 27th." [ref=e705]
+                        - gridcell "18 contributions on April 3rd." [ref=e706]
+                        - gridcell "No contributions on April 10th." [ref=e707]
+                        - gridcell "No contributions on April 17th." [ref=e708]
+                        - gridcell "No contributions on April 24th." [ref=e709]
+                        - gridcell "No contributions on May 1st." [ref=e710]
+                        - gridcell "No contributions on May 8th." [ref=e711]
+                        - gridcell "No contributions on May 15th." [ref=e712]
+                        - gridcell "No contributions on May 22nd." [ref=e713]
+                        - gridcell "No contributions on May 29th." [ref=e714]
+                        - gridcell "No contributions on June 5th." [ref=e715]
+                        - gridcell "No contributions on June 12th." [ref=e716]
+                        - gridcell "No contributions on June 19th." [ref=e717]
+                        - gridcell "No contributions on June 26th." [ref=e718]
+                        - gridcell "No contributions on July 3rd." [ref=e719]
+                        - gridcell "No contributions on July 10th." [ref=e720]
+                        - gridcell "No contributions on July 17th." [ref=e721]
+                        - gridcell "No contributions on July 24th." [ref=e722]
+                        - gridcell "2 contributions on July 31st." [ref=e723]
+                        - gridcell "61 contributions on August 7th." [ref=e724]
+                        - gridcell "No contributions on August 14th." [ref=e725]
+                        - gridcell [ref=e726]
+                      - row [ref=e727]:
+                        - gridcell "Saturday" [ref=e728]:
+                          - generic [ref=e730]: Sat
+                        - gridcell "No contributions on August 23rd." [ref=e731]
+                        - gridcell "No contributions on August 30th." [ref=e732]
+                        - gridcell "No contributions on September 6th." [ref=e733]
+                        - gridcell "No contributions on September 13th." [ref=e734]
+                        - gridcell "No contributions on September 20th." [ref=e735]
+                        - gridcell "No contributions on September 27th." [ref=e736]
+                        - gridcell "No contributions on October 4th." [ref=e737]
+                        - gridcell "No contributions on October 11th." [ref=e738]
+                        - gridcell "No contributions on October 18th." [ref=e739]
+                        - gridcell "No contributions on October 25th." [ref=e740]
+                        - gridcell "No contributions on November 1st." [ref=e741]
+                        - gridcell "No contributions on November 8th." [ref=e742]
+                        - gridcell "No contributions on November 15th." [ref=e743]
+                        - gridcell "2 contributions on November 22nd." [ref=e744]
+                        - gridcell "No contributions on November 29th." [ref=e745]
+                        - gridcell "No contributions on December 6th." [ref=e746]
+                        - gridcell "No contributions on December 13th." [ref=e747]
+                        - gridcell "No contributions on December 20th." [ref=e748]
+                        - gridcell "No contributions on December 27th." [ref=e749]
+                        - gridcell "No contributions on January 3rd." [ref=e750]
+                        - gridcell "No contributions on January 10th." [ref=e751]
+                        - gridcell "No contributions on January 17th." [ref=e752]
+                        - gridcell "No contributions on January 24th." [ref=e753]
+                        - gridcell "No contributions on January 31st." [ref=e754]
+                        - gridcell "No contributions on February 7th." [ref=e755]
+                        - gridcell "No contributions on February 14th." [ref=e756]
+                        - gridcell "No contributions on February 21st." [ref=e757]
+                        - gridcell "4 contributions on February 28th." [ref=e758]
+                        - gridcell "No contributions on March 7th." [ref=e759]
+                        - gridcell "3 contributions on March 14th." [ref=e760]
+                        - gridcell "No contributions on March 21st." [ref=e761]
+                        - gridcell "No contributions on March 28th." [ref=e762]
+                        - gridcell "14 contributions on April 4th." [ref=e763]
+                        - gridcell "No contributions on April 11th." [ref=e764]
+                        - gridcell "24 contributions on April 18th." [ref=e765]
+                        - gridcell "No contributions on April 25th." [ref=e766]
+                        - gridcell "1 contribution on May 2nd." [ref=e767]
+                        - gridcell "No contributions on May 9th." [ref=e768]
+                        - gridcell "No contributions on May 16th." [ref=e769]
+                        - gridcell "No contributions on May 23rd." [ref=e770]
+                        - gridcell "No contributions on May 30th." [ref=e771]
+                        - gridcell "No contributions on June 6th." [ref=e772]
+                        - gridcell "No contributions on June 13th." [ref=e773]
+                        - gridcell "No contributions on June 20th." [ref=e774]
+                        - gridcell "No contributions on June 27th." [ref=e775]
+                        - gridcell "39 contributions on July 4th." [ref=e776]
+                        - gridcell "No contributions on July 11th." [ref=e777]
+                        - gridcell "No contributions on July 18th." [ref=e778]
+                        - gridcell "No contributions on July 25th." [ref=e779]
+                        - gridcell "8 contributions on August 1st." [ref=e780]
+                        - gridcell "9 contributions on August 8th." [ref=e781]
+                        - gridcell "No contributions on August 15th." [ref=e782]
+                        - gridcell [ref=e783]
+                  - generic [ref=e784]:
+                    - link "Learn how we count contributions" [ref=e786] [cursor=pointer]:
+                      - /url: https://docs.github.com/articles/why-are-my-contributions-not-showing-up-on-my-profile
+                    - generic [ref=e787]:
+                      - generic [ref=e788]: Less
+                      - generic [ref=e789]: No contributions.
+                      - generic [ref=e791]: Low contributions.
+                      - generic [ref=e793]: Medium-low contributions.
+                      - generic [ref=e795]: Medium-high contributions.
+                      - generic [ref=e797]: High contributions.
+                      - generic [ref=e799]: More
+              - generic [ref=e802]:
+                - generic [ref=e803]:
+                  - heading "Activity overview" [level=3] [ref=e804]
+                  - generic [ref=e808]:
+                    - text: Contributed to
+                    - link "Williyami/UUAIbiz" [ref=e809] [cursor=pointer]:
+                      - /url: /Williyami/UUAIbiz
+                    - text: ","
+                    - link "Williyami/macro-place-challenge-2026" [ref=e810] [cursor=pointer]:
+                      - /url: /Williyami/macro-place-challenge-2026
+                    - text: ","
+                    - link "Williyami/polymarket-kalshi-arbitrage" [ref=e811] [cursor=pointer]:
+                      - /url: /Williyami/polymarket-kalshi-arbitrage
+                    - text: and 3 other repositories
+                - generic [ref=e813]:
+                  - generic: Loading
+                  - img "A graph representing Williyami's contributions from August 17, 2025 to August 17, 2026. The contributions are 74% commits, 9% pull requests, 9% code review, 8% issues." [ref=e815]:
+                    - generic [ref=e816]:
+                      - generic [ref=e822]: 9%
+                      - generic [ref=e823]: Code review
+                      - generic [ref=e824]: 8%
+                      - generic [ref=e825]: Issues
+                      - generic [ref=e826]: 9%
+                      - generic [ref=e827]: Pull requests
+                      - generic [ref=e828]: 74%
+                      - generic [ref=e829]: Commits
+            - generic [ref=e830]:
+              - heading "Contribution activity" [level=2] [ref=e831]
+              - generic [ref=e833]:
+                - heading "August 2026" [level=3] [ref=e834]
+                - group [ref=e842]:
+                  - button [expanded] [ref=e843] [cursor=pointer]
+                  - list [ref=e849]:
+                    - listitem [ref=e850]:
+                      - generic [ref=e851]:
+                        - link "Williyami/UUAIbiz" [ref=e852] [cursor=pointer]:
+                          - /url: /Williyami/UUAIbiz
+                        - link "20 commits" [ref=e853] [cursor=pointer]:
+                          - /url: /Williyami/UUAIbiz/commits?author=Williyami&since=2026-08-01&until=2026-08-18
+                      - img "61% of commits in August were made to Williyami/UUAIbiz" [ref=e855]
+                    - listitem [ref=e857]:
+                      - generic [ref=e858]:
+                        - link "Williyami/polymarket-kalshi-arbitrage" [ref=e859] [cursor=pointer]:
+                          - /url: /Williyami/polymarket-kalshi-arbitrage
+                        - link "7 commits" [ref=e860] [cursor=pointer]:
+                          - /url: /Williyami/polymarket-kalshi-arbitrage/commits?author=Williyami&since=2026-08-01&until=2026-08-18
+                      - img "22% of commits in August were made to Williyami/polymarket-kalshi-arbitrage" [ref=e862]
+                    - listitem [ref=e864]:
+                      - generic [ref=e865]:
+                        - link "Williyami/Terminal" [ref=e866] [cursor=pointer]:
+                          - /url: /Williyami/Terminal
+                        - link "6 commits" [ref=e867] [cursor=pointer]:
+                          - /url: /Williyami/Terminal/commits?author=Williyami&since=2026-08-01&until=2026-08-18
+                      - img "19% of commits in August were made to Williyami/Terminal" [ref=e869]
+                - group [ref=e877]:
+                  - button "Created 1 repository" [expanded] [ref=e878] [cursor=pointer]
+                  - list [ref=e885]:
+                    - listitem [ref=e886]:
+                      - link "Williyami/uuais" [ref=e891] [cursor=pointer]:
+                        - /url: /Williyami/uuais
+                      - generic [ref=e892]: TypeScript
+                      - generic [ref=e895]:
+                        - generic [ref=e896]: This contribution was made on Aug 10
+                        - time [ref=e897]: Aug 10
+                - generic [ref=e902]:
+                  - generic [ref=e903]:
+                    - heading [level=4] [ref=e904]:
+                      - text: Created a pull request in
+                      - link "Williyami/UUAIbiz" [ref=e905] [cursor=pointer]:
+                        - /url: /Williyami/UUAIbiz
+                      - text: that received 1 comment
+                    - link [ref=e906] [cursor=pointer]:
+                      - /url: /Williyami?tab=overview&from=2026-08-01&to=2026-08-31
+                      - time [ref=e907]: Aug 6
+                  - generic [ref=e911]:
+                    - heading [level=3] [ref=e912]:
+                      - 'link "ci: add GitHub Actions workflow and typecheck script" [ref=e913] [cursor=pointer]':
+                        - /url: /Williyami/UUAIbiz/pull/7
+                    - paragraph [ref=e915]: Nothing ran automatically on push or PR, so lint and build breakage was only caught locally — or after it had already been pushed to the branch Lov…
+                    - generic [ref=e916]:
+                      - generic [ref=e917]: +47 −0 lines changed •
+                      - text: 1 comment
+                - generic [ref=e927]:
+                  - generic [ref=e928]:
+                    - heading "Opened their first pull request on GitHub in Williyami/UUAIbiz Public" [level=4] [ref=e929]:
+                      - text: Opened their first pull request on GitHub in
+                      - generic [ref=e930]:
+                        - link "Williyami/UUAIbiz" [ref=e931] [cursor=pointer]:
+                          - /url: /Williyami/UUAIbiz
+                        - generic [ref=e932]: Public
+                    - link [ref=e933] [cursor=pointer]:
+                      - /url: /Williyami?tab=overview&from=2026-08-01&to=2026-08-31
+                      - time [ref=e934]: Aug 6
+                  - generic [ref=e936]:
+                    - img "Williyami created their first pull request!" [ref=e938]
+                    - generic [ref=e939]:
+                      - heading "First pull request" [level=4] [ref=e940]
+                      - 'link "docs: add README" [ref=e941] [cursor=pointer]':
+                        - /url: /Williyami/UUAIbiz/pull/6
+                      - generic [ref=e942]: Public
+                - group [ref=e949]:
+                  - button "Opened 27 other pull requests in 3 repositories" [expanded] [ref=e950] [cursor=pointer]
+                  - generic [ref=e956]:
+                    - group [ref=e958]:
+                      - button "Williyami/UUAIbiz 14 merged" [ref=e959] [cursor=pointer]:
+                        - generic [ref=e960]:
+                          - generic [ref=e961]: Williyami/UUAIbiz
+                          - generic [ref=e962]:
+                            - generic [ref=e963]: "14"
+                            - text: merged
+                    - group [ref=e969]:
+                      - button "Williyami/polymarket-kalshi-arbitrage 7 merged" [ref=e970] [cursor=pointer]:
+                        - generic [ref=e971]:
+                          - generic [ref=e972]: Williyami/polymarket-kalshi-arbitrage
+                          - generic [ref=e973]:
+                            - generic [ref=e974]: "7"
+                            - text: merged
+                    - group [ref=e980]:
+                      - button "Williyami/Terminal 6 merged" [ref=e981] [cursor=pointer]:
+                        - generic [ref=e982]:
+                          - generic [ref=e983]: Williyami/Terminal
+                          - generic [ref=e984]:
+                            - generic [ref=e985]: "6"
+                            - text: merged
+                - group [ref=e996]:
+                  - button "Reviewed 27 pull requests in 3 repositories" [expanded] [ref=e997] [cursor=pointer]
+                  - generic [ref=e1004]:
+                    - group [ref=e1006]:
+                      - button "Williyami/UUAIbiz 14 pull requests" [ref=e1007] [cursor=pointer]:
+                        - generic [ref=e1008]:
+                          - generic [ref=e1009]: Williyami/UUAIbiz
+                          - generic [ref=e1010]: 14 pull requests
+                    - group [ref=e1016]:
+                      - button "Williyami/polymarket-kalshi-arbitrage 7 pull requests" [ref=e1017] [cursor=pointer]:
+                        - generic [ref=e1018]:
+                          - generic [ref=e1019]: Williyami/polymarket-kalshi-arbitrage
+                          - generic [ref=e1020]: 7 pull requests
+                    - group [ref=e1026]:
+                      - button "Williyami/Terminal 6 pull requests" [ref=e1027] [cursor=pointer]:
+                        - generic [ref=e1028]:
+                          - generic [ref=e1029]: Williyami/Terminal
+                          - generic [ref=e1030]: 6 pull requests
+                - generic [ref=e1040]:
+                  - generic [ref=e1041]:
+                    - heading "Opened their first issue on GitHub in Williyami/UUAIbiz Public" [level=4] [ref=e1042]:
+                      - text: Opened their first issue on GitHub in
+                      - link "Williyami/UUAIbiz" [ref=e1043] [cursor=pointer]:
+                        - /url: /Williyami/UUAIbiz
+                      - generic [ref=e1044]: Public
+                    - link [ref=e1045] [cursor=pointer]:
+                      - /url: /Williyami?tab=overview&from=2026-08-01&to=2026-08-31
+                      - time [ref=e1046]: Aug 6
+                  - generic [ref=e1048]:
+                    - img "William Eklund created their first issue!" [ref=e1050]
+                    - generic [ref=e1051]:
+                      - heading "First issue" [level=4] [ref=e1052]
+                      - link "Add a README" [ref=e1053] [cursor=pointer]:
+                        - /url: /Williyami/UUAIbiz/issues/1
+                - group [ref=e1061]:
+                  - button "Opened 27 other issues in 3 repositories" [expanded] [ref=e1062] [cursor=pointer]
+                  - generic [ref=e1068]:
+                    - group [ref=e1070]:
+                      - button "Williyami/UUAIbiz 12 open 8 closed" [ref=e1071] [cursor=pointer]:
+                        - generic [ref=e1072]:
+                          - generic [ref=e1073]: Williyami/UUAIbiz
+                          - generic [ref=e1074]:
+                            - generic [ref=e1075]: "12"
+                            - text: open
+                            - generic [ref=e1076]: "8"
+                            - text: closed
+                    - group [ref=e1082]:
+                      - button "Williyami/polymarket-kalshi-arbitrage 3 open 1 closed" [ref=e1083] [cursor=pointer]:
+                        - generic [ref=e1084]:
+                          - generic [ref=e1085]: Williyami/polymarket-kalshi-arbitrage
+                          - generic [ref=e1086]:
+                            - generic [ref=e1087]: "3"
+                            - text: open
+                            - generic [ref=e1088]: "1"
+                            - text: closed
+                    - group [ref=e1094]:
+                      - button "Williyami/Terminal 3 open" [ref=e1095] [cursor=pointer]:
+                        - generic [ref=e1096]:
+                          - generic [ref=e1097]: Williyami/Terminal
+                          - generic [ref=e1098]:
+                            - generic [ref=e1099]: "3"
+                            - text: open
+                - generic [ref=e1108]:
+                  - text: 144 contributions in private repositories
+                  - generic [ref=e1109]: Aug 1 – Aug 10
+              - generic [ref=e1110]:
+                - generic: Loading
+                - button "Show more activity" [ref=e1112] [cursor=pointer]
+          - list [ref=e1115]:
+            - listitem [ref=e1116]:
+              - link "Contribution activity in 2026, 1 of 10" [ref=e1117] [cursor=pointer]:
+                - /url: /Williyami?tab=overview&from=2026-08-01&to=2026-08-17
+                - text: "2026"
+            - listitem [ref=e1118]:
+              - link "Contribution activity in 2025, 2 of 10" [ref=e1119] [cursor=pointer]:
+                - /url: /Williyami?tab=overview&from=2025-12-01&to=2025-12-31
+                - text: "2025"
+            - listitem [ref=e1120]:
+              - link "Contribution activity in 2024, 3 of 10" [ref=e1121] [cursor=pointer]:
+                - /url: /Williyami?tab=overview&from=2024-12-01&to=2024-12-31
+                - text: "2024"
+            - listitem [ref=e1122]:
+              - link "Contribution activity in 2023, 4 of 10" [ref=e1123] [cursor=pointer]:
+                - /url: /Williyami?tab=overview&from=2023-12-01&to=2023-12-31
+                - text: "2023"
+            - listitem [ref=e1124]:
+              - link "Contribution activity in 2022, 5 of 10" [ref=e1125] [cursor=pointer]:
+                - /url: /Williyami?tab=overview&from=2022-12-01&to=2022-12-31
+                - text: "2022"
+            - listitem [ref=e1126]:
+              - link "Contribution activity in 2021, 6 of 10" [ref=e1127] [cursor=pointer]:
+                - /url: /Williyami?tab=overview&from=2021-12-01&to=2021-12-31
+                - text: "2021"
+            - listitem [ref=e1128]:
+              - link "Contribution activity in 2020, 7 of 10" [ref=e1129] [cursor=pointer]:
+                - /url: /Williyami?tab=overview&from=2020-12-01&to=2020-12-31
+                - text: "2020"
+            - listitem [ref=e1130]:
+              - link "Contribution activity in 2019, 8 of 10" [ref=e1131] [cursor=pointer]:
+                - /url: /Williyami?tab=overview&from=2019-12-01&to=2019-12-31
+                - text: "2019"
+            - listitem [ref=e1132]:
+              - link "Contribution activity in 2018, 9 of 10" [ref=e1133] [cursor=pointer]:
+                - /url: /Williyami?tab=overview&from=2018-12-01&to=2018-12-31
+                - text: "2018"
+            - listitem [ref=e1134]:
+              - link "Contribution activity in 2017, 10 of 10" [ref=e1135] [cursor=pointer]:
+                - /url: /Williyami?tab=overview&from=2017-12-01&to=2017-12-31
+                - text: "2017"
+  - contentinfo [ref=e1136]:
+    - heading "Footer" [level=2] [ref=e1137]
+    - generic [ref=e1138]:
+      - generic [ref=e1139]:
+        - link "GitHub Homepage" [ref=e1140] [cursor=pointer]:
+          - /url: https://github.com
+        - generic [ref=e1143]: © 2026 GitHub, Inc.
+      - navigation "Footer" [ref=e1144]:
+        - heading "Footer navigation" [level=3] [ref=e1145]
+        - list "Footer navigation" [ref=e1146]:
+          - listitem [ref=e1147]:
+            - link "Terms" [ref=e1148] [cursor=pointer]:
+              - /url: https://docs.github.com/site-policy/github-terms/github-terms-of-service
+          - listitem [ref=e1149]:
+            - link "Privacy" [ref=e1150] [cursor=pointer]:
+              - /url: https://docs.github.com/site-policy/privacy-policies/github-privacy-statement
+          - listitem [ref=e1151]:
+            - link "Security" [ref=e1152] [cursor=pointer]:
+              - /url: https://github.com/security
+          - listitem [ref=e1153]:
+            - link "Status" [ref=e1154] [cursor=pointer]:
+              - /url: https://www.githubstatus.com/
+          - listitem [ref=e1155]:
+            - link "Community" [ref=e1156] [cursor=pointer]:
+              - /url: https://github.community/
+          - listitem [ref=e1157]:
+            - link "Docs" [ref=e1158] [cursor=pointer]:
+              - /url: https://docs.github.com/
+          - listitem [ref=e1159]:
+            - link "Contact" [ref=e1160] [cursor=pointer]:
+              - /url: https://support.github.com?tags=dotcom-footer
+          - listitem [ref=e1161]:
+            - button "Manage cookies" [ref=e1163] [cursor=pointer]
+          - listitem [ref=e1164]:
+            - button "Do not share my personal information" [ref=e1166] [cursor=pointer]
