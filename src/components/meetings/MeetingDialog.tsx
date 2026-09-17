@@ -16,6 +16,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { AssigneePicker } from "@/components/shared/AssigneePicker";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { profilesQuery, companiesQuery } from "@/lib/queries";
+import { normalizeTimeInput } from "@/lib/format";
 import { toast } from "sonner";
 
 type Meeting = any;
@@ -99,7 +100,9 @@ export function MeetingDialog({
           onSubmit={(e) => {
             e.preventDefault();
             if (!form.title?.trim()) return toast.error("Title is required");
-            save.mutate(form);
+            const meeting_time = normalizeTimeInput(form.meeting_time || "");
+            if (meeting_time === null) return toast.error("Time must be HH:mm, e.g. 16:30");
+            save.mutate({ ...form, meeting_time });
           }}
         >
           <Field label="Title">
@@ -145,9 +148,20 @@ export function MeetingDialog({
             </Field>
             <Field label="Time (optional)">
               <Input
-                type="time"
+                inputMode="numeric"
+                placeholder="16:30"
+                maxLength={5}
                 value={(form.meeting_time || "").slice(0, 5)}
-                onChange={(e) => setForm({ ...form, meeting_time: e.target.value })}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    meeting_time: e.target.value.replace(/[^\d:.]/g, "").slice(0, 5),
+                  })
+                }
+                onBlur={(e) => {
+                  const t = normalizeTimeInput(e.target.value);
+                  if (t) setForm({ ...form, meeting_time: t });
+                }}
               />
             </Field>
             <Field label="Assigned to">

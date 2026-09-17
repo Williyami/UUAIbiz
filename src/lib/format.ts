@@ -42,3 +42,20 @@ export function timeAgo(d: string | Date | null | undefined): string {
   if (s < 7 * 86400) return `${Math.floor(s / 86400)}d ago`;
   return formatDate(date);
 }
+
+// Locale-proof 24-hour time entry. Chrome renders <input type="time"> using its
+// own UI language, not the OS region — anyone whose Chrome falls back to generic
+// "en" gets a 12-hour AM/PM field, where 16:30 clamps to 12:30 and can't be
+// completed. Times are shown as plain HH:mm everywhere else, so take that
+// directly and normalise the near misses ("1630", "16.30", "9:05").
+// Returns "" for blank, null when the value isn't a time.
+export function normalizeTimeInput(value: string): string | null {
+  const raw = value.trim();
+  if (!raw) return "";
+  const m = raw.match(/^(\d{1,2})[:.]?(\d{2})$/);
+  if (!m) return null;
+  const hours = Number(m[1]);
+  const minutes = Number(m[2]);
+  if (hours > 23 || minutes > 59) return null;
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+}
