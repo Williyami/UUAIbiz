@@ -2,7 +2,9 @@ export function formatSEK(amount: number | null | undefined): string {
   // ?? only catches null/undefined — a value that fails to coerce would other-
   // wise render as "NaN SEK" or "∞ SEK" on a dashboard tile.
   const raw = Number(amount ?? 0);
-  const n = Number.isFinite(raw) ? raw : 0;
+  // `raw === 0` is true for -0 as well, which would otherwise format as
+  // "−0 SEK" wherever a negated zero total is rendered.
+  const n = Number.isFinite(raw) ? (raw === 0 ? 0 : raw) : 0;
   return new Intl.NumberFormat("sv-SE", { maximumFractionDigits: 0 }).format(n) + " SEK";
 }
 
