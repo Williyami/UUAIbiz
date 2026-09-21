@@ -54,9 +54,7 @@ export function financeTotals(events: any[], entries: any[]): FinanceTotals {
   );
 
   const sumWhere = (kind: FinanceKind) =>
-    (entries ?? [])
-      .filter((x) => x.kind === kind)
-      .reduce((s, x) => s + Number(x.amount || 0), 0);
+    (entries ?? []).filter((x) => x.kind === kind).reduce((s, x) => s + Number(x.amount || 0), 0);
 
   const otherIncome = sumWhere("Income");
   const otherExpenses = sumWhere("Expense");

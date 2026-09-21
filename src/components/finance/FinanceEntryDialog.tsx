@@ -84,10 +84,7 @@ export function FinanceEntryDialog({
         ...(entry?.id ? {} : { created_by: currentUserId ?? null }),
       };
       if (entry?.id) {
-        const { error } = await supabase
-          .from("finance_entries")
-          .update(payload)
-          .eq("id", entry.id);
+        const { error } = await supabase.from("finance_entries").update(payload).eq("id", entry.id);
         if (error) throw error;
       } else {
         const { error } = await supabase.from("finance_entries").insert(payload);
@@ -135,8 +132,8 @@ export function FinanceEntryDialog({
         >
           {isAdjustment ? (
             <p className="border border-border bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
-              This is a balance adjustment. Only the amount, date and note can be edited here —
-              its kind is fixed.
+              This is a balance adjustment. Only the amount, date and note can be edited here — its
+              kind is fixed.
             </p>
           ) : (
             <Field label="Type">

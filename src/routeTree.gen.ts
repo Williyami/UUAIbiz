@@ -21,6 +21,7 @@ import { Route as AuthenticatedOutreachRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedMeetingsRouteImport } from './routes/_authenticated/meetings'
 import { Route as AuthenticatedInfoRouteImport } from './routes/_authenticated/info'
 import { Route as AuthenticatedIdeasRouteImport } from './routes/_authenticated/ideas'
+import { Route as AuthenticatedFinanceRouteImport } from './routes/_authenticated/finance'
 import { Route as AuthenticatedEventsRouteImport } from './routes/_authenticated/events'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedContractsRouteImport } from './routes/_authenticated/contracts'
@@ -87,6 +88,11 @@ const AuthenticatedIdeasRoute = AuthenticatedIdeasRouteImport.update({
   path: '/ideas',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedFinanceRoute = AuthenticatedFinanceRouteImport.update({
+  id: '/finance',
+  path: '/finance',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedEventsRoute = AuthenticatedEventsRouteImport.update({
   id: '/events',
   path: '/events',
@@ -127,6 +133,7 @@ export interface FileRoutesByFullPath {
   '/contracts': typeof AuthenticatedContractsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/events': typeof AuthenticatedEventsRoute
+  '/finance': typeof AuthenticatedFinanceRoute
   '/ideas': typeof AuthenticatedIdeasRoute
   '/info': typeof AuthenticatedInfoRoute
   '/meetings': typeof AuthenticatedMeetingsRoute
@@ -146,6 +153,7 @@ export interface FileRoutesByTo {
   '/contracts': typeof AuthenticatedContractsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/events': typeof AuthenticatedEventsRoute
+  '/finance': typeof AuthenticatedFinanceRoute
   '/ideas': typeof AuthenticatedIdeasRoute
   '/info': typeof AuthenticatedInfoRoute
   '/meetings': typeof AuthenticatedMeetingsRoute
@@ -167,6 +175,7 @@ export interface FileRoutesById {
   '/_authenticated/contracts': typeof AuthenticatedContractsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/events': typeof AuthenticatedEventsRoute
+  '/_authenticated/finance': typeof AuthenticatedFinanceRoute
   '/_authenticated/ideas': typeof AuthenticatedIdeasRoute
   '/_authenticated/info': typeof AuthenticatedInfoRoute
   '/_authenticated/meetings': typeof AuthenticatedMeetingsRoute
@@ -188,6 +197,7 @@ export interface FileRouteTypes {
     | '/contracts'
     | '/dashboard'
     | '/events'
+    | '/finance'
     | '/ideas'
     | '/info'
     | '/meetings'
@@ -207,6 +217,7 @@ export interface FileRouteTypes {
     | '/contracts'
     | '/dashboard'
     | '/events'
+    | '/finance'
     | '/ideas'
     | '/info'
     | '/meetings'
@@ -227,6 +238,7 @@ export interface FileRouteTypes {
     | '/_authenticated/contracts'
     | '/_authenticated/dashboard'
     | '/_authenticated/events'
+    | '/_authenticated/finance'
     | '/_authenticated/ideas'
     | '/_authenticated/info'
     | '/_authenticated/meetings'
@@ -333,6 +345,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIdeasRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/finance': {
+      id: '/_authenticated/finance'
+      path: '/finance'
+      fullPath: '/finance'
+      preLoaderRoute: typeof AuthenticatedFinanceRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/events': {
       id: '/_authenticated/events'
       path: '/events'
@@ -384,6 +403,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedContractsRoute: typeof AuthenticatedContractsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedEventsRoute: typeof AuthenticatedEventsRoute
+  AuthenticatedFinanceRoute: typeof AuthenticatedFinanceRoute
   AuthenticatedIdeasRoute: typeof AuthenticatedIdeasRoute
   AuthenticatedInfoRoute: typeof AuthenticatedInfoRoute
   AuthenticatedMeetingsRoute: typeof AuthenticatedMeetingsRoute
@@ -400,6 +420,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedContractsRoute: AuthenticatedContractsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedEventsRoute: AuthenticatedEventsRoute,
+  AuthenticatedFinanceRoute: AuthenticatedFinanceRoute,
   AuthenticatedIdeasRoute: AuthenticatedIdeasRoute,
   AuthenticatedInfoRoute: AuthenticatedInfoRoute,
   AuthenticatedMeetingsRoute: AuthenticatedMeetingsRoute,

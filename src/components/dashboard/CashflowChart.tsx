@@ -6,32 +6,22 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { semesterBounds } from "@/components/events/eventStyles";
-import { formatSEK, parseLocalDate } from "@/lib/format";
+import { formatSEK } from "@/lib/format";
+import { monthlySeries } from "@/lib/finance";
 
 const chartConfig = {
   revenue: { label: "Revenue", color: "var(--status-success)" },
   costs: { label: "Costs", color: "var(--brand-red)" },
 } satisfies ChartConfig;
 
-/** Revenue vs costs per month for the current semester, from real event records. */
-export function CashflowChart({ events }: { events: any[] }) {
+/**
+ * Revenue vs costs per month for the current semester. The dashboard passes
+ * events alone; the Finance page also passes ledger entries so the bars match
+ * the balance shown beside them.
+ */
+export function CashflowChart({ events, entries = [] }: { events: any[]; entries?: any[] }) {
   const sem = semesterBounds();
-  const startMonth = sem.start.getMonth();
-  const year = sem.start.getFullYear();
-
-  const data = Array.from({ length: 6 }, (_, i) => {
-    const month = startMonth + i;
-    const inMonth = events.filter((e) => {
-      if (!e.date || e.status === "Cancelled") return false;
-      const d = parseLocalDate(e.date);
-      return d.getFullYear() === year && d.getMonth() === month;
-    });
-    return {
-      month: new Date(year, month, 1).toLocaleDateString("en-GB", { month: "short" }).toUpperCase(),
-      revenue: inMonth.reduce((s, e) => s + Number(e.revenue_from_partner || 0), 0),
-      costs: inMonth.reduce((s, e) => s + Number(e.cost_to_us || 0) + Number(e.food_cost || 0), 0),
-    };
-  });
+  const data = monthlySeries(events, entries, sem.start);
 
   const hasData = data.some((d) => d.revenue > 0 || d.costs > 0);
 
