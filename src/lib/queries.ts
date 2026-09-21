@@ -192,3 +192,16 @@ export const currentUserQuery = queryOptions({
     };
   },
 });
+
+export const financeEntriesQuery = queryOptions({
+  queryKey: ["financeEntries"],
+  queryFn: async () => {
+    const { data, error } = await supabase
+      .from("finance_entries")
+      .select("*, author:profiles!finance_entries_created_by_fkey(id,name)")
+      .order("entry_date", { ascending: false })
+      .order("created_at", { ascending: false });
+    if (error) throw error;
+    return data ?? [];
+  },
+});

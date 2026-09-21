@@ -367,6 +367,53 @@ export type Database = {
           },
         ]
       }
+      finance_entries: {
+        Row: {
+          amount: number
+          category: Database["public"]["Enums"]["finance_category"]
+          created_at: string
+          created_by: string | null
+          description: string
+          entry_date: string
+          id: string
+          kind: Database["public"]["Enums"]["finance_kind"]
+          notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          category?: Database["public"]["Enums"]["finance_category"]
+          created_at?: string
+          created_by?: string | null
+          description: string
+          entry_date?: string
+          id?: string
+          kind: Database["public"]["Enums"]["finance_kind"]
+          notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          category?: Database["public"]["Enums"]["finance_category"]
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          entry_date?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["finance_kind"]
+          notes?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "finance_entries_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       idea_comments: {
         Row: {
           author_id: string | null
@@ -714,12 +761,29 @@ export type Database = {
         | "Discussing"
         | "Declined"
         | "On hold"
-      event_status: "Planned" | "Confirmed" | "On hold" | "Completed" | "Cancelled"
+      event_status:
+        | "Planned"
+        | "Confirmed"
+        | "On hold"
+        | "Completed"
+        | "Cancelled"
       event_type:
         | "Lunch lecture"
         | "Evening event"
         | "Weekend event or longer"
         | "Other"
+      finance_category:
+        | "Partnership"
+        | "Event"
+        | "Merch"
+        | "Equipment"
+        | "Food"
+        | "Travel"
+        | "Software"
+        | "Grant"
+        | "Membership"
+        | "Other"
+      finance_kind: "Income" | "Expense" | "Adjustment"
       task_priority: "Low" | "Medium" | "High"
       task_status: "To do" | "In progress" | "Done"
     }
@@ -737,12 +801,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -766,11 +830,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -791,11 +855,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -816,11 +880,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -833,11 +897,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -870,13 +934,32 @@ export const Constants = {
         "Declined",
         "On hold",
       ],
-      event_status: ["Planned", "Confirmed", "On hold", "Completed", "Cancelled"],
+      event_status: [
+        "Planned",
+        "Confirmed",
+        "On hold",
+        "Completed",
+        "Cancelled",
+      ],
       event_type: [
         "Lunch lecture",
         "Evening event",
         "Weekend event or longer",
         "Other",
       ],
+      finance_category: [
+        "Partnership",
+        "Event",
+        "Merch",
+        "Equipment",
+        "Food",
+        "Travel",
+        "Software",
+        "Grant",
+        "Membership",
+        "Other",
+      ],
+      finance_kind: ["Income", "Expense", "Adjustment"],
       task_priority: ["Low", "Medium", "High"],
       task_status: ["To do", "In progress", "Done"],
     },
