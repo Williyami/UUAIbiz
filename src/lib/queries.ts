@@ -1,5 +1,6 @@
 import { queryOptions } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { lastTouchedAt } from "@/lib/stale";
 
 export const profilesQuery = queryOptions({
   queryKey: ["profiles"],
@@ -16,12 +17,12 @@ export const profilesQuery = queryOptions({
 export const companiesQuery = queryOptions({
   queryKey: ["companies"],
   queryFn: async () => {
-    const { data, error } = await supabase
-      .from("companies")
-      .select("*")
-      .order("updated_at", { ascending: false });
+    const { data, error } = await supabase.from("companies").select("*");
     if (error) throw error;
-    return data ?? [];
+    // Most recently touched first — contacted or edited, whichever is later.
+    // Sorted here rather than in the query because it spans two columns, and
+    // so every consumer (table, kanban, palette) inherits the same order.
+    return (data ?? []).sort((a, b) => lastTouchedAt(b) - lastTouchedAt(a));
   },
 });
 

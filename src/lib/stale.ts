@@ -32,3 +32,23 @@ export function isStale(company: {
   const days = daysSinceContact(company);
   return days !== null && days >= STALE_AFTER_DAYS;
 }
+
+/**
+ * When a company was last touched at all — contacted, or edited in the Hub.
+ *
+ * Outreach sorts on this so whatever moved most recently sits at the top. The
+ * contact date is a plain date, so it counts as end-of-day: deliberately
+ * logging a touchpoint outranks an incidental edit made earlier the same day.
+ */
+export function lastTouchedAt(company: {
+  updated_at?: string | null;
+  last_contact_date?: string | null;
+  created_at?: string | null;
+}): number {
+  const stamps = [
+    company.updated_at ? Date.parse(company.updated_at) : NaN,
+    company.last_contact_date ? Date.parse(`${company.last_contact_date}T23:59:59`) : NaN,
+    company.created_at ? Date.parse(company.created_at) : NaN,
+  ].filter((n) => Number.isFinite(n));
+  return stamps.length ? Math.max(...stamps) : 0;
+}
