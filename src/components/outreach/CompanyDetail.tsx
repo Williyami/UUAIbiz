@@ -10,7 +10,8 @@ import {
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
-import { profilesQuery, eventsQuery } from "@/lib/queries";
+import { profilesQuery, eventsQuery, contactsQuery } from "@/lib/queries";
+import { ContactPicker } from "./ContactPicker";
 import { AssigneePicker } from "@/components/shared/AssigneePicker";
 import { STATUS_ORDER, CompanyStatus, companyStatusColor } from "./statusStyles";
 import { StatusTag } from "@/components/shared/StatusTag";
@@ -18,7 +19,16 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { formatDate } from "@/lib/format";
-import { Mail, Phone, User, Calendar, CalendarCheck, FileSignature, Trash2, Pencil } from "lucide-react";
+import {
+  Mail,
+  Phone,
+  User,
+  Calendar,
+  CalendarCheck,
+  FileSignature,
+  Trash2,
+  Pencil,
+} from "lucide-react";
 
 export function CompanyDetail({
   company,
@@ -35,7 +45,10 @@ export function CompanyDetail({
   const navigate = useNavigate();
   const { data: profiles } = useSuspenseQuery(profilesQuery);
   const { data: events } = useSuspenseQuery(eventsQuery);
+  const { data: allContacts } = useSuspenseQuery(contactsQuery);
   const [notes, setNotes] = useState("");
+
+  const companyContacts = allContacts.filter((c: any) => c.company_id === company?.id);
 
   useEffect(() => {
     setNotes(company?.notes || "");
@@ -93,13 +106,38 @@ export function CompanyDetail({
 
         <div className="mt-5 space-y-6 px-4 pb-6 sm:px-0">
           <section className="space-y-2 text-sm">
-            {company.contact_person && (
-              <InfoRow icon={User}>
-                {company.contact_person}
-                {company.contact_title && (
-                  <span className="text-muted-foreground"> · {company.contact_title}</span>
+            {canEdit ? (
+              <div className="py-0.5">
+                <ContactPicker
+                  companyId={company.id}
+                  companyName={company.name}
+                  contacts={companyContacts}
+                  value={company.primary_contact_id}
+                  onSelect={(c) =>
+                    update.mutate({
+                      primary_contact_id: c.id,
+                      contact_person: c.name ?? null,
+                      contact_title: c.role ?? null,
+                      contact_email: c.email ?? null,
+                      contact_phone: c.phone ?? null,
+                    })
+                  }
+                />
+                {companyContacts.length > 1 && (
+                  <p className="microlabel mt-1 text-[9px] text-muted-foreground">
+                    {companyContacts.length} contacts here
+                  </p>
                 )}
-              </InfoRow>
+              </div>
+            ) : (
+              company.contact_person && (
+                <InfoRow icon={User}>
+                  {company.contact_person}
+                  {company.contact_title && (
+                    <span className="text-muted-foreground"> · {company.contact_title}</span>
+                  )}
+                </InfoRow>
+              )
             )}
             {company.contact_email && (
               <InfoRow icon={Mail}>

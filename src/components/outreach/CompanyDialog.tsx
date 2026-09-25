@@ -21,7 +21,8 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { AssigneePicker } from "@/components/shared/AssigneePicker";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
-import { profilesQuery } from "@/lib/queries";
+import { profilesQuery, contactsQuery } from "@/lib/queries";
+import { ContactPicker } from "./ContactPicker";
 import { INDUSTRY_ORDER } from "./industryStyles";
 import { toast } from "sonner";
 
@@ -47,7 +48,10 @@ export function CompanyDialog({
 }) {
   const qc = useQueryClient();
   const { data: profiles } = useSuspenseQuery(profilesQuery);
+  const { data: allContacts } = useSuspenseQuery(contactsQuery);
   const [form, setForm] = useState<any>({});
+
+  const companyContacts = allContacts.filter((c: any) => c.company_id === company?.id);
 
   useEffect(() => {
     setForm(
@@ -66,6 +70,7 @@ export function CompanyDialog({
         last_contact_date: new Date().toLocaleDateString("sv-SE"),
         meeting_booked: false,
         meeting_date: null,
+        primary_contact_id: null,
       },
     );
   }, [company, open]);
@@ -87,9 +92,24 @@ export function CompanyDialog({
         const { error } = await supabase.from("companies").insert(payload);
         if (error) throw error;
       }
+      // The inline contact_* columns mirror the chosen contact. Push edits made
+      // here back to the contact row as well, or the two quietly diverge.
+      if (values.primary_contact_id) {
+        const { error } = await supabase
+          .from("contacts")
+          .update({
+            name: values.contact_person?.trim() || null,
+            role: values.contact_title?.trim() || null,
+            email: values.contact_email?.trim() || null,
+            phone: values.contact_phone?.trim() || null,
+          })
+          .eq("id", values.primary_contact_id);
+        if (error) throw error;
+      }
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["companies"] });
+      qc.invalidateQueries({ queryKey: ["contacts"] });
       toast.success(company ? "Company updated" : "Company added");
       onOpenChange(false);
     },
@@ -118,6 +138,28 @@ export function CompanyDialog({
             />
           </Field>
           <div className="grid grid-cols-2 gap-3">
+            {company?.id && (
+              <div className="sm:col-span-2">
+                <Field label="Who did you contact?">
+                  <ContactPicker
+                    companyId={company.id}
+                    companyName={company.name}
+                    contacts={companyContacts}
+                    value={form.primary_contact_id}
+                    onSelect={(c) =>
+                      setForm({
+                        ...form,
+                        primary_contact_id: c.id,
+                        contact_person: c.name ?? "",
+                        contact_title: c.role ?? "",
+                        contact_email: c.email ?? "",
+                        contact_phone: c.phone ?? "",
+                      })
+                    }
+                  />
+                </Field>
+              </div>
+            )}
             <Field label="Contact person">
               <Input
                 value={form.contact_person || ""}

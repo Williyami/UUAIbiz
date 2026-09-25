@@ -1,7 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { companiesQuery, profilesQuery, eventsQuery, currentUserQuery } from "@/lib/queries";
+import {
+  companiesQuery,
+  profilesQuery,
+  eventsQuery,
+  currentUserQuery,
+  contactsQuery,
+} from "@/lib/queries";
 import { Button } from "@/components/ui/button";
 import { Plus, LayoutGrid, Table as TableIcon } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -14,6 +20,7 @@ export const Route = createFileRoute("/_authenticated/outreach")({
   loader: ({ context }) => {
     context.queryClient.ensureQueryData(companiesQuery);
     context.queryClient.ensureQueryData(profilesQuery);
+    context.queryClient.ensureQueryData(contactsQuery);
     context.queryClient.ensureQueryData(eventsQuery);
     context.queryClient.ensureQueryData(currentUserQuery);
   },

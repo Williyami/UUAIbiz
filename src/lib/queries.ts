@@ -84,7 +84,9 @@ export const contactsQuery = queryOptions({
   queryFn: async () => {
     const { data, error } = await supabase
       .from("contacts")
-      .select("*, company:companies(id,name)")
+      // Named explicitly: companies.primary_contact_id points back at contacts,
+      // so an unqualified companies embed is ambiguous (PGRST201).
+      .select("*, company:companies!contacts_company_id_fkey(id,name)")
       .order("name");
     if (error) throw error;
     return data ?? [];

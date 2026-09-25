@@ -6,7 +6,6 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ContactDialog } from "@/components/contacts/ContactDialog";
-import { CompanyContactDialog } from "@/components/contacts/CompanyContactDialog";
 import { Plus, Search, Mail, Phone } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/contacts")({
@@ -30,30 +29,17 @@ type Row = {
 };
 
 function ContactsPage() {
-  const { data: companies } = useSuspenseQuery(companiesQuery);
   const { data: contacts } = useSuspenseQuery(contactsQuery);
   const { data: me } = useSuspenseQuery(currentUserQuery);
   const canEdit = me?.role !== "viewer";
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
-  const [companyDialogOpen, setCompanyDialogOpen] = useState(false);
-  const [companyEditing, setCompanyEditing] = useState<any>(null);
   const [q, setQ] = useState("");
 
-  const fromOutreach: Row[] = companies
-    .filter((c: any) => c.contact_person || c.contact_email || c.contact_phone)
-    .map((c: any) => ({
-      id: `company-${c.id}`,
-      kind: "company" as const,
-      name: c.contact_person || "Unnamed contact",
-      role: c.contact_title,
-      company: c.name,
-      email: c.contact_email,
-      phone: c.contact_phone,
-      source: c,
-    }));
-
+  // Every company contact now lives in public.contacts — the inline
+  // contact_* columns on a company mirror whichever of them is primary. Listing
+  // both sources would show each of those people twice.
   const manual: Row[] = contacts.map((c: any) => ({
     id: c.id,
     kind: "manual" as const,
@@ -66,7 +52,7 @@ function ContactsPage() {
   }));
 
   const needle = q.trim().toLowerCase();
-  const rows = [...fromOutreach, ...manual]
+  const rows = manual
     .filter(
       (r) =>
         !needle ||
@@ -77,13 +63,9 @@ function ContactsPage() {
     .sort((a, b) => a.name.localeCompare(b.name, "sv"));
 
   function open(row: Row) {
-    if (row.kind === "company") {
-      setCompanyEditing(row.source);
-      setCompanyDialogOpen(true);
-    } else if (canEdit) {
-      setEditing(row.source);
-      setDialogOpen(true);
-    }
+    if (!canEdit) return;
+    setEditing(row.source);
+    setDialogOpen(true);
   }
 
   return (
@@ -145,9 +127,6 @@ function ContactsPage() {
                       {row.email}
                     </span>
                   )}
-                  <span className="microlabel mr-1.5 hidden text-[9px] text-muted-foreground/60 sm:inline">
-                    {row.kind === "company" ? "Outreach" : "Manual"}
-                  </span>
                   {row.email && (
                     <a
                       href={`mailto:${row.email}`}
@@ -176,12 +155,6 @@ function ContactsPage() {
       </section>
 
       <ContactDialog open={dialogOpen} onOpenChange={setDialogOpen} contact={editing} />
-      <CompanyContactDialog
-        open={companyDialogOpen}
-        onOpenChange={setCompanyDialogOpen}
-        company={companyEditing}
-        canEdit={canEdit}
-      />
     </div>
   );
 }
