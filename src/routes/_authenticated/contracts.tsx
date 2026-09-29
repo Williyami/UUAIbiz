@@ -75,7 +75,7 @@ function ContractsPage() {
   const [customTerms, setCustomTerms] = useState("");
   const [signatory, setSignatory] = useState("");
   const [counterpart, setCounterpart] = useState("");
-  const [place, setPlace] = useState("Uppsala");
+  const [place, setPlace] = useState("");
   // null = follow the template; a string = hand-edited in the preview and no
   // longer tracking the form until reset.
   const [editedBody, setEditedBody] = useState<string | null>(null);
@@ -98,11 +98,6 @@ function ContractsPage() {
     if (suggested != null) setPrice(String(suggested));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [eventType, template?.language]);
-
-  useEffect(() => {
-    if (!signatory && me?.profile?.name) setSignatory(me.profile.name);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [me?.profile?.name]);
 
   useEffect(() => {
     if (!foodNote)
