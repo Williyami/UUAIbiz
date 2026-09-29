@@ -8,6 +8,12 @@ export type ContractPdfMeta = {
   price: number;
   language: string; // "en" | "sv"
   generatedByName?: string | null;
+  /** Printed under the UUAIS signature rule. */
+  signatory?: string | null;
+  /** Printed under the partner's signature rule. */
+  counterpartName?: string | null;
+  /** Town written above the date lines, e.g. "Uppsala". */
+  place?: string | null;
 };
 
 const RED: [number, number, number] = [196, 30, 58]; // #C41E3A
@@ -80,6 +86,66 @@ export function downloadContractPdf(body: string, meta: ContractPdfMeta) {
       y += lineHeight;
     }
   }
+
+  // Signatures. Two columns of labelled rules — filled in by hand after
+  // printing, so the name lines carry whatever we already know and the date
+  // and place stay blank.
+  const blockH = 46;
+  if (y > pageH - blockH - 24) {
+    doc.addPage();
+    y = margin;
+  }
+  y += 10;
+
+  doc.setDrawColor(210, 206, 200);
+  doc.setLineWidth(0.25);
+  doc.line(margin, y, margin + width, y);
+  y += 8;
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(7.5);
+  doc.setTextColor(...GRAY);
+  doc.text(sv ? "UNDERSKRIFTER" : "SIGNATURES", margin, y);
+  y += 9;
+
+  const colGap = 12;
+  const colW = (width - colGap) / 2;
+  const parties: [string, string][] = [
+    ["UU AI Society", meta.signatory?.trim() || ""],
+    [meta.companyName || (sv ? "Motpart" : "Counterparty"), meta.counterpartName?.trim() || ""],
+  ];
+
+  parties.forEach(([party, who], i) => {
+    const x = margin + i * (colW + colGap);
+    let ly = y;
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8);
+    doc.setTextColor(...INK);
+    doc.text(party, x, ly);
+    ly += 12;
+
+    const rule = (label: string, value: string) => {
+      if (value) {
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(9.5);
+        doc.setTextColor(...INK);
+        doc.text(value, x, ly - 1.5);
+      }
+      doc.setDrawColor(150, 146, 140);
+      doc.line(x, ly, x + colW, ly);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(7);
+      doc.setTextColor(...GRAY);
+      doc.text(label.toUpperCase(), x, ly + 3.4);
+      ly += 12;
+    };
+
+    rule(sv ? "Underskrift" : "Signature", "");
+    rule(sv ? "Namnförtydligande" : "Name in print", who);
+    rule(sv ? "Ort" : "Place", meta.place?.trim() || "");
+    rule(sv ? "Datum" : "Date", "");
+  });
 
   // Footer
   const generated = new Date().toLocaleDateString("sv-SE");

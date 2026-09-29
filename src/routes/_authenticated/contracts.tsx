@@ -32,7 +32,7 @@ import { EVENT_TYPE_ORDER, EventType } from "@/components/events/eventStyles";
 import { downloadContractPdf } from "@/lib/contract-pdf";
 import { formatSEK, formatDate } from "@/lib/format";
 import { toast } from "sonner";
-import { Download, Eye, Trash2, Settings2 } from "lucide-react";
+import { Download, Eye, Trash2, Settings2, RotateCcw } from "lucide-react";
 
 type ContractSearch = { company?: string; contact?: string };
 
@@ -74,6 +74,11 @@ function ContractsPage() {
   const [eventDate, setEventDate] = useState("");
   const [customTerms, setCustomTerms] = useState("");
   const [signatory, setSignatory] = useState("");
+  const [counterpart, setCounterpart] = useState("");
+  const [place, setPlace] = useState("Uppsala");
+  // null = follow the template; a string = hand-edited in the preview and no
+  // longer tracking the form until reset.
+  const [editedBody, setEditedBody] = useState<string | null>(null);
   const [viewing, setViewing] = useState<any | null>(null);
   const [templatesOpen, setTemplatesOpen] = useState(false);
 
@@ -90,7 +95,7 @@ function ContractsPage() {
   // Suggest standard price when the event type changes (manual override allowed)
   useEffect(() => {
     const suggested = pricing[eventType];
-    if (suggested != null && Number(suggested) > 0) setPrice(String(suggested));
+    if (suggested != null) setPrice(String(suggested));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [eventType, template?.language]);
 
@@ -128,6 +133,9 @@ function ContractsPage() {
     });
   }, [template, contact, pricingBlock, customTerms, signatory, sv]);
 
+  const body = editedBody ?? preview;
+  const isEdited = editedBody !== null && editedBody !== preview;
+
   const generate = useMutation({
     mutationFn: async () => {
       const { error } = await supabase.from("contracts").insert({
@@ -136,20 +144,23 @@ function ContractsPage() {
         price: Number(price || 0),
         custom_terms: customTerms.trim() || null,
         language,
-        content_snapshot: preview,
+        content_snapshot: body,
         generated_by: me?.id ?? null,
       });
       if (error) throw error;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["contracts"] });
-      downloadContractPdf(preview, {
+      downloadContractPdf(body, {
         companyName: company.trim(),
         eventType,
         eventDate: eventDate || null,
         price: Number(price || 0),
         language,
         generatedByName: me?.profile?.name,
+        signatory: signatory,
+        counterpartName: counterpart,
+        place: place,
       });
       toast.success("Contract exported and logged");
     },
@@ -256,8 +267,20 @@ function ContractsPage() {
                 placeholder={sv ? "Valfritt…" : "Optional…"}
               />
             </Field>
-            <Field label={sv ? "Undertecknare (UUAIS)" : "Our signatory"}>
-              <Input value={signatory} onChange={(e) => setSignatory(e.target.value)} />
+            <div className="grid grid-cols-2 gap-3">
+              <Field label={sv ? "Undertecknare (UUAIS)" : "Our signatory"}>
+                <Input value={signatory} onChange={(e) => setSignatory(e.target.value)} />
+              </Field>
+              <Field label={sv ? "Undertecknare (företaget)" : "Their signatory"}>
+                <Input
+                  value={counterpart}
+                  placeholder={sv ? "Namn" : "Name"}
+                  onChange={(e) => setCounterpart(e.target.value)}
+                />
+              </Field>
+            </div>
+            <Field label={sv ? "Ort" : "Place"}>
+              <Input value={place} onChange={(e) => setPlace(e.target.value)} />
             </Field>
             <Button
               className="w-full"
@@ -266,7 +289,12 @@ function ContractsPage() {
               onClick={() => {
                 if (!company.trim())
                   return toast.error(sv ? "Företagsnamn krävs" : "Company name is required");
-                if (!Number(price)) return toast.error(sv ? "Pris krävs" : "Price is required");
+                // 0 is a real price — free events still need terms. Only a
+                // blank or negative value is rejected.
+                if (price.trim() === "" || !Number.isFinite(Number(price)) || Number(price) < 0)
+                  return toast.error(
+                    sv ? "Ange ett pris (0 går bra)" : "Enter a price (0 is fine)",
+                  );
                 generate.mutate();
               }}
             >
@@ -281,9 +309,37 @@ function ContractsPage() {
             <h2 className="font-display text-base font-medium tracking-tight">
               {sv ? "Förhandsvisning" : "Live preview"}
             </h2>
-            <span className="microlabel text-[10px] text-muted-foreground">
-              {sv ? "Uppdateras direkt" : "Updates as you type"}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="microlabel text-[10px] text-muted-foreground">
+                {isEdited
+                  ? sv
+                    ? "Handredigerad"
+                    : "Edited by hand"
+                  : sv
+                    ? "Uppdateras direkt"
+                    : "Updates as you type"}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={!isEdited}
+                title={
+                  isEdited
+                    ? sv
+                      ? "Kasta ändringarna och återgå till mallen"
+                      : "Discard edits and go back to the template"
+                    : sv
+                      ? "Inga ändringar att återställa"
+                      : "Nothing to reset"
+                }
+                onClick={() => {
+                  setEditedBody(null);
+                  toast.success(sv ? "Återställd till mallen" : "Reset to the template");
+                }}
+              >
+                <RotateCcw className="h-3.5 w-3.5" /> {sv ? "Återställ" : "Reset"}
+              </Button>
+            </div>
           </div>
           <div className="p-6">
             <div className="border bg-background px-7 py-8 shadow-[0_1px_0_var(--border)]">
@@ -298,9 +354,38 @@ function ContractsPage() {
                 </div>
                 <Tri className="h-6 w-6 text-brand" />
               </div>
-              <pre className="whitespace-pre-wrap font-sans text-[13px] leading-relaxed text-foreground/90">
-                {preview || "—"}
-              </pre>
+              {/* Editable in place: type straight into the document. Once
+                  touched it stops following the form until Reset. */}
+              <textarea
+                id="contract-body"
+                value={body}
+                spellCheck={false}
+                onChange={(e) => setEditedBody(e.target.value)}
+                rows={Math.max(14, body.split("\n").length + 1)}
+                className="w-full resize-y border-0 bg-transparent p-0 font-sans text-[13px] leading-relaxed text-foreground/90 outline-none focus-visible:ring-0"
+              />
+
+              <div className="mt-8 border-t pt-6">
+                <div className="microlabel mb-4 text-[9px] text-muted-foreground">
+                  {sv ? "Underskrifter" : "Signatures"}
+                </div>
+                <div className="grid grid-cols-2 gap-6">
+                  {[
+                    ["UU AI Society", signatory],
+                    [company || (sv ? "Motpart" : "Counterparty"), counterpart],
+                  ].map(([party, who], i) => (
+                    <div key={i}>
+                      <div className="text-[11px] font-medium">{party}</div>
+                      <div className="mt-5 space-y-4">
+                        <SignRule label={sv ? "Underskrift" : "Signature"} />
+                        <SignRule label={sv ? "Namnförtydligande" : "Name in print"} value={who} />
+                        <SignRule label={sv ? "Ort" : "Place"} value={place} />
+                        <SignRule label={sv ? "Datum" : "Date"} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -581,4 +666,14 @@ function Th({ children, className = "" }: any) {
 }
 function Td({ children, className = "" }: any) {
   return <td className={`px-4 py-3 align-middle ${className}`}>{children}</td>;
+}
+
+function SignRule({ label, value }: { label: string; value?: string }) {
+  return (
+    <div>
+      <div className="h-5 text-[11px] leading-5">{value || " "}</div>
+      <div className="border-b border-foreground/35" />
+      <div className="microlabel mt-1 text-[8.5px] text-muted-foreground">{label}</div>
+    </div>
+  );
 }
