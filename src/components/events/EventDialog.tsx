@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -41,6 +41,7 @@ export function EventDialog({
   const { data: profiles } = useSuspenseQuery(profilesQuery);
   const { data: companies } = useSuspenseQuery(companiesQuery);
   const [form, setForm] = useState<any>({});
+  const dateRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setForm(
@@ -123,9 +124,18 @@ export function EventDialog({
         </DialogHeader>
         <form
           className="space-y-3"
+          // Native validation is off on purpose. The browser blocks submit when
+          // an <input type="date"> holds a half-typed value, which read as
+          // "a date is required" even though every event field except the title
+          // is optional — an Idea has no date yet by definition.
+          noValidate
           onSubmit={(e) => {
             e.preventDefault();
             if (!form.title?.trim()) return toast.error("Title is required");
+            // A partially typed date reports an empty value, so catch it here
+            // rather than silently saving the event with no date at all.
+            if (dateRef.current?.validity.badInput)
+              return toast.error("That date is incomplete — finish it or clear the field");
             save.mutate(form);
           }}
         >
@@ -164,6 +174,7 @@ export function EventDialog({
               </Field>
               <Field label="Date">
                 <Input
+                  ref={dateRef}
                   type="date"
                   value={form.date || ""}
                   onChange={(e) => setForm({ ...form, date: e.target.value })}
