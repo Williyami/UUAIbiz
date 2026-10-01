@@ -1,0 +1,168 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e6]:
+      - generic [ref=e8]:
+        - generic:
+          - generic: UUAI Society
+          - generic: Business Hub
+        - button "Collapse sidebar" [ref=e9]
+      - list [ref=e16]:
+        - listitem [ref=e17]:
+          - link "01 Dashboard" [ref=e18] [cursor=pointer]:
+            - /url: /dashboard
+            - generic [ref=e19]: "01"
+            - generic: Dashboard
+        - listitem [ref=e20]:
+          - link "02 Outreach" [ref=e21] [cursor=pointer]:
+            - /url: /outreach
+            - generic [ref=e22]: "02"
+            - generic: Outreach
+        - listitem [ref=e23]:
+          - link "03 Contacts" [ref=e24] [cursor=pointer]:
+            - /url: /contacts
+            - generic [ref=e25]: "03"
+            - generic: Contacts
+        - listitem [ref=e26]:
+          - link "04 Meetings" [ref=e27] [cursor=pointer]:
+            - /url: /meetings
+            - generic [ref=e28]: "04"
+            - generic: Meetings
+        - listitem [ref=e29]:
+          - link "05 Events" [ref=e30] [cursor=pointer]:
+            - /url: /events
+            - generic [ref=e31]: "05"
+            - generic: Events
+        - listitem [ref=e32]:
+          - link "06 Finance" [ref=e33] [cursor=pointer]:
+            - /url: /finance
+            - generic [ref=e34]: "06"
+            - generic: Finance
+        - listitem [ref=e35]:
+          - link "07 Tasks" [ref=e36] [cursor=pointer]:
+            - /url: /tasks
+            - generic [ref=e37]: "07"
+            - generic: Tasks
+        - listitem [ref=e38]:
+          - link "08 Ideas" [ref=e39] [cursor=pointer]:
+            - /url: /ideas
+            - generic [ref=e40]: "08"
+            - generic: Ideas
+        - listitem [ref=e41]:
+          - link "09 Chat" [ref=e42] [cursor=pointer]:
+            - /url: /chat
+            - generic [ref=e43]: "09"
+            - generic: Chat
+        - listitem [ref=e44]:
+          - link "10 Team" [ref=e45] [cursor=pointer]:
+            - /url: /team
+            - generic [ref=e46]: "10"
+            - generic: Team
+        - listitem [ref=e47]:
+          - link "11 Info" [ref=e48] [cursor=pointer]:
+            - /url: /info
+            - generic [ref=e49]: "11"
+            - generic: Info
+        - listitem [ref=e50]:
+          - link "12 Contracts" [ref=e51] [cursor=pointer]:
+            - /url: /contracts
+            - generic [ref=e52]: "12"
+            - generic: Contracts
+      - generic [ref=e54]:
+        - button "A(" [ref=e55] [cursor=pointer]
+        - generic:
+          - generic:
+            - generic: API (read-only)
+            - generic: Viewer
+          - link "Settings":
+            - /url: /settings
+          - button "Sign out"
+    - generic [ref=e57]:
+      - generic [ref=e59]:
+        - button "⌘K" [ref=e60]
+        - button "3" [ref=e65]
+        - button "Switch to light mode" [ref=e70]
+      - main [ref=e77]:
+        - generic [ref=e78]:
+          - generic [ref=e80]:
+            - heading "Contracts" [level=1] [ref=e85]
+            - paragraph [ref=e86]: Fill in the details, check the preview, export a PDF. No AI involved — just the standard terms.
+          - generic [ref=e87]:
+            - generic [ref=e88]:
+              - generic [ref=e89]:
+                - heading "Details" [level=2] [ref=e90]
+                - generic [ref=e91]:
+                  - button "English" [ref=e92]
+                  - button "Svenska" [ref=e93]
+              - generic [ref=e94]:
+                - generic [ref=e95]:
+                  - generic [ref=e96]:
+                    - text: Company name
+                    - textbox [ref=e97]
+                  - generic [ref=e98]:
+                    - text: Contact person
+                    - textbox [ref=e99]
+                - generic [ref=e100]:
+                  - text: Event type
+                  - combobox [ref=e101] [cursor=pointer]:
+                    - generic: Lunch lecture · 5 000 SEK
+                - generic [ref=e104]:
+                  - generic [ref=e105]:
+                    - text: Price (SEK)
+                    - spinbutton [ref=e106]: "5000"
+                  - generic [ref=e107]:
+                    - text: Event date
+                    - textbox [ref=e108]
+                - generic [ref=e109]:
+                  - text: Food cost note
+                  - textbox [ref=e110]: approx. 80 SEK per participant
+                - generic [ref=e111]:
+                  - text: Custom / additional terms
+                  - textbox "Optional…" [ref=e112]
+                - generic [ref=e113]:
+                  - generic [ref=e114]:
+                    - text: Our signatory
+                    - textbox [ref=e115]
+                  - generic [ref=e116]:
+                    - text: Their signatory
+                    - textbox "Name" [ref=e117]
+                - generic [ref=e118]:
+                  - text: Place
+                  - textbox [ref=e119]
+                - button "Export PDF" [disabled]
+            - generic [ref=e120]:
+              - generic [ref=e121]:
+                - heading "Live preview" [level=2] [ref=e122]
+                - generic [ref=e123]:
+                  - generic [ref=e124]: Updates as you type
+                  - button "Reset" [disabled]
+              - generic [ref=e126]:
+                - generic [ref=e128]:
+                  - generic [ref=e129]: UU AI Society · Uppsala
+                  - generic [ref=e130]: Partnership Terms
+                - textbox [ref=e134]: "Hi [Name], Thank you for your interest in organizing an event together with UUAI Society. Below are our standard terms for collaborations and events. Event type: Lunch lecture Price: 5 000 SEK Food: approx. 80 SEK per participant Agreement that UUAIS may use your company's logo and name for marketing and promotional purposes. Agreement to co-collaborators or sponsorships that may be part of the event. If any of the terms are difficult to meet, let us know, we're happy to find a suitable solution together. Best regards, [Name]"
+                - generic [ref=e135]:
+                  - generic [ref=e136]: Signatures
+                  - generic [ref=e137]:
+                    - generic [ref=e138]:
+                      - generic [ref=e139]: UU AI Society
+                      - generic [ref=e140]:
+                        - generic [ref=e141]: Signature
+                        - generic [ref=e145]: Name in print
+                        - generic [ref=e149]: Place
+                        - generic [ref=e153]: Date
+                    - generic [ref=e157]:
+                      - generic [ref=e158]: Counterparty
+                      - generic [ref=e159]:
+                        - generic [ref=e160]: Signature
+                        - generic [ref=e164]: Name in print
+                        - generic [ref=e168]: Place
+                        - generic [ref=e172]: Date
+          - generic [ref=e176]:
+            - generic [ref=e177]:
+              - heading "History" [level=2] [ref=e178]
+              - generic [ref=e179]: "0"
+            - generic [ref=e180]: No contracts generated yet
+  - region "Notifications alt+T":
+    - list:
+      - listitem [ref=e181]:
+        - generic [ref=e185]: Reset to the template

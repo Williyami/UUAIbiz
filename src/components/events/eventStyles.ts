@@ -1,4 +1,5 @@
 export const EVENT_STATUS_ORDER = [
+  "Idea",
   "Planned",
   "Confirmed",
   "On hold",
@@ -9,11 +10,12 @@ export type EventStatus = (typeof EVENT_STATUS_ORDER)[number];
 
 /**
  * Statuses meaning the event isn't going ahead as scheduled. Cancelled is
- * dead; On hold is paused — but neither should inflate a revenue forecast or
- * claim the "next event" slot on the dashboard, so both are excluded from
- * projections and upcoming lists.
+ * dead; On hold is paused; an Idea was never scheduled in the first place.
+ * None of them should inflate a revenue forecast or claim the "next event"
+ * slot on the dashboard, so all are excluded from projections and upcoming
+ * lists.
  */
-export const INACTIVE_EVENT_STATUSES = ["Cancelled", "On hold"] as const;
+export const INACTIVE_EVENT_STATUSES = ["Cancelled", "On hold", "Idea"] as const;
 
 export function isEventActive(status: string | null | undefined): boolean {
   return !INACTIVE_EVENT_STATUSES.includes(status as (typeof INACTIVE_EVENT_STATUSES)[number]);
@@ -28,6 +30,8 @@ export const EVENT_TYPE_ORDER = [
 export type EventType = (typeof EVENT_TYPE_ORDER)[number];
 
 export const eventStatusColor: Record<EventStatus, string> = {
+  // Deliberately the quietest of the set — an idea hasn't earned attention yet.
+  Idea: "var(--muted-foreground)",
   Planned: "var(--status-neutral)",
   Confirmed: "var(--status-info)",
   "On hold": "var(--status-warning)",
@@ -47,4 +51,19 @@ export function semesterBounds(now = new Date()) {
     // overflowed June into 1 July, putting that date in both semesters.
     end: new Date(y, ht ? 12 : 6, 0, 23, 59, 59),
   };
+}
+
+/**
+ * Partner names for an event, in the order they were added.
+ *
+ * Reads company_ids, falling back to the embedded company for anything written
+ * before events could hold several partners.
+ */
+export function eventCompanyNames(event: any, companies: any[]): string[] {
+  const ids: string[] = event?.company_ids ?? [];
+  if (ids.length) {
+    const byId = new Map(companies.map((c: any) => [c.id, c.name]));
+    return ids.map((id) => byId.get(id)).filter(Boolean) as string[];
+  }
+  return event?.company?.name ? [event.company.name] : [];
 }

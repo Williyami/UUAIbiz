@@ -8,7 +8,10 @@ import { parseLocalDate } from "@/lib/format";
 export type ChecklistItem = { offset: number; title: string };
 
 export const EVENT_CHECKLIST: ChecklistItem[] = [
-  { offset: -28, title: "Book with partner: date, time, duration, activity, venue, food, payment, participants" },
+  {
+    offset: -28,
+    title: "Book with partner: date, time, duration, activity, venue, food, payment, participants",
+  },
   { offset: -21, title: "Create marketing material" },
   { offset: -21, title: "Internal confirmation in social-media-posts channel" },
   { offset: -14, title: "Create event on website + Luma" },

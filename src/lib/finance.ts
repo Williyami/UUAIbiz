@@ -18,9 +18,12 @@ export function eventNet(event: any): number {
   );
 }
 
-/** Events that actually moved money — a cancelled event never did. */
+/**
+ * Events that actually moved money. A cancelled event never did, and an idea
+ * hasn't happened at all — neither belongs in the books.
+ */
 export function bookedEvents(events: any[]): any[] {
-  return (events ?? []).filter((e) => e.status !== "Cancelled");
+  return (events ?? []).filter((e) => e.status !== "Cancelled" && e.status !== "Idea");
 }
 
 /**

@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
-import { SearchableSelect } from "@/components/shared/SearchableSelect";
+import { CompaniesPicker } from "./CompaniesPicker";
 import { AssigneePicker } from "@/components/shared/AssigneePicker";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { profilesQuery, companiesQuery } from "@/lib/queries";
@@ -47,6 +47,7 @@ export function EventDialog({
       event ?? {
         title: "",
         company_id: null,
+        company_ids: [],
         event_type: "Lunch lecture",
         date: null,
         duration: "",
@@ -69,7 +70,10 @@ export function EventDialog({
       const payload = {
         ...rest,
         date: values.date || null,
-        company_id: values.company_id || null,
+        company_ids: values.company_ids ?? [],
+        // Mirror of the first partner: the events query embeds through this
+        // foreign key, and tasks copy it into related_company_id.
+        company_id: (values.company_ids ?? [])[0] ?? null,
         assignees: values.assignees ?? [],
         participant_count:
           values.participant_count === "" || values.participant_count == null
@@ -134,17 +138,11 @@ export function EventDialog({
               />
             </Field>
             <div className="grid grid-cols-2 gap-3">
-              <Field label="Company">
-                <SearchableSelect
-                  value={form.company_id}
-                  onChange={(v) => setForm({ ...form, company_id: v })}
-                  options={companies.map((c: any) => ({
-                    value: c.id,
-                    label: c.name,
-                    keywords: c.contact_person ?? "",
-                    hint: c.status,
-                  }))}
-                  searchPlaceholder="Search companies…"
+              <Field label="Partner companies">
+                <CompaniesPicker
+                  value={form.company_ids ?? []}
+                  onChange={(ids) => setForm({ ...form, company_ids: ids })}
+                  companies={companies}
                 />
               </Field>
               <Field label="Type">

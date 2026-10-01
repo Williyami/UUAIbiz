@@ -1,7 +1,13 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Fragment, useMemo, useState } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { eventsQuery, profilesQuery, companiesQuery, tasksQuery, currentUserQuery } from "@/lib/queries";
+import {
+  eventsQuery,
+  profilesQuery,
+  companiesQuery,
+  tasksQuery,
+  currentUserQuery,
+} from "@/lib/queries";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -22,6 +28,7 @@ import {
   EVENT_TYPE_ORDER,
   eventStatusColor,
   isEventActive,
+  eventCompanyNames,
   semesterBounds,
 } from "@/components/events/eventStyles";
 import { formatSEK, formatDate, parseLocalDate } from "@/lib/format";
@@ -39,13 +46,23 @@ export const Route = createFileRoute("/_authenticated/events")({
 });
 
 /** Display order for the grouped table — confirmed work sits above planning,
- *  paused work below it, and finished or dead events sink to the bottom. */
-const EVENT_GROUP_ORDER = ["Confirmed", "Planned", "On hold", "Completed", "Cancelled"] as const;
+ *  paused work and loose ideas below it, and finished or dead events sink to
+ *  the bottom. */
+const EVENT_GROUP_ORDER = [
+  "Confirmed",
+  "Planned",
+  "On hold",
+  "Idea",
+  "Completed",
+  "Cancelled",
+] as const;
 
 /** Events store a date but no clock time, so these export as all-day entries. */
-function icsFromEvent(e: any): IcsEvent {
+function icsFromEvent(e: any, companies: any[]): IcsEvent {
   const details = [
-    e.company?.name ? `Company: ${e.company.name}` : null,
+    eventCompanyNames(e, companies).length
+      ? `Companies: ${eventCompanyNames(e, companies).join(", ")}`
+      : null,
     e.event_type ? `Type: ${e.event_type}` : null,
     `Status: ${e.status}`,
     e.venue ? `Venue: ${e.venue}` : null,
@@ -65,6 +82,7 @@ function EventsPage() {
   const { data: events } = useSuspenseQuery(eventsQuery);
   const { data: profiles } = useSuspenseQuery(profilesQuery);
   const { data: me } = useSuspenseQuery(currentUserQuery);
+  const { data: companies } = useSuspenseQuery(companiesQuery);
   const canEdit = me?.role !== "viewer";
   const navigate = useNavigate();
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -101,7 +119,7 @@ function EventsPage() {
       }
       if (
         q &&
-        !`${e.title} ${(e as any).company?.name ?? ""} ${e.venue ?? ""}`
+        !`${e.title} ${eventCompanyNames(e, companies).join(" ")} ${e.venue ?? ""}`
           .toLowerCase()
           .includes(q.toLowerCase())
       )
@@ -144,7 +162,12 @@ function EventsPage() {
               ? "No dated events in the current filter"
               : `Export ${datedRows.length} event${datedRows.length === 1 ? "" : "s"} as .ics`
           }
-          onClick={() => downloadICS("uuais-events.ics", datedRows.map(icsFromEvent))}
+          onClick={() =>
+            downloadICS(
+              "uuais-events.ics",
+              datedRows.map((e) => icsFromEvent(e, companies)),
+            )
+          }
         >
           <CalendarPlus className="h-4 w-4" /> Export calendar
         </Button>
@@ -254,7 +277,7 @@ function EventsPage() {
                       <Td>
                         <div className="font-medium">{e.title}</div>
                         <div className="microlabel mt-0.5 text-[9.5px] text-muted-foreground/80">
-                          {(e as any).company?.name || "No company"}
+                          {eventCompanyNames(e, companies).join(" · ") || "No company"}
                           {e.venue ? ` · ${e.venue}` : ""}
                         </div>
                       </Td>

@@ -1,7 +1,13 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
-import { eventsQuery, profilesQuery, companiesQuery, tasksQuery, currentUserQuery } from "@/lib/queries";
+import {
+  eventsQuery,
+  profilesQuery,
+  companiesQuery,
+  tasksQuery,
+  currentUserQuery,
+} from "@/lib/queries";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -32,6 +38,7 @@ import {
   Pencil,
   Plus,
   Trash2,
+  Building2,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/events_/$eventId")({
@@ -54,6 +61,7 @@ function EventPage() {
   const { data: profiles } = useSuspenseQuery(profilesQuery);
   const { data: tasks } = useSuspenseQuery(tasksQuery);
   const { data: me } = useSuspenseQuery(currentUserQuery);
+  const { data: companies } = useSuspenseQuery(companiesQuery);
   const canEdit = me?.role !== "viewer";
   const [editOpen, setEditOpen] = useState(false);
   const [newItem, setNewItem] = useState("");
@@ -87,7 +95,9 @@ function EventPage() {
     },
     onSuccess: (n) => {
       invalidate();
-      toast.success(n === 0 ? "Checklist already added" : `${n} checklist tasks added to team tasks`);
+      toast.success(
+        n === 0 ? "Checklist already added" : `${n} checklist tasks added to team tasks`,
+      );
     },
     onError: (e: any) => toast.error(e.message),
   });
@@ -164,12 +174,24 @@ function EventPage() {
     );
   }
 
+  // The first partner carries the contact details (company_id mirrors it);
+  // any others are listed by name beneath.
   const company = event.company;
+  const partnerIds: string[] = event.company_ids ?? [];
+  const partners = partnerIds.length
+    ? (partnerIds
+        .map((id: string) => companies.find((c: any) => c.id === id))
+        .filter(Boolean) as any[])
+    : company
+      ? [company]
+      : [];
   const eventTasks = tasks
     .filter((t: any) => t.related_event_id === event.id)
     .sort((a: any, b: any) => (a.due_date || "9999").localeCompare(b.due_date || "9999"));
   const doneCount = eventTasks.filter((t: any) => t.status === "Done").length;
-  const owners = (event.assignees ?? []).map((id: string) => profiles.find((p) => p.id === id)).filter(Boolean);
+  const owners = (event.assignees ?? [])
+    .map((id: string) => profiles.find((p) => p.id === id))
+    .filter(Boolean);
   const net =
     Number(event.revenue_from_partner || 0) -
     Number(event.cost_to_us || 0) -
@@ -182,7 +204,9 @@ function EventPage() {
 
       <header className="flex flex-wrap items-end justify-between gap-4 border-b pb-5">
         <div className="min-w-0">
-          <StatusTag color={eventStatusColor[event.status as EventStatus]}>{event.status}</StatusTag>
+          <StatusTag color={eventStatusColor[event.status as EventStatus]}>
+            {event.status}
+          </StatusTag>
           <h1 className="mt-2 font-display text-3xl font-medium leading-none tracking-tight">
             {event.title}
           </h1>
@@ -215,27 +239,38 @@ function EventPage() {
           <section className="border bg-card">
             <SectionHead>Partner & logistics</SectionHead>
             <div className="space-y-2.5 p-4 text-sm">
-              {company ? (
+              {partners.length ? (
                 <>
                   <InfoRow icon={User}>
-                    <span className="font-medium">{company.name}</span>
-                    {company.contact_person && (
-                      <span className="text-muted-foreground"> — {company.contact_person}</span>
+                    <span className="font-medium">{partners[0].name}</span>
+                    {partners[0].contact_person && (
+                      <span className="text-muted-foreground"> — {partners[0].contact_person}</span>
                     )}
                   </InfoRow>
-                  {company.contact_email && (
+                  {partners.length > 1 && (
+                    <InfoRow icon={Building2}>
+                      <span className="text-xs text-muted-foreground">
+                        with{" "}
+                        {partners
+                          .slice(1)
+                          .map((p: any) => p.name)
+                          .join(", ")}
+                      </span>
+                    </InfoRow>
+                  )}
+                  {partners[0].contact_email && (
                     <InfoRow icon={Mail}>
                       <a
                         className="font-mono text-xs hover:underline"
-                        href={`mailto:${company.contact_email}`}
+                        href={`mailto:${partners[0].contact_email}`}
                       >
-                        {company.contact_email}
+                        {partners[0].contact_email}
                       </a>
                     </InfoRow>
                   )}
-                  {company.contact_phone && (
+                  {partners[0].contact_phone && (
                     <InfoRow icon={Phone}>
-                      <span className="font-mono text-xs">{company.contact_phone}</span>
+                      <span className="font-mono text-xs">{partners[0].contact_phone}</span>
                     </InfoRow>
                   )}
                 </>
@@ -374,7 +409,9 @@ function EventPage() {
                       >
                         {t.title}
                         {t.personal && (
-                          <span className="microlabel ml-1.5 text-[8.5px] text-brand">Personal</span>
+                          <span className="microlabel ml-1.5 text-[8.5px] text-brand">
+                            Personal
+                          </span>
                         )}
                       </div>
                       <div

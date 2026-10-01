@@ -146,6 +146,7 @@ export type Database = {
           meeting_date: string | null
           name: string
           notes: string | null
+          primary_contact_id: string | null
           status: Database["public"]["Enums"]["company_status"]
           updated_at: string
         }
@@ -164,6 +165,7 @@ export type Database = {
           meeting_date?: string | null
           name: string
           notes?: string | null
+          primary_contact_id?: string | null
           status?: Database["public"]["Enums"]["company_status"]
           updated_at?: string
         }
@@ -182,10 +184,19 @@ export type Database = {
           meeting_date?: string | null
           name?: string
           notes?: string | null
+          primary_contact_id?: string | null
           status?: Database["public"]["Enums"]["company_status"]
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "companies_primary_contact_id_fkey"
+            columns: ["primary_contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       contacts: {
         Row: {
@@ -303,6 +314,7 @@ export type Database = {
         Row: {
           assignees: string[]
           company_id: string | null
+          company_ids: string[]
           cost_to_us: number
           created_at: string
           date: string | null
@@ -322,6 +334,7 @@ export type Database = {
         Insert: {
           assignees?: string[]
           company_id?: string | null
+          company_ids?: string[]
           cost_to_us?: number
           created_at?: string
           date?: string | null
@@ -341,6 +354,7 @@ export type Database = {
         Update: {
           assignees?: string[]
           company_id?: string | null
+          company_ids?: string[]
           cost_to_us?: number
           created_at?: string
           date?: string | null
@@ -762,6 +776,7 @@ export type Database = {
         | "Declined"
         | "On hold"
       event_status:
+        | "Idea"
         | "Planned"
         | "Confirmed"
         | "On hold"
@@ -935,6 +950,7 @@ export const Constants = {
         "On hold",
       ],
       event_status: [
+        "Idea",
         "Planned",
         "Confirmed",
         "On hold",
