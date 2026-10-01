@@ -97,6 +97,10 @@ export function MeetingDialog({
         </DialogHeader>
         <form
           className="space-y-3"
+          // Native validation is off: a half-typed date reports an empty
+          // value and blocks submit, which reads as "a date is required" even
+          // though the field is optional. The required field is checked below.
+          noValidate
           onSubmit={(e) => {
             e.preventDefault();
             if (!form.title?.trim()) return toast.error("Title is required");
