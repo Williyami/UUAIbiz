@@ -33,6 +33,7 @@ import { downloadContractPdf } from "@/lib/contract-pdf";
 import { formatSEK, formatDate } from "@/lib/format";
 import { toast } from "sonner";
 import { Download, Eye, Trash2, Settings2, RotateCcw } from "lucide-react";
+import { errorMessage } from "@/lib/chunk-error";
 
 type ContractSearch = { company?: string; contact?: string };
 
@@ -47,7 +48,9 @@ export const Route = createFileRoute("/_authenticated/contracts")({
     context.queryClient.ensureQueryData(profilesQuery);
   },
   component: ContractsPage,
-  errorComponent: ({ error }) => <div className="p-8 text-destructive">Error: {error.message}</div>,
+  errorComponent: ({ error }) => (
+    <div className="p-8 text-destructive">Error: {errorMessage(error)}</div>
+  ),
 });
 
 function fillTemplate(tpl: string, vars: Record<string, string>) {

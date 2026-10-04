@@ -15,6 +15,7 @@ import { Plus, Users, User, Trash2 } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { TaskBoard } from "@/components/tasks/TaskBoard";
 import { TaskDialog } from "@/components/tasks/TaskDialog";
+import { errorMessage } from "@/lib/chunk-error";
 
 export const Route = createFileRoute("/_authenticated/tasks")({
   loader: ({ context }) => {
@@ -24,7 +25,9 @@ export const Route = createFileRoute("/_authenticated/tasks")({
     context.queryClient.ensureQueryData(eventsQuery);
   },
   component: TasksPage,
-  errorComponent: ({ error }) => <div className="p-8 text-destructive">Error: {error.message}</div>,
+  errorComponent: ({ error }) => (
+    <div className="p-8 text-destructive">Error: {errorMessage(error)}</div>
+  ),
 });
 
 function TasksPage() {
@@ -88,7 +91,12 @@ function TasksPage() {
         }
       >
         <div className="inline-flex border bg-card p-0.5">
-          <ScopeButton active={mineOnly} onClick={() => setMineOnly(true)} icon={User} label="My tasks" />
+          <ScopeButton
+            active={mineOnly}
+            onClick={() => setMineOnly(true)}
+            icon={User}
+            label="My tasks"
+          />
           <ScopeButton
             active={!mineOnly}
             onClick={() => setMineOnly(false)}

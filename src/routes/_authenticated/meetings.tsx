@@ -11,6 +11,7 @@ import { formatDate, initials, parseLocalDate } from "@/lib/format";
 import { MeetingDialog } from "@/components/meetings/MeetingDialog";
 import { downloadICS, type IcsEvent } from "@/lib/ics";
 import { Plus, CalendarPlus, ChevronLeft, ChevronRight } from "lucide-react";
+import { errorMessage } from "@/lib/chunk-error";
 
 export const Route = createFileRoute("/_authenticated/meetings")({
   loader: ({ context }) => {
@@ -19,7 +20,9 @@ export const Route = createFileRoute("/_authenticated/meetings")({
     context.queryClient.ensureQueryData(meetingsQuery);
   },
   component: MeetingsPage,
-  errorComponent: ({ error }) => <div className="p-8 text-destructive">Error: {error.message}</div>,
+  errorComponent: ({ error }) => (
+    <div className="p-8 text-destructive">Error: {errorMessage(error)}</div>
+  ),
 });
 
 function MeetingsPage() {
@@ -127,13 +130,7 @@ function MeetingsPage() {
             emptyText="Nothing upcoming"
           />
           {past.length > 0 && (
-            <MeetingList
-              title="Past"
-              rows={past}
-              profileMap={profileMap}
-              onOpen={open}
-              muted
-            />
+            <MeetingList title="Past" rows={past} profileMap={profileMap} onOpen={open} muted />
           )}
         </>
       )}
@@ -290,15 +287,17 @@ function MonthCalendar({ rows, onOpen }: { rows: any[]; onOpen: (row: any) => vo
       </div>
       <div className="grid grid-cols-7 border-b">
         {WEEKDAYS.map((w) => (
-          <div key={w} className="microlabel px-1 py-2 text-center text-[9px] text-muted-foreground">
+          <div
+            key={w}
+            className="microlabel px-1 py-2 text-center text-[9px] text-muted-foreground"
+          >
             {w}
           </div>
         ))}
       </div>
       <div className="grid grid-cols-7">
         {cells.map((iso, i) => {
-          if (!iso)
-            return <div key={i} className="h-14 border-b border-r bg-muted/20 md:h-16" />;
+          if (!iso) return <div key={i} className="h-14 border-b border-r bg-muted/20 md:h-16" />;
           const dayMeetings = byDate.get(iso) ?? [];
           const isToday = iso === todayIso;
           return (

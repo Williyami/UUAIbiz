@@ -25,3 +25,16 @@ export function useReloadOnChunkError(error: unknown) {
     if (isChunkLoadError(error)) reloadOnceForStaleChunk();
   }, [error]);
 }
+
+/**
+ * Readable text for whatever a route error boundary was handed.
+ *
+ * TanStack Router types a boundary's `error` as `unknown` — a loader can throw
+ * a string, a Response or anything else — so `error.message` is not safe to
+ * assume. Falls back to String() rather than showing nothing.
+ */
+export function errorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  if (typeof error === "string") return error;
+  return String(error);
+}

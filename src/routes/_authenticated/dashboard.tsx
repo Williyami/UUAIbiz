@@ -21,6 +21,7 @@ import {
 } from "@/components/events/eventStyles";
 import { priorityColor, type TaskPriority } from "@/components/tasks/taskStyles";
 import { ArrowUpRight } from "lucide-react";
+import { errorMessage } from "@/lib/chunk-error";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   loader: ({ context }) => {
@@ -30,7 +31,9 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
     context.queryClient.ensureQueryData(profilesQuery);
   },
   component: Dashboard,
-  errorComponent: ({ error }) => <div className="p-8 text-destructive">Error: {error.message}</div>,
+  errorComponent: ({ error }) => (
+    <div className="p-8 text-destructive">Error: {errorMessage(error)}</div>
+  ),
 });
 
 function Dashboard() {
@@ -64,7 +67,11 @@ function Dashboard() {
     .sort((a, b) => (a.date! < b.date! ? -1 : 1));
   const nextEvent = upcoming[0];
   const semesterEvents = events.filter(
-    (e) => isEventActive(e.status) && e.date && new Date(e.date) >= sem.start && new Date(e.date) <= sem.end,
+    (e) =>
+      isEventActive(e.status) &&
+      e.date &&
+      new Date(e.date) >= sem.start &&
+      new Date(e.date) <= sem.end,
   );
   const revenue = semesterEvents.reduce((s, e) => s + Number(e.revenue_from_partner || 0), 0);
   const costs = semesterEvents.reduce(
@@ -99,25 +106,25 @@ function Dashboard() {
 
       <div className="space-y-4">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <StatCard label="Active outreach" value={String(activeOutreach)}>
-          {newCompanies30d > 0 ? (
-            <>
-              <Delta value={newCompanies30d}>
-                <DeltaIcon variant="arrow" />
-                <DeltaValue precision={0} suffix="" />
-              </Delta>
-              <span className="text-muted-foreground">new in 30 days</span>
-            </>
-          ) : (
-            <span className="text-muted-foreground">Contacted → Booked</span>
-          )}
-        </StatCard>
+          <StatCard label="Active outreach" value={String(activeOutreach)}>
+            {newCompanies30d > 0 ? (
+              <>
+                <Delta value={newCompanies30d}>
+                  <DeltaIcon variant="arrow" />
+                  <DeltaValue precision={0} suffix="" />
+                </Delta>
+                <span className="text-muted-foreground">new in 30 days</span>
+              </>
+            ) : (
+              <span className="text-muted-foreground">Contacted → Booked</span>
+            )}
+          </StatCard>
 
-        <StatCard label="Upcoming events" value={String(upcoming.length)}>
-          <span className="truncate text-muted-foreground">
-            {nextEvent ? `Next: ${formatDate(nextEvent.date)}` : "None in the next 30 days"}
-          </span>
-        </StatCard>
+          <StatCard label="Upcoming events" value={String(upcoming.length)}>
+            <span className="truncate text-muted-foreground">
+              {nextEvent ? `Next: ${formatDate(nextEvent.date)}` : "None in the next 30 days"}
+            </span>
+          </StatCard>
         </div>
 
         <Panel
@@ -128,25 +135,25 @@ function Dashboard() {
         </Panel>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <StatCard label="Overdue tasks" value={String(overdue)} danger={overdue > 0}>
-          <span className="text-muted-foreground">
-            {dueThisWeek > 0 ? `${dueThisWeek} more due this week` : "Nothing due this week"}
-          </span>
-        </StatCard>
+          <StatCard label="Overdue tasks" value={String(overdue)} danger={overdue > 0}>
+            <span className="text-muted-foreground">
+              {dueThisWeek > 0 ? `${dueThisWeek} more due this week` : "Nothing due this week"}
+            </span>
+          </StatCard>
 
-        <StatCard label={`Net · ${sem.label}`} value={formatSEK(net)} danger={net < 0}>
-          {revenue > 0 ? (
-            <>
-              <Delta value={margin}>
-                <DeltaIcon variant="trend" />
-                <DeltaValue precision={0} suffix="% margin" />
-              </Delta>
-              <span className="tnum text-muted-foreground">{formatSEK(revenue)} in</span>
-            </>
-          ) : (
-            <span className="text-muted-foreground">No revenue booked yet</span>
-          )}
-        </StatCard>
+          <StatCard label={`Net · ${sem.label}`} value={formatSEK(net)} danger={net < 0}>
+            {revenue > 0 ? (
+              <>
+                <Delta value={margin}>
+                  <DeltaIcon variant="trend" />
+                  <DeltaValue precision={0} suffix="% margin" />
+                </Delta>
+                <span className="tnum text-muted-foreground">{formatSEK(revenue)} in</span>
+              </>
+            ) : (
+              <span className="text-muted-foreground">No revenue booked yet</span>
+            )}
+          </StatCard>
         </div>
       </div>
 
@@ -228,7 +235,8 @@ function Dashboard() {
                 const owned = {
                   c: companies.filter((c) => (c.assignees ?? []).includes(p.id)).length,
                   e: events.filter((e) => (e.assignees ?? []).includes(p.id)).length,
-                  t: tasks.filter((t) => (t.assignees ?? []).includes(p.id) && t.status !== "Done").length,
+                  t: tasks.filter((t) => (t.assignees ?? []).includes(p.id) && t.status !== "Done")
+                    .length,
                 };
                 return (
                   <li key={p.id} className="flex items-center justify-between gap-3 px-4 py-3">

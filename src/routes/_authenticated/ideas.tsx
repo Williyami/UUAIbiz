@@ -11,13 +11,16 @@ import { toast } from "sonner";
 import { Pencil, Trash2, Send, Heart, MessageCircle } from "lucide-react";
 import { ProfileWidget } from "@/components/shared/ProfileWidget";
 import { Input } from "@/components/ui/input";
+import { errorMessage } from "@/lib/chunk-error";
 
 export const Route = createFileRoute("/_authenticated/ideas")({
   loader: ({ context }) => {
     context.queryClient.ensureQueryData(boardPostsQuery);
   },
   component: IdeasPage,
-  errorComponent: ({ error }) => <div className="p-8 text-destructive">Error: {error.message}</div>,
+  errorComponent: ({ error }) => (
+    <div className="p-8 text-destructive">Error: {errorMessage(error)}</div>
+  ),
 });
 
 const CATEGORIES = ["General", "Company idea", "Event idea"] as const;
@@ -202,7 +205,11 @@ function IdeasPage() {
                     className="flex min-w-0 flex-1 cursor-pointer items-center gap-2.5 text-left"
                   >
                     {p.author?.avatar_url ? (
-                      <img src={p.author.avatar_url} alt="" className="size-7 rounded-full object-cover" />
+                      <img
+                        src={p.author.avatar_url}
+                        alt=""
+                        className="size-7 rounded-full object-cover"
+                      />
                     ) : (
                       <div className="flex size-7 items-center justify-center rounded-full bg-accent font-mono text-[9px] font-semibold uppercase">
                         {initials(authorName)}
@@ -215,7 +222,9 @@ function IdeasPage() {
                       </span>
                     </div>
                   </button>
-                  <span className={`microlabel text-[9px] ${categoryColor[p.category] ?? "text-muted-foreground"}`}>
+                  <span
+                    className={`microlabel text-[9px] ${categoryColor[p.category] ?? "text-muted-foreground"}`}
+                  >
                     {p.category}
                   </span>
                   {mine && (
@@ -348,9 +357,16 @@ function PostFooter({
             const name = c.author?.name || c.author?.email || "Former member";
             return (
               <div key={c.id} className="flex items-start gap-2">
-                <button onClick={() => c.author && onViewProfile(c.author)} className="shrink-0 cursor-pointer pt-0.5">
+                <button
+                  onClick={() => c.author && onViewProfile(c.author)}
+                  className="shrink-0 cursor-pointer pt-0.5"
+                >
                   {c.author?.avatar_url ? (
-                    <img src={c.author.avatar_url} alt="" className="size-5 rounded-full object-cover" />
+                    <img
+                      src={c.author.avatar_url}
+                      alt=""
+                      className="size-5 rounded-full object-cover"
+                    />
                   ) : (
                     <div className="flex size-5 items-center justify-center rounded-full bg-accent font-mono text-[7px] font-semibold uppercase">
                       {initials(name)}

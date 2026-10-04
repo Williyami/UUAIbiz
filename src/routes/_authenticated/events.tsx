@@ -32,6 +32,7 @@ import {
   semesterBounds,
 } from "@/components/events/eventStyles";
 import { formatSEK, formatDate, parseLocalDate } from "@/lib/format";
+import { errorMessage } from "@/lib/chunk-error";
 
 export const Route = createFileRoute("/_authenticated/events")({
   loader: ({ context }) => {
@@ -42,7 +43,9 @@ export const Route = createFileRoute("/_authenticated/events")({
     context.queryClient.ensureQueryData(currentUserQuery);
   },
   component: EventsPage,
-  errorComponent: ({ error }) => <div className="p-8 text-destructive">Error: {error.message}</div>,
+  errorComponent: ({ error }) => (
+    <div className="p-8 text-destructive">Error: {errorMessage(error)}</div>
+  ),
 });
 
 /** Display order for the grouped table — confirmed work sits above planning,

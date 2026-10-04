@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ContactDialog } from "@/components/contacts/ContactDialog";
 import { Plus, Search, Mail, Phone } from "lucide-react";
+import { errorMessage } from "@/lib/chunk-error";
 
 export const Route = createFileRoute("/_authenticated/contacts")({
   loader: ({ context }) => {
@@ -14,7 +15,9 @@ export const Route = createFileRoute("/_authenticated/contacts")({
     context.queryClient.ensureQueryData(contactsQuery);
   },
   component: ContactsPage,
-  errorComponent: ({ error }) => <div className="p-8 text-destructive">Error: {error.message}</div>,
+  errorComponent: ({ error }) => (
+    <div className="p-8 text-destructive">Error: {errorMessage(error)}</div>
+  ),
 });
 
 type Row = {

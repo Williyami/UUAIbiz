@@ -11,13 +11,16 @@ import { AvatarCropDialog } from "@/components/layout/AvatarCropDialog";
 import { initials } from "@/lib/format";
 import { toast } from "sonner";
 import { KeyRound } from "lucide-react";
+import { errorMessage } from "@/lib/chunk-error";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   loader: ({ context }) => {
     context.queryClient.ensureQueryData(currentUserQuery);
   },
   component: SettingsPage,
-  errorComponent: ({ error }) => <div className="p-8 text-destructive">Error: {error.message}</div>,
+  errorComponent: ({ error }) => (
+    <div className="p-8 text-destructive">Error: {errorMessage(error)}</div>
+  ),
 });
 
 function SettingsPage() {

@@ -59,6 +59,7 @@ import {
   X,
   Settings,
 } from "lucide-react";
+import { errorMessage } from "@/lib/chunk-error";
 
 type AppRole = "admin" | "member" | "viewer";
 
@@ -76,7 +77,9 @@ export const Route = createFileRoute("/_authenticated/team")({
     context.queryClient.ensureQueryData(accessRequestsQuery);
   },
   component: TeamPage,
-  errorComponent: ({ error }) => <div className="p-8 text-destructive">Error: {error.message}</div>,
+  errorComponent: ({ error }) => (
+    <div className="p-8 text-destructive">Error: {errorMessage(error)}</div>
+  ),
 });
 
 function TeamPage() {
@@ -208,7 +211,8 @@ function TeamPage() {
           const owned = {
             companies: companies.filter((c) => (c.assignees ?? []).includes(p.id)).length,
             events: events.filter((e) => (e.assignees ?? []).includes(p.id)).length,
-            tasks: tasks.filter((t) => (t.assignees ?? []).includes(p.id) && t.status !== "Done").length,
+            tasks: tasks.filter((t) => (t.assignees ?? []).includes(p.id) && t.status !== "Done")
+              .length,
           };
           return (
             <div key={p.id} className="flex items-center gap-4 px-4 py-4">

@@ -12,6 +12,7 @@ import { CashflowChart } from "@/components/dashboard/CashflowChart";
 import { FinanceEntryDialog } from "@/components/finance/FinanceEntryDialog";
 import { ReconcileDialog } from "@/components/finance/ReconcileDialog";
 import { cn } from "@/lib/utils";
+import { errorMessage } from "@/lib/chunk-error";
 
 export const Route = createFileRoute("/_authenticated/finance")({
   loader: ({ context }) => {
@@ -19,7 +20,9 @@ export const Route = createFileRoute("/_authenticated/finance")({
     context.queryClient.ensureQueryData(financeEntriesQuery);
   },
   component: FinancePage,
-  errorComponent: ({ error }) => <div className="p-8 text-destructive">Error: {error.message}</div>,
+  errorComponent: ({ error }) => (
+    <div className="p-8 text-destructive">Error: {errorMessage(error)}</div>
+  ),
 });
 
 function FinancePage() {

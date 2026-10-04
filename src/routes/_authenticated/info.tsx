@@ -25,13 +25,16 @@ import { DocumentCard } from "@/components/shared/DocumentCard";
 import { Markdown } from "@/lib/markdown";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, ArrowUp, ArrowDown } from "lucide-react";
+import { errorMessage } from "@/lib/chunk-error";
 
 export const Route = createFileRoute("/_authenticated/info")({
   loader: ({ context }) => {
     context.queryClient.ensureQueryData(infoSectionsQuery);
   },
   component: InfoPage,
-  errorComponent: ({ error }) => <div className="p-8 text-destructive">Error: {error.message}</div>,
+  errorComponent: ({ error }) => (
+    <div className="p-8 text-destructive">Error: {errorMessage(error)}</div>
+  ),
 });
 
 function InfoPage() {

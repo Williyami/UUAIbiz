@@ -40,6 +40,7 @@ import {
   Trash2,
   Building2,
 } from "lucide-react";
+import { errorMessage } from "@/lib/chunk-error";
 
 export const Route = createFileRoute("/_authenticated/events_/$eventId")({
   loader: ({ context }) => {
@@ -50,7 +51,9 @@ export const Route = createFileRoute("/_authenticated/events_/$eventId")({
     context.queryClient.ensureQueryData(currentUserQuery);
   },
   component: EventPage,
-  errorComponent: ({ error }) => <div className="p-8 text-destructive">Error: {error.message}</div>,
+  errorComponent: ({ error }) => (
+    <div className="p-8 text-destructive">Error: {errorMessage(error)}</div>
+  ),
 });
 
 function EventPage() {

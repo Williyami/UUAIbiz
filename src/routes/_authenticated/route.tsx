@@ -11,7 +11,7 @@ import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { currentUserQuery } from "@/lib/queries";
 import { checkStaleCompanies } from "@/lib/stale.functions";
 import { CommandPalette, CommandPaletteTrigger } from "@/components/shared/CommandPalette";
-import { isChunkLoadError, useReloadOnChunkError } from "@/lib/chunk-error";
+import { isChunkLoadError, useReloadOnChunkError, errorMessage } from "@/lib/chunk-error";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -25,12 +25,12 @@ export const Route = createFileRoute("/_authenticated")({
   errorComponent: ShellError,
 });
 
-function ShellError({ error }: { error: Error }) {
+function ShellError({ error }: { error: unknown }) {
   useReloadOnChunkError(error);
   if (isChunkLoadError(error)) {
     return <div className="p-8 text-sm text-muted-foreground">Updating to the latest version…</div>;
   }
-  return <div className="p-8 text-sm text-destructive">Failed to load: {error.message}</div>;
+  return <div className="p-8 text-sm text-destructive">Failed to load: {errorMessage(error)}</div>;
 }
 
 function AuthenticatedShell() {
@@ -68,25 +68,25 @@ function AuthenticatedShell() {
       style={{ "--sidebar-width": "13.5rem" } as React.CSSProperties}
     >
       <PresenceProvider userId={me?.id}>
-      <ProfileWidgetProvider>
-      <div className="flex min-h-screen w-full">
-        <AppSidebar />
-        <div className="relative flex min-w-0 flex-1 flex-col">
-          <div className="flex items-center justify-between gap-2 border-b border-border/70 bg-card/85 px-3 py-2 md:absolute md:right-3 md:top-3 md:z-10 md:justify-start md:rounded-[3px] md:border md:px-2.5 md:py-1.5 md:shadow-sm md:backdrop-blur-sm">
-            <SidebarTrigger className="text-muted-foreground md:hidden" />
-            <div className="flex items-center gap-2">
-              <CommandPaletteTrigger />
-              <NotificationBell />
-              <ThemeToggle />
+        <ProfileWidgetProvider>
+          <div className="flex min-h-screen w-full">
+            <AppSidebar />
+            <div className="relative flex min-w-0 flex-1 flex-col">
+              <div className="flex items-center justify-between gap-2 border-b border-border/70 bg-card/85 px-3 py-2 md:absolute md:right-3 md:top-3 md:z-10 md:justify-start md:rounded-[3px] md:border md:px-2.5 md:py-1.5 md:shadow-sm md:backdrop-blur-sm">
+                <SidebarTrigger className="text-muted-foreground md:hidden" />
+                <div className="flex items-center gap-2">
+                  <CommandPaletteTrigger />
+                  <NotificationBell />
+                  <ThemeToggle />
+                </div>
+              </div>
+              <main className="flex-1 overflow-auto">
+                <Outlet />
+              </main>
+              <CommandPalette />
             </div>
           </div>
-          <main className="flex-1 overflow-auto">
-            <Outlet />
-          </main>
-          <CommandPalette />
-        </div>
-      </div>
-      </ProfileWidgetProvider>
+        </ProfileWidgetProvider>
       </PresenceProvider>
     </SidebarProvider>
   );

@@ -1,11 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import {
-  useMutation,
-  useQueryClient,
-  useSuspenseQuery,
-  queryOptions,
-} from "@tanstack/react-query";
+import { useMutation, useQueryClient, useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { profilesQuery, currentUserQuery } from "@/lib/queries";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -17,6 +12,7 @@ import { OnlineAvatar } from "@/components/shared/OnlineAvatar";
 import { timeAgo } from "@/lib/format";
 import { toast } from "sonner";
 import { Send, Trash2 } from "lucide-react";
+import { errorMessage } from "@/lib/chunk-error";
 
 const chatMessagesQuery = queryOptions({
   queryKey: ["chatMessages"],
@@ -37,7 +33,9 @@ export const Route = createFileRoute("/_authenticated/chat")({
     context.queryClient.ensureQueryData(chatMessagesQuery);
   },
   component: ChatPage,
-  errorComponent: ({ error }) => <div className="p-8 text-destructive">Error: {error.message}</div>,
+  errorComponent: ({ error }) => (
+    <div className="p-8 text-destructive">Error: {errorMessage(error)}</div>
+  ),
 });
 
 function ChatPage() {
@@ -56,10 +54,8 @@ function ChatPage() {
   useEffect(() => {
     const channel = supabase
       .channel("team-chat-stream")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "chat_messages" },
-        () => qc.invalidateQueries({ queryKey: ["chatMessages"] }),
+      .on("postgres_changes", { event: "*", schema: "public", table: "chat_messages" }, () =>
+        qc.invalidateQueries({ queryKey: ["chatMessages"] }),
       )
       .subscribe();
     return () => {

@@ -15,6 +15,7 @@ import { KanbanBoard } from "@/components/outreach/KanbanBoard";
 import { CompanyTable } from "@/components/outreach/CompanyTable";
 import { CompanyDialog } from "@/components/outreach/CompanyDialog";
 import { CompanyDetail } from "@/components/outreach/CompanyDetail";
+import { errorMessage } from "@/lib/chunk-error";
 
 export const Route = createFileRoute("/_authenticated/outreach")({
   loader: ({ context }) => {
@@ -25,7 +26,9 @@ export const Route = createFileRoute("/_authenticated/outreach")({
     context.queryClient.ensureQueryData(currentUserQuery);
   },
   component: OutreachPage,
-  errorComponent: ({ error }) => <div className="p-8 text-destructive">Error: {error.message}</div>,
+  errorComponent: ({ error }) => (
+    <div className="p-8 text-destructive">Error: {errorMessage(error)}</div>
+  ),
 });
 
 function OutreachPage() {
