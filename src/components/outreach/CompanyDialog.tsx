@@ -85,12 +85,18 @@ export function CompanyDialog({
         meeting_booked: !!values.meeting_booked,
         meeting_date: values.meeting_booked ? values.meeting_date || null : null,
       };
-      if (company?.id) {
-        const { error } = await supabase.from("companies").update(payload).eq("id", company.id);
+      let companyId: string | undefined = company?.id;
+      if (companyId) {
+        const { error } = await supabase.from("companies").update(payload).eq("id", companyId);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("companies").insert(payload);
+        const { data, error } = await supabase
+          .from("companies")
+          .insert(payload)
+          .select("id")
+          .single();
         if (error) throw error;
+        companyId = data.id;
       }
       // The inline contact_* columns mirror the chosen contact. Push edits made
       // here back to the contact row as well, or the two quietly diverge.
@@ -105,6 +111,28 @@ export function CompanyDialog({
           })
           .eq("id", values.primary_contact_id);
         if (error) throw error;
+      } else if (values.contact_person?.trim()) {
+        // A person typed in while adding the company (or on one that had no
+        // contact yet) has to exist as a real contact, or the picker — which
+        // lists contacts rows — never offers them.
+        const { data: created, error } = await supabase
+          .from("contacts")
+          .insert({
+            name: values.contact_person.trim(),
+            role: values.contact_title?.trim() || null,
+            email: values.contact_email?.trim() || null,
+            phone: values.contact_phone?.trim() || null,
+            company_id: companyId,
+            company_name: values.name?.trim() || null,
+          })
+          .select("id")
+          .single();
+        if (error) throw error;
+        const { error: linkError } = await supabase
+          .from("companies")
+          .update({ primary_contact_id: created.id })
+          .eq("id", companyId);
+        if (linkError) throw linkError;
       }
     },
     onSuccess: () => {

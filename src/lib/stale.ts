@@ -36,9 +36,13 @@ export function isStale(company: {
 /**
  * When a company was last touched at all — contacted, or edited in the Hub.
  *
- * Outreach sorts on this so whatever moved most recently sits at the top. The
- * contact date is a plain date, so it counts as end-of-day: deliberately
- * logging a touchpoint outranks an incidental edit made earlier the same day.
+ * Outreach sorts on this so whatever moved most recently sits at the top.
+ *
+ * updated_at already records the moment a contact was logged, because logging
+ * one is an edit. The contact date is a plain date with no time, so it counts
+ * from the start of its day: it only wins when it lies ahead of every real
+ * timestamp. Counting it as end-of-day, as an earlier version did, gave every
+ * company contacted today the same key and left them in arbitrary order.
  */
 export function lastTouchedAt(company: {
   updated_at?: string | null;
@@ -47,7 +51,7 @@ export function lastTouchedAt(company: {
 }): number {
   const stamps = [
     company.updated_at ? Date.parse(company.updated_at) : NaN,
-    company.last_contact_date ? Date.parse(`${company.last_contact_date}T23:59:59`) : NaN,
+    company.last_contact_date ? Date.parse(`${company.last_contact_date}T00:00:00`) : NaN,
     company.created_at ? Date.parse(company.created_at) : NaN,
   ].filter((n) => Number.isFinite(n));
   return stamps.length ? Math.max(...stamps) : 0;

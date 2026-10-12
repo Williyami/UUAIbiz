@@ -22,7 +22,9 @@ export const companiesQuery = queryOptions({
     // Most recently touched first — contacted or edited, whichever is later.
     // Sorted here rather than in the query because it spans two columns, and
     // so every consumer (table, kanban, palette) inherits the same order.
-    return (data ?? []).sort((a, b) => lastTouchedAt(b) - lastTouchedAt(a));
+    return (data ?? []).sort(
+      (a, b) => lastTouchedAt(b) - lastTouchedAt(a) || a.name.localeCompare(b.name, "sv"),
+    );
   },
 });
 
