@@ -81,7 +81,7 @@ function MeetingsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6 p-6 md:p-10">
+    <div className="mx-auto max-w-[1400px] space-y-6 p-6 md:p-10">
       <PageHeader
         title="Meetings"
         lede="Company meetings booked from Outreach, plus any added manually."
@@ -121,14 +121,32 @@ function MeetingsPage() {
             profileMap={profileMap}
             onOpen={open}
           />
-          <MonthCalendar rows={all} onOpen={open} />
-          <MeetingList
-            title="Upcoming"
-            rows={upcoming}
-            profileMap={profileMap}
-            onOpen={open}
-            emptyText="Nothing upcoming"
-          />
+          {/* The calendar with the next few meetings beside it; everything
+              further out, and the past, collects underneath. */}
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+            <MonthCalendar rows={all} onOpen={open} />
+            {/* The calendar sets the row height; on wide screens the list is
+                pinned to it and scrolls inside rather than stretching the row. */}
+            <div className="lg:relative">
+              <MeetingList
+                title="Upcoming"
+                rows={upcoming.slice(0, UPCOMING_BESIDE)}
+                total={upcoming.length}
+                profileMap={profileMap}
+                onOpen={open}
+                emptyText="Nothing upcoming"
+                compact
+              />
+            </div>
+          </div>
+          {upcoming.length > UPCOMING_BESIDE && (
+            <MeetingList
+              title="Later"
+              rows={upcoming.slice(UPCOMING_BESIDE)}
+              profileMap={profileMap}
+              onOpen={open}
+            />
+          )}
           {past.length > 0 && (
             <MeetingList title="Past" rows={past} profileMap={profileMap} onOpen={open} muted />
           )}
@@ -337,31 +355,46 @@ function MonthCalendar({ rows, onOpen }: { rows: any[]; onOpen: (row: any) => vo
   );
 }
 
+// How many upcoming meetings sit beside the calendar before the rest move below.
+const UPCOMING_BESIDE = 6;
+
 function MeetingList({
   title,
   rows,
+  total,
   profileMap,
   onOpen,
   muted,
   emptyText,
+  compact,
 }: {
   title: string;
   rows: any[];
+  /** Full count when `rows` is only the first part of a longer list. */
+  total?: number;
   profileMap: Map<string, any>;
   onOpen: (row: any) => void;
   muted?: boolean;
   emptyText?: string;
+  /** Narrow column beside the calendar: drop status and owners. */
+  compact?: boolean;
 }) {
   return (
-    <section className={`border bg-card ${muted ? "opacity-80" : ""}`}>
+    <section
+      className={`flex flex-col border bg-card ${muted ? "opacity-80" : ""} ${compact ? "lg:absolute lg:inset-0" : ""}`}
+    >
       <div className="flex items-center justify-between border-b px-4 py-3">
         <h2 className="font-display text-base font-medium tracking-tight">{title}</h2>
-        <span className="microlabel tnum text-[10px] text-muted-foreground">{rows.length}</span>
+        <span className="microlabel tnum text-[10px] text-muted-foreground">
+          {total && total > rows.length ? `Next ${rows.length} of ${total}` : rows.length}
+        </span>
       </div>
       {rows.length === 0 ? (
-        <div className="px-4 py-8 text-center text-sm text-muted-foreground">{emptyText}</div>
+        <div className="flex flex-1 items-center justify-center px-4 py-8 text-center text-sm text-muted-foreground">
+          {emptyText}
+        </div>
       ) : (
-        <ul className="divide-y">
+        <ul className={`divide-y ${compact ? "min-h-0 flex-1 overflow-y-auto" : ""}`}>
           {rows.map((row) => {
             return (
               <li
@@ -376,7 +409,7 @@ function MeetingList({
                   </div>
                 </div>
                 <div className="flex shrink-0 items-center gap-4">
-                  {row.status && (
+                  {row.status && !compact && (
                     <StatusTag
                       color={companyStatusColor[row.status as CompanyStatus]}
                       className="hidden text-[9.5px] sm:inline-flex"
@@ -384,7 +417,7 @@ function MeetingList({
                       {row.status}
                     </StatusTag>
                   )}
-                  <MemberStack ids={row.assignees} profileMap={profileMap} />
+                  {!compact && <MemberStack ids={row.assignees} profileMap={profileMap} />}
                   <span className="microlabel tnum text-muted-foreground">
                     {row.meeting_date ? formatDate(row.meeting_date) : "Date TBD"}
                     {row.meeting_time && ` · ${row.meeting_time.slice(0, 5)}`}

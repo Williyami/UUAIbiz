@@ -27,11 +27,9 @@ import {
   EVENT_STATUS_ORDER,
   EVENT_TYPE_ORDER,
   eventStatusColor,
-  isEventActive,
   eventCompanyNames,
-  semesterBounds,
 } from "@/components/events/eventStyles";
-import { formatSEK, formatDate, parseLocalDate } from "@/lib/format";
+import { formatDate } from "@/lib/format";
 import { errorMessage } from "@/lib/chunk-error";
 
 export const Route = createFileRoute("/_authenticated/events")({
@@ -77,10 +75,6 @@ function icsFromEvent(e: any, companies: any[]): IcsEvent {
   return { id: e.id, title: e.title, date: e.date, description: details };
 }
 
-function net(e: any) {
-  return Number(e.revenue_from_partner || 0) - Number(e.cost_to_us || 0) - Number(e.food_cost || 0);
-}
-
 function EventsPage() {
   const { data: events } = useSuspenseQuery(eventsQuery);
   const { data: profiles } = useSuspenseQuery(profilesQuery);
@@ -97,20 +91,6 @@ function EventsPage() {
   const [sortAsc, setSortAsc] = useState(false);
 
   const profileMap = new Map(profiles.map((p) => [p.id, p]));
-  const sem = semesterBounds();
-
-  const semesterEvents = events.filter(
-    (e) =>
-      isEventActive(e.status) &&
-      e.date &&
-      parseLocalDate(e.date) >= sem.start &&
-      parseLocalDate(e.date) <= sem.end,
-  );
-  const revenue = semesterEvents.reduce((s, e) => s + Number(e.revenue_from_partner || 0), 0);
-  const costs = semesterEvents.reduce(
-    (s, e) => s + Number(e.cost_to_us || 0) + Number(e.food_cost || 0),
-    0,
-  );
 
   const rows = useMemo(() => {
     const filtered = events.filter((e) => {
@@ -153,10 +133,7 @@ function EventsPage() {
 
   return (
     <div className="mx-auto max-w-[1400px] space-y-6 p-6 md:p-10">
-      <PageHeader
-        title="Events"
-        lede="Every event we've run or booked — dates, money and ownership."
-      >
+      <PageHeader title="Events" lede="Every event we've run or booked, with dates and owners.">
         <Button
           variant="outline"
           disabled={datedRows.length === 0}
@@ -185,13 +162,6 @@ function EventsPage() {
           </Button>
         )}
       </PageHeader>
-
-      <div className="grid grid-cols-2 divide-y border bg-card sm:grid-cols-4 sm:divide-x sm:divide-y-0">
-        <Stat label={`Events · ${sem.label}`} value={String(semesterEvents.length)} />
-        <Stat label="Revenue" value={formatSEK(revenue)} />
-        <Stat label="Costs incl. food" value={formatSEK(costs)} />
-        <Stat label="Net" value={formatSEK(revenue - costs)} danger={revenue - costs < 0} />
-      </div>
 
       <div className="flex flex-wrap items-center gap-2">
         <div className="relative max-w-xs">
@@ -247,9 +217,6 @@ function EventsPage() {
                 </button>
               </Th>
               <Th>Type</Th>
-              <Th className="text-right">Revenue</Th>
-              <Th className="text-right">Costs</Th>
-              <Th className="text-right">Net</Th>
               <Th>Assigned</Th>
               <Th />
             </tr>
@@ -258,7 +225,7 @@ function EventsPage() {
             {groups.map((g) => (
               <Fragment key={g.status}>
                 <tr className="border-t bg-muted/40">
-                  <td colSpan={9} className="px-4 py-2">
+                  <td colSpan={6} className="px-4 py-2">
                     <span className="inline-flex items-center gap-2">
                       <StatusTag color={eventStatusColor[g.status]}>{g.status}</StatusTag>
                       <span className="microlabel tnum text-[9.5px] text-muted-foreground">
@@ -268,7 +235,6 @@ function EventsPage() {
                   </td>
                 </tr>
                 {g.items.map((e) => {
-                  const n = net(e);
                   return (
                     <tr
                       key={e.id}
@@ -291,15 +257,6 @@ function EventsPage() {
                       </Td>
                       <Td>
                         <span className="text-xs text-muted-foreground">{e.event_type}</span>
-                      </Td>
-                      <Td className="text-right">
-                        <Money value={Number(e.revenue_from_partner || 0)} />
-                      </Td>
-                      <Td className="text-right">
-                        <Money value={Number(e.cost_to_us || 0) + Number(e.food_cost || 0)} />
-                      </Td>
-                      <Td className="text-right">
-                        <Money value={n} signed />
                       </Td>
                       <Td>
                         <MemberStack ids={e.assignees} profileMap={profileMap} />
@@ -325,7 +282,7 @@ function EventsPage() {
             ))}
             {rows.length === 0 && (
               <tr>
-                <td colSpan={8} className="p-10 text-center text-sm text-muted-foreground">
+                <td colSpan={6} className="p-10 text-center text-sm text-muted-foreground">
                   No events match your filters
                 </td>
               </tr>
@@ -341,29 +298,6 @@ function EventsPage() {
         canEdit={canEdit}
       />
     </div>
-  );
-}
-
-function Stat({ label, value, danger }: { label: string; value: string; danger?: boolean }) {
-  return (
-    <div className="px-5 py-4">
-      <div className="microlabel text-[10px] text-muted-foreground">{label}</div>
-      <div
-        className={`tnum mt-1.5 font-display text-2xl font-medium leading-none tracking-tight ${danger ? "text-brand" : ""}`}
-      >
-        {value}
-      </div>
-    </div>
-  );
-}
-
-function Money({ value, signed }: { value: number; signed?: boolean }) {
-  return (
-    <span
-      className={`font-mono text-xs tnum ${signed ? (value < 0 ? "text-brand" : value > 0 ? "text-(--status-success)" : "text-muted-foreground") : ""}`}
-    >
-      {formatSEK(value)}
-    </span>
   );
 }
 

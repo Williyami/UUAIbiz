@@ -1,3 +1,4 @@
+import { avatarColor } from "@/lib/avatar";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
@@ -93,7 +94,10 @@ function SettingsPage() {
               className="h-16 w-16 shrink-0 rounded-full object-cover"
             />
           ) : (
-            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-foreground/85 font-mono text-lg font-semibold uppercase text-background">
+            <div
+              className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full font-mono text-lg font-semibold uppercase"
+              style={avatarColor(me?.id)}
+            >
               {initials(me?.profile?.name || me?.email)}
             </div>
           )}

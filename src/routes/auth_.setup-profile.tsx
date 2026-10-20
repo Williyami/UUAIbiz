@@ -1,3 +1,4 @@
+import { avatarColor } from "@/lib/avatar";
 import { createFileRoute, useNavigate, redirect } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -71,7 +72,10 @@ function SetupProfilePage() {
           {avatarUrl ? (
             <img src={avatarUrl} alt="" className="h-20 w-20 shrink-0 rounded-full object-cover" />
           ) : (
-            <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-foreground/85 font-mono text-xl font-semibold uppercase text-background">
+            <div
+              className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full font-mono text-xl font-semibold uppercase"
+              style={avatarColor(name)}
+            >
               {initials(name)}
             </div>
           )}

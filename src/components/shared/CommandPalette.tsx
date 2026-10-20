@@ -25,7 +25,7 @@ import {
   CalendarDays,
   ContactRound,
   FileSignature,
-  LayoutDashboard,
+  House,
   ListChecks,
   MessagesSquare,
   Search as SearchIcon,
@@ -34,7 +34,7 @@ import {
 } from "lucide-react";
 
 const PAGES = [
-  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Home", url: "/dashboard", icon: House },
   { title: "Outreach", url: "/outreach", icon: Building2 },
   { title: "Contacts", url: "/contacts", icon: ContactRound },
   { title: "Meetings", url: "/meetings", icon: CalendarCheck },

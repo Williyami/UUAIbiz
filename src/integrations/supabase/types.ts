@@ -327,6 +327,7 @@ export type Database = {
           participant_count: number | null
           revenue_from_partner: number
           status: Database["public"]["Enums"]["event_status"]
+          tasks_assigned: boolean
           title: string
           updated_at: string
           venue: string | null
@@ -347,6 +348,7 @@ export type Database = {
           participant_count?: number | null
           revenue_from_partner?: number
           status?: Database["public"]["Enums"]["event_status"]
+          tasks_assigned?: boolean
           title: string
           updated_at?: string
           venue?: string | null
@@ -367,6 +369,7 @@ export type Database = {
           participant_count?: number | null
           revenue_from_partner?: number
           status?: Database["public"]["Enums"]["event_status"]
+          tasks_assigned?: boolean
           title?: string
           updated_at?: string
           venue?: string | null

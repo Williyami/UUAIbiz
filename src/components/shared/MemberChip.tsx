@@ -1,3 +1,4 @@
+import { avatarColor } from "@/lib/avatar";
 import { initials } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { useOpenProfile } from "@/components/shared/profile-widget-context";
@@ -45,7 +46,10 @@ export function MemberChip({
       {avatarUrl ? (
         <img src={avatarUrl} alt="" className="h-5 w-5 shrink-0 rounded-full object-cover" />
       ) : (
-        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-foreground/85 font-mono text-[9px] font-semibold uppercase text-background">
+        <span
+          className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full font-mono text-[9px] font-semibold uppercase"
+          style={avatarColor(profile?.id ?? name)}
+        >
           {initials(name)}
         </span>
       )}

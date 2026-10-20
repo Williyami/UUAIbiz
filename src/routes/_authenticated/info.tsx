@@ -78,7 +78,7 @@ function InfoPage() {
   });
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6 p-6 md:p-10">
+    <div className="mx-auto max-w-[1400px] space-y-6 p-6 md:p-10">
       <PageHeader
         title="Info & Resources"
         lede="Terms, pricing, checklists and lessons learned — the team's living reference."
@@ -97,18 +97,20 @@ function InfoPage() {
 
       <div className="space-y-2">
         <h2 className="microlabel text-[10px] text-muted-foreground">Documents</h2>
-        <DocumentCard
-          title="Partnership Overview"
-          description="The deck we send to prospective partners — who we are, who our members are, what we offer, and the two ways to work with us."
-          href="/UUAIS-Partnership-Overview.pdf"
-          meta="PDF · 4 pages · 234 KB"
-        />
-        <DocumentCard
-          title="Partnership Tiers"
-          description="Alfa and Beta pricing and what each level includes, with a side-by-side comparison. Sent once a company has shown interest in an ongoing partnership."
-          href="/UUAIS-Partnership-Tiers.pdf"
-          meta="PDF · 3 pages · 84 KB"
-        />
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <DocumentCard
+            title="Partnership Overview"
+            description="The deck we send to prospective partners — who we are, who our members are, what we offer, and the two ways to work with us."
+            href="/UUAIS-Partnership-Overview.pdf"
+            meta="PDF · 4 pages · 234 KB"
+          />
+          <DocumentCard
+            title="Partnership Tiers"
+            description="Alfa and Beta pricing and what each level includes, with a side-by-side comparison. Sent once a company has shown interest in an ongoing partnership."
+            href="/UUAIS-Partnership-Tiers.pdf"
+            meta="PDF · 3 pages · 84 KB"
+          />
+        </div>
       </div>
 
       {sections.length === 0 ? (

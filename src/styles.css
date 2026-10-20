@@ -195,6 +195,9 @@
 
   html {
     font-family: var(--font-sans);
+    /* The team works at one step of browser zoom-out, so the app is sized for
+       that natively: every rem-based size (spacing, type, radii) scales by 90%. */
+    font-size: 90%;
   }
 
   body {

@@ -1,3 +1,4 @@
+import { avatarColor } from "@/lib/avatar";
 import { initials } from "@/lib/format";
 import { useOnlineUsers } from "@/components/shared/presence-context";
 
@@ -38,7 +39,8 @@ export function OnlineAvatar({
         <img src={profile.avatar_url} alt="" className={`${cls} rounded-full object-cover`} />
       ) : (
         <span
-          className={`flex ${cls} items-center justify-center rounded-full bg-foreground/85 font-mono text-[9px] font-semibold uppercase text-background`}
+          className={`flex ${cls} items-center justify-center rounded-full font-mono text-[9px] font-semibold uppercase`}
+          style={avatarColor(profile?.id ?? name)}
         >
           {initials(name)}
         </span>

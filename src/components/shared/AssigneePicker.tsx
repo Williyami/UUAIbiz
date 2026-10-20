@@ -1,3 +1,4 @@
+import { avatarColor } from "@/lib/avatar";
 import { useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScrollList } from "@/components/shared/ScrollList";
@@ -109,7 +110,10 @@ function Avatar({ p }: { p: any }) {
       className="h-5 w-5 shrink-0 rounded-full object-cover ring-2 ring-card"
     />
   ) : (
-    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-foreground/85 font-mono text-[8px] font-semibold uppercase text-background ring-2 ring-card">
+    <span
+      className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full font-mono text-[8px] font-semibold uppercase ring-2 ring-card"
+      style={avatarColor(p.id)}
+    >
       {initials(p.name || p.email)}
     </span>
   );

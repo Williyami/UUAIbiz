@@ -155,6 +155,18 @@ function EventPage() {
     onError: (e: any) => toast.error(e.message),
   });
 
+  const setTasksAssigned = useMutation({
+    mutationFn: async (value: boolean) => {
+      const { error } = await supabase
+        .from("events")
+        .update({ tasks_assigned: value })
+        .eq("id", event.id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["events"] }),
+    onError: (e: any) => toast.error(e.message),
+  });
+
   const del = useMutation({
     mutationFn: async () => {
       const { error } = await supabase.from("events").delete().eq("id", event.id);
@@ -202,7 +214,7 @@ function EventPage() {
   const today = new Date(new Date().toDateString());
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6 p-6 md:p-10">
+    <div className="mx-auto max-w-[1400px] space-y-6 p-6 md:p-10">
       <BackLink />
 
       <header className="flex flex-wrap items-end justify-between gap-4 border-b pb-5">
@@ -219,29 +231,42 @@ function EventPage() {
             {event.venue ? ` · ${event.venue}` : ""}
           </div>
         </div>
-        {canEdit && (
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => setEditOpen(true)}>
-              <Pencil className="h-3.5 w-3.5" /> Edit
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-destructive hover:text-destructive"
-              onClick={() => confirm(`Delete "${event.title}"?`) && del.mutate()}
-            >
-              <Trash2 className="h-3.5 w-3.5" /> Delete
-            </Button>
-          </div>
-        )}
+        <div className="flex flex-wrap items-center gap-2">
+          <label
+            className={`mr-2 flex items-center gap-2 border bg-card px-3 py-1.5 ${canEdit ? "cursor-pointer" : ""}`}
+          >
+            <Checkbox
+              checked={!!event.tasks_assigned}
+              disabled={!canEdit || setTasksAssigned.isPending}
+              onCheckedChange={(v) => setTasksAssigned.mutate(!!v)}
+            />
+            <span className="microlabel text-[10px] text-muted-foreground">Tasks assigned?</span>
+          </label>
+          {canEdit && (
+            <>
+              <Button variant="outline" size="sm" onClick={() => setEditOpen(true)}>
+                <Pencil className="h-3.5 w-3.5" /> Edit
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-destructive hover:text-destructive"
+                onClick={() => confirm(`Delete "${event.title}"?`) && del.mutate()}
+              >
+                <Trash2 className="h-3.5 w-3.5" /> Delete
+              </Button>
+            </>
+          )}
+        </div>
       </header>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
-        {/* Left: partner, money, notes */}
+      {/* Left: overview, then the checklist under it. Right: About, which is
+          usually the longest block, so it gets a column of its own. */}
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
         <div className="space-y-6">
-          <section className="border bg-card">
-            <SectionHead>Partner & logistics</SectionHead>
-            <div className="space-y-2.5 p-4 text-sm">
+          <section className="flex flex-col border bg-card">
+            <SectionHead>Overview</SectionHead>
+            <div className="flex-1 space-y-3.5 p-5 text-sm">
               {partners.length ? (
                 <>
                   <InfoRow icon={User}>
@@ -307,146 +332,153 @@ function EventPage() {
                 </InfoRow>
               )}
             </div>
+            <div className="grid grid-cols-4 divide-x border-t">
+              <Money label="Revenue" value={Number(event.revenue_from_partner || 0)} />
+              <Money label="Cost" value={Number(event.cost_to_us || 0)} />
+              <Money label="Food" value={Number(event.food_cost || 0)} />
+              <Money label="Net" value={net} signed />
+            </div>
           </section>
 
-          <section className="grid grid-cols-4 divide-x border bg-card">
-            <Money label="Revenue" value={Number(event.revenue_from_partner || 0)} />
-            <Money label="Cost" value={Number(event.cost_to_us || 0)} />
-            <Money label="Food" value={Number(event.food_cost || 0)} />
-            <Money label="Net" value={net} signed />
-          </section>
-
-          {event.notes && (
-            <section className="border bg-card">
-              <SectionHead>About</SectionHead>
-              <p className="whitespace-pre-wrap p-4 text-sm leading-relaxed text-foreground/85">
-                {event.notes}
+          <section className="border bg-card">
+            <div className="flex items-center justify-between border-b px-4 py-3">
+              <h2 className="font-display text-base font-medium tracking-tight">
+                Checklist
+                {eventTasks.length > 0 && (
+                  <span className="microlabel tnum ml-2 text-[10px] text-muted-foreground">
+                    {doneCount}/{eventTasks.length}
+                  </span>
+                )}
+              </h2>
+              {canEdit && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 text-xs"
+                  disabled={generate.isPending || !event.date}
+                  title={event.date ? undefined : "Set an event date first"}
+                  onClick={() => generate.mutate()}
+                >
+                  <ListChecks className="h-3.5 w-3.5" />
+                  {eventTasks.length > 0 ? "Add missing items" : "Add checklist to team tasks"}
+                </Button>
+              )}
+            </div>
+            {/* Sits directly under the header rather than below the list: with a
+                full checklist the list runs long, and a native date picker opened
+                at the bottom of it renders off the bottom of the viewport. */}
+            {canEdit && (
+              <form
+                className="flex items-center gap-2 border-b bg-muted/30 px-4 py-2.5"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  addItem.mutate();
+                }}
+              >
+                <Plus className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                <Input
+                  value={newItem}
+                  onChange={(e) => setNewItem(e.target.value)}
+                  placeholder="Add your own item…"
+                  className="h-7 flex-1 border-0 bg-transparent px-0 text-xs shadow-none focus-visible:ring-0"
+                />
+                <Input
+                  type="date"
+                  value={newDue}
+                  onChange={(e) => setNewDue(e.target.value)}
+                  title="Due date — defaults to the event date"
+                  className="tnum h-7 w-[125px] shrink-0 text-[11px]"
+                />
+                <Button
+                  type="submit"
+                  size="sm"
+                  variant="outline"
+                  className="h-7 shrink-0 text-xs"
+                  disabled={!newItem.trim() || addItem.isPending}
+                >
+                  Add
+                </Button>
+              </form>
+            )}
+            {eventTasks.length === 0 ? (
+              <p className="p-4 text-xs leading-relaxed text-muted-foreground">
+                No tasks yet. This adds the standard procedure (book partner → marketing → Luma →
+                follow-up) as team tasks, dated around{" "}
+                {event.date ? formatDate(event.date) : "the event date"}. Assign items below, or
+                anyone can open a task and mark it personal to claim it privately.
               </p>
-            </section>
-          )}
+            ) : (
+              <ul className="divide-y">
+                {eventTasks.map((t: any) => {
+                  const done = t.status === "Done";
+                  const overdue = !done && t.due_date && parseLocalDate(t.due_date) < today;
+                  return (
+                    <li key={t.id} className="flex items-center gap-2.5 px-4 py-2.5">
+                      <Checkbox
+                        checked={done}
+                        disabled={!canEdit}
+                        onCheckedChange={(v) => toggleDone.mutate({ id: t.id, done: !!v })}
+                      />
+                      <div className="min-w-0 flex-1">
+                        <div
+                          className={`truncate text-xs ${done ? "text-muted-foreground line-through" : ""}`}
+                        >
+                          {t.title}
+                          {t.personal && (
+                            <span className="microlabel ml-1.5 text-[8.5px] text-brand">
+                              Personal
+                            </span>
+                          )}
+                        </div>
+                        <div
+                          className={`microlabel tnum mt-0.5 text-[9px] ${overdue ? "font-semibold text-brand" : "text-muted-foreground/70"}`}
+                        >
+                          {t.due_date ? formatDate(t.due_date) : "No due date"}
+                        </div>
+                      </div>
+                      <Select
+                        value={t.assignees?.[0] || "none"}
+                        disabled={!canEdit}
+                        onValueChange={(v) =>
+                          assign.mutate({ id: t.id, userId: v === "none" ? null : v })
+                        }
+                      >
+                        <SelectTrigger className="h-7 w-[110px] shrink-0 text-[11px]">
+                          <SelectValue placeholder="Assign" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">Unassigned</SelectItem>
+                          {profiles.map((p) => (
+                            <SelectItem key={p.id} value={p.id}>
+                              {(p.name || p.email).split(" ")[0]}
+                              {p.id === me?.id ? " (me)" : ""}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </section>
         </div>
 
-        {/* Right: checklist */}
-        <section className="h-fit border bg-card">
-          <div className="flex items-center justify-between border-b px-4 py-3">
-            <h2 className="font-display text-base font-medium tracking-tight">
-              Checklist
-              {eventTasks.length > 0 && (
-                <span className="microlabel tnum ml-2 text-[10px] text-muted-foreground">
-                  {doneCount}/{eventTasks.length}
-                </span>
-              )}
-            </h2>
-            {canEdit && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-7 text-xs"
-                disabled={generate.isPending || !event.date}
-                title={event.date ? undefined : "Set an event date first"}
-                onClick={() => generate.mutate()}
-              >
-                <ListChecks className="h-3.5 w-3.5" />
-                {eventTasks.length > 0 ? "Add missing items" : "Add checklist to team tasks"}
-              </Button>
-            )}
-          </div>
-          {/* Sits directly under the header rather than below the list: with a
-              full checklist the list runs long, and a native date picker opened
-              at the bottom of it renders off the bottom of the viewport. */}
-          {canEdit && (
-            <form
-              className="flex items-center gap-2 border-b bg-muted/30 px-4 py-2.5"
-              onSubmit={(e) => {
-                e.preventDefault();
-                addItem.mutate();
-              }}
-            >
-              <Plus className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-              <Input
-                value={newItem}
-                onChange={(e) => setNewItem(e.target.value)}
-                placeholder="Add your own item…"
-                className="h-7 flex-1 border-0 bg-transparent px-0 text-xs shadow-none focus-visible:ring-0"
-              />
-              <Input
-                type="date"
-                value={newDue}
-                onChange={(e) => setNewDue(e.target.value)}
-                title="Due date — defaults to the event date"
-                className="tnum h-7 w-[125px] shrink-0 text-[11px]"
-              />
-              <Button
-                type="submit"
-                size="sm"
-                variant="outline"
-                className="h-7 shrink-0 text-xs"
-                disabled={!newItem.trim() || addItem.isPending}
-              >
-                Add
-              </Button>
-            </form>
-          )}
-          {eventTasks.length === 0 ? (
-            <p className="p-4 text-xs leading-relaxed text-muted-foreground">
-              No tasks yet. This adds the standard procedure (book partner → marketing → Luma →
-              follow-up) as team tasks, dated around{" "}
-              {event.date ? formatDate(event.date) : "the event date"}. Assign items below, or
-              anyone can open a task and mark it personal to claim it privately.
+        <section className="flex flex-col border bg-card">
+          <SectionHead>About</SectionHead>
+          {event.notes ? (
+            <p className="flex-1 whitespace-pre-wrap p-5 text-[15px] leading-relaxed text-foreground/85">
+              {event.notes}
             </p>
           ) : (
-            <ul className="divide-y">
-              {eventTasks.map((t: any) => {
-                const done = t.status === "Done";
-                const overdue = !done && t.due_date && parseLocalDate(t.due_date) < today;
-                return (
-                  <li key={t.id} className="flex items-center gap-2.5 px-4 py-2.5">
-                    <Checkbox
-                      checked={done}
-                      disabled={!canEdit}
-                      onCheckedChange={(v) => toggleDone.mutate({ id: t.id, done: !!v })}
-                    />
-                    <div className="min-w-0 flex-1">
-                      <div
-                        className={`truncate text-xs ${done ? "text-muted-foreground line-through" : ""}`}
-                      >
-                        {t.title}
-                        {t.personal && (
-                          <span className="microlabel ml-1.5 text-[8.5px] text-brand">
-                            Personal
-                          </span>
-                        )}
-                      </div>
-                      <div
-                        className={`microlabel tnum mt-0.5 text-[9px] ${overdue ? "font-semibold text-brand" : "text-muted-foreground/70"}`}
-                      >
-                        {t.due_date ? formatDate(t.due_date) : "No due date"}
-                      </div>
-                    </div>
-                    <Select
-                      value={t.assignees?.[0] || "none"}
-                      disabled={!canEdit}
-                      onValueChange={(v) =>
-                        assign.mutate({ id: t.id, userId: v === "none" ? null : v })
-                      }
-                    >
-                      <SelectTrigger className="h-7 w-[110px] shrink-0 text-[11px]">
-                        <SelectValue placeholder="Assign" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">Unassigned</SelectItem>
-                        {profiles.map((p) => (
-                          <SelectItem key={p.id} value={p.id}>
-                            {(p.name || p.email).split(" ")[0]}
-                            {p.id === me?.id ? " (me)" : ""}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </li>
-                );
-              })}
-            </ul>
+            <div className="flex flex-1 flex-col items-start justify-center gap-3 p-5 text-sm text-muted-foreground">
+              No description yet.
+              {canEdit && (
+                <Button variant="outline" size="sm" onClick={() => setEditOpen(true)}>
+                  <Pencil className="h-3.5 w-3.5" /> Add one
+                </Button>
+              )}
+            </div>
           )}
         </section>
       </div>

@@ -1,3 +1,4 @@
+import { avatarColor } from "@/lib/avatar";
 import { useQuery } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { StatusTag } from "@/components/shared/StatusTag";
@@ -12,7 +13,12 @@ export function ProfileWidget({
   profile,
   onOpenChange,
 }: {
-  profile: { id: string; name?: string | null; email?: string | null; avatar_url?: string | null } | null;
+  profile: {
+    id: string;
+    name?: string | null;
+    email?: string | null;
+    avatar_url?: string | null;
+  } | null;
   onOpenChange: (o: boolean) => void;
 }) {
   const { data: roles = [] } = useQuery(userRolesQuery);
@@ -27,9 +33,13 @@ export function ProfileWidget({
   const displayName = profile.name || profile.email || "Former member";
 
   const owned = companies.filter((c: any) => (c.assignees ?? []).includes(profile.id));
-  const openTasks = tasks.filter((t: any) => (t.assignees ?? []).includes(profile.id) && t.status !== "Done");
+  const openTasks = tasks.filter(
+    (t: any) => (t.assignees ?? []).includes(profile.id) && t.status !== "Done",
+  );
   const upcomingEvents = events.filter(
-    (e: any) => (e.assignees ?? []).includes(profile.id) && (!e.date || e.date >= new Date().toLocaleDateString("sv-SE")),
+    (e: any) =>
+      (e.assignees ?? []).includes(profile.id) &&
+      (!e.date || e.date >= new Date().toLocaleDateString("sv-SE")),
   );
 
   return (
@@ -40,9 +50,16 @@ export function ProfileWidget({
         </DialogHeader>
         <div className="flex items-center gap-3.5">
           {profile.avatar_url ? (
-            <img src={profile.avatar_url} alt="" className="size-14 shrink-0 rounded-full object-cover" />
+            <img
+              src={profile.avatar_url}
+              alt=""
+              className="size-14 shrink-0 rounded-full object-cover"
+            />
           ) : (
-            <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-foreground/85 font-mono text-base font-semibold uppercase text-background">
+            <div
+              className="flex size-14 shrink-0 items-center justify-center rounded-full font-mono text-base font-semibold uppercase"
+              style={avatarColor(profile.id)}
+            >
               {initials(displayName)}
             </div>
           )}
@@ -50,7 +67,9 @@ export function ProfileWidget({
             <div className="truncate font-display text-lg font-medium tracking-tight">
               {displayName}
             </div>
-            <div className={`microlabel text-[10px] ${role === "admin" ? "text-brand" : "text-muted-foreground"}`}>
+            <div
+              className={`microlabel text-[10px] ${role === "admin" ? "text-brand" : "text-muted-foreground"}`}
+            >
               {roleLabel}
             </div>
           </div>
@@ -74,7 +93,10 @@ export function ProfileWidget({
             items={owned.slice(0, 5).map((c: any) => (
               <li key={c.id} className="flex items-center justify-between gap-2 py-1.5">
                 <span className="min-w-0 flex-1 truncate text-xs">{c.name}</span>
-                <StatusTag color={companyStatusColor[c.status as CompanyStatus]} className="shrink-0 text-[8.5px]">
+                <StatusTag
+                  color={companyStatusColor[c.status as CompanyStatus]}
+                  className="shrink-0 text-[8.5px]"
+                >
                   {c.status}
                 </StatusTag>
               </li>

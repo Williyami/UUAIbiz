@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -255,6 +256,13 @@ export function EventDialog({
                 />
               </Field>
             </div>
+            <label className="flex w-fit cursor-pointer items-center gap-2">
+              <Checkbox
+                checked={!!form.tasks_assigned}
+                onCheckedChange={(v) => setForm({ ...form, tasks_assigned: !!v })}
+              />
+              <span className="microlabel text-muted-foreground">Tasks assigned?</span>
+            </label>
             <Field label="Notes">
               <Textarea
                 rows={3}

@@ -1,6 +1,6 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
-  LayoutDashboard,
+  House,
   Building2,
   ContactRound,
   CalendarCheck,
@@ -34,9 +34,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { currentUserQuery } from "@/lib/queries";
 import { initials } from "@/lib/format";
+import { avatarColor } from "@/lib/avatar";
 
 const nav = [
-  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Home", url: "/dashboard", icon: House },
   { title: "Outreach", url: "/outreach", icon: Building2 },
   { title: "Contacts", url: "/contacts", icon: ContactRound },
   { title: "Meetings", url: "/meetings", icon: CalendarCheck },
@@ -133,16 +134,19 @@ export function AppSidebar() {
           <button
             onClick={() => me?.profile && openProfile(me.profile)}
             title="View your profile"
-            className="shrink-0 cursor-pointer"
+            className="flex shrink-0 cursor-pointer rounded-full group-data-[collapsible=icon]:mx-auto"
           >
             {me?.profile?.avatar_url ? (
               <img
                 src={me.profile.avatar_url}
                 alt=""
-                className="size-8 shrink-0 rounded-full object-cover"
+                className="aspect-square size-8 shrink-0 rounded-full object-cover group-data-[collapsible=icon]:size-7"
               />
             ) : (
-              <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-sidebar-accent font-mono text-[10px] font-semibold uppercase text-sidebar-accent-foreground">
+              <div
+                className="flex aspect-square size-8 shrink-0 items-center justify-center rounded-full font-mono text-[10px] font-semibold uppercase group-data-[collapsible=icon]:size-7"
+                style={avatarColor(me?.id)}
+              >
                 {initials(me?.profile?.name || me?.email)}
               </div>
             )}

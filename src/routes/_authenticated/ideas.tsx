@@ -1,3 +1,4 @@
+import { avatarColor } from "@/lib/avatar";
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
@@ -125,14 +126,15 @@ function IdeasPage() {
   const shown = posts.filter((p: any) => filter === "All" || p.category === filter);
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6 p-6 md:p-10">
+    <div className="mx-auto max-w-[1400px] space-y-6 p-6 md:p-10">
       <PageHeader
         title="Ideas"
-        lede="Shared notes for the whole team — companies worth contacting, event ideas, anything."
+        lede="Shared notes for the whole team: companies worth contacting, event ideas, anything. Newest first."
       />
 
+      {/* Compose */}
       <form
-        className="space-y-3 border bg-card p-4"
+        className="border bg-card"
         onSubmit={(e) => {
           e.preventDefault();
           if (!content.trim()) return;
@@ -143,10 +145,12 @@ function IdeasPage() {
           rows={3}
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          placeholder="Share an idea — a company we should reach out to, an event format, anything…"
+          placeholder="Share an idea: a company we should reach out to, an event format, anything…"
+          className="resize-none rounded-none border-0 px-4 py-3 shadow-none focus-visible:ring-0"
         />
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex gap-1.5">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t bg-muted/30 px-4 py-2.5">
+          <div className="flex items-center gap-1.5">
+            <span className="microlabel mr-1 text-[9.5px] text-muted-foreground">Category</span>
             {CATEGORIES.map((c) => (
               <button
                 key={c}
@@ -154,8 +158,8 @@ function IdeasPage() {
                 onClick={() => setCategory(c)}
                 className={`microlabel rounded-[3px] border px-2 py-1 text-[9.5px] transition-colors ${
                   category === c
-                    ? "border-foreground/40 bg-accent text-foreground"
-                    : "text-muted-foreground hover:bg-accent/50"
+                    ? "border-foreground/40 bg-card text-foreground"
+                    : "border-transparent text-muted-foreground hover:bg-accent/50"
                 }`}
               >
                 {c}
@@ -163,131 +167,143 @@ function IdeasPage() {
             ))}
           </div>
           <Button type="submit" size="sm" disabled={create.isPending || !content.trim()}>
-            <Send className="h-3.5 w-3.5" /> Post
+            <Send className="h-3.5 w-3.5" /> Post idea
           </Button>
         </div>
       </form>
 
-      <div className="flex items-center gap-1.5">
-        {["All", ...CATEGORIES].map((c) => (
-          <button
-            key={c}
-            onClick={() => setFilter(c)}
-            className={`microlabel rounded-[3px] border px-2 py-1 text-[9.5px] transition-colors ${
-              filter === c
-                ? "border-foreground/40 bg-accent text-foreground"
-                : "text-muted-foreground hover:bg-accent/50"
-            }`}
-          >
-            {c}
-          </button>
-        ))}
-        <span className="microlabel tnum ml-auto text-[10px] text-muted-foreground">
-          {shown.length}
-        </span>
+      {/* Filter */}
+      <div className="flex flex-wrap items-center gap-1 border-b">
+        {["All", ...CATEGORIES].map((c) => {
+          const count =
+            c === "All" ? posts.length : posts.filter((p: any) => p.category === c).length;
+          return (
+            <button
+              key={c}
+              onClick={() => setFilter(c)}
+              className={`-mb-px inline-flex items-center gap-1.5 border-b-2 px-3 py-2 text-sm transition-colors ${
+                filter === c
+                  ? "border-(--brand-red) font-medium text-foreground"
+                  : "border-transparent text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {c}
+              <span className="tnum text-xs text-muted-foreground">{count}</span>
+            </button>
+          );
+        })}
       </div>
 
-      {shown.length === 0 ? (
-        <div className="border border-dashed bg-card/50 px-6 py-16 text-center">
-          <p className="text-sm text-muted-foreground">Nothing here yet — share the first idea.</p>
-        </div>
-      ) : (
-        <ul className="space-y-3">
-          {shown.map((p: any) => {
-            const mine = p.author_id === me?.id;
-            const canDelete = mine || me?.isAdmin;
-            const authorName = p.author?.name || p.author?.email || "Former member";
-            return (
-              <li key={p.id} className="border bg-card p-4">
-                <div className="flex items-center gap-2.5">
-                  <button
-                    onClick={() => p.author && setViewing(p.author)}
-                    className="flex min-w-0 flex-1 cursor-pointer items-center gap-2.5 text-left"
-                  >
-                    {p.author?.avatar_url ? (
-                      <img
-                        src={p.author.avatar_url}
-                        alt=""
-                        className="size-7 rounded-full object-cover"
-                      />
-                    ) : (
-                      <div className="flex size-7 items-center justify-center rounded-full bg-accent font-mono text-[9px] font-semibold uppercase">
-                        {initials(authorName)}
+      <div>
+        {shown.length === 0 ? (
+          <div className="border border-dashed bg-card/50 px-6 py-16 text-center">
+            <p className="text-sm text-muted-foreground">
+              Nothing here yet — share the first idea.
+            </p>
+          </div>
+        ) : (
+          <ul className="space-y-3">
+            {shown.map((p: any) => {
+              const mine = p.author_id === me?.id;
+              const canDelete = mine || me?.isAdmin;
+              const authorName = p.author?.name || p.author?.email || "Former member";
+              return (
+                <li key={p.id} className="border bg-card p-4">
+                  <div className="flex items-center gap-2.5">
+                    <button
+                      onClick={() => p.author && setViewing(p.author)}
+                      className="flex min-w-0 flex-1 cursor-pointer items-center gap-2.5 text-left"
+                    >
+                      {p.author?.avatar_url ? (
+                        <img
+                          src={p.author.avatar_url}
+                          alt=""
+                          className="size-7 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div
+                          className="flex size-7 items-center justify-center rounded-full font-mono text-[9px] font-semibold uppercase"
+                          style={avatarColor(p.author?.id ?? authorName)}
+                        >
+                          {initials(authorName)}
+                        </div>
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <span className="text-xs font-medium">{authorName}</span>
+                        <span className="microlabel ml-2 text-[9px] text-muted-foreground/70">
+                          {timeAgo(p.created_at)}
+                        </span>
                       </div>
-                    )}
-                    <div className="min-w-0 flex-1">
-                      <span className="text-xs font-medium">{authorName}</span>
-                      <span className="microlabel ml-2 text-[9px] text-muted-foreground/70">
-                        {timeAgo(p.created_at)}
-                      </span>
-                    </div>
-                  </button>
-                  <span
-                    className={`microlabel text-[9px] ${categoryColor[p.category] ?? "text-muted-foreground"}`}
-                  >
-                    {p.category}
-                  </span>
-                  {mine && (
-                    <button
-                      title="Edit"
-                      onClick={() => {
-                        setEditingId(p.id);
-                        setEditContent(p.content);
-                      }}
-                      className="rounded-[3px] p-1 text-muted-foreground/60 transition-colors hover:bg-accent hover:text-foreground"
-                    >
-                      <Pencil className="h-3 w-3" />
                     </button>
-                  )}
-                  {canDelete && (
-                    <button
-                      title="Delete"
-                      onClick={() => confirm("Delete this post?") && remove.mutate(p.id)}
-                      className="rounded-[3px] p-1 text-muted-foreground/60 transition-colors hover:bg-accent hover:text-destructive"
+                    <span
+                      className={`microlabel text-[9px] ${categoryColor[p.category] ?? "text-muted-foreground"}`}
                     >
-                      <Trash2 className="h-3 w-3" />
-                    </button>
-                  )}
-                </div>
-                {editingId === p.id ? (
-                  <div className="mt-3 space-y-2">
-                    <Textarea
-                      rows={3}
-                      value={editContent}
-                      onChange={(e) => setEditContent(e.target.value)}
-                    />
-                    <div className="flex justify-end gap-2">
-                      <Button variant="ghost" size="sm" onClick={() => setEditingId(null)}>
-                        Cancel
-                      </Button>
-                      <Button
-                        size="sm"
-                        disabled={update.isPending || !editContent.trim()}
-                        onClick={() => update.mutate({ id: p.id, content: editContent })}
+                      {p.category}
+                    </span>
+                    {mine && (
+                      <button
+                        title="Edit"
+                        onClick={() => {
+                          setEditingId(p.id);
+                          setEditContent(p.content);
+                        }}
+                        className="rounded-[3px] p-1 text-muted-foreground/60 transition-colors hover:bg-accent hover:text-foreground"
                       >
-                        Save
-                      </Button>
-                    </div>
+                        <Pencil className="h-3 w-3" />
+                      </button>
+                    )}
+                    {canDelete && (
+                      <button
+                        title="Delete"
+                        onClick={() => confirm("Delete this post?") && remove.mutate(p.id)}
+                        className="rounded-[3px] p-1 text-muted-foreground/60 transition-colors hover:bg-accent hover:text-destructive"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    )}
                   </div>
-                ) : (
-                  <p className="mt-2.5 whitespace-pre-wrap text-sm leading-relaxed">{p.content}</p>
-                )}
-                <PostFooter
-                  post={p}
-                  meId={me?.id}
-                  isAdmin={!!me?.isAdmin}
-                  expanded={openComments === p.id}
-                  onToggleComments={() => setOpenComments(openComments === p.id ? null : p.id)}
-                  onToggleLike={(liked) => toggleLike.mutate({ postId: p.id, liked })}
-                  onAddComment={(text) => addComment.mutate({ postId: p.id, text })}
-                  onRemoveComment={(id) => removeComment.mutate(id)}
-                  onViewProfile={setViewing}
-                />
-              </li>
-            );
-          })}
-        </ul>
-      )}
+                  {editingId === p.id ? (
+                    <div className="mt-3 space-y-2">
+                      <Textarea
+                        rows={3}
+                        value={editContent}
+                        onChange={(e) => setEditContent(e.target.value)}
+                      />
+                      <div className="flex justify-end gap-2">
+                        <Button variant="ghost" size="sm" onClick={() => setEditingId(null)}>
+                          Cancel
+                        </Button>
+                        <Button
+                          size="sm"
+                          disabled={update.isPending || !editContent.trim()}
+                          onClick={() => update.mutate({ id: p.id, content: editContent })}
+                        >
+                          Save
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="mt-2.5 whitespace-pre-wrap text-sm leading-relaxed">
+                      {p.content}
+                    </p>
+                  )}
+                  <PostFooter
+                    post={p}
+                    meId={me?.id}
+                    isAdmin={!!me?.isAdmin}
+                    expanded={openComments === p.id}
+                    onToggleComments={() => setOpenComments(openComments === p.id ? null : p.id)}
+                    onToggleLike={(liked) => toggleLike.mutate({ postId: p.id, liked })}
+                    onAddComment={(text) => addComment.mutate({ postId: p.id, text })}
+                    onRemoveComment={(id) => removeComment.mutate(id)}
+                    onViewProfile={setViewing}
+                  />
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
       <ProfileWidget profile={viewing} onOpenChange={(o) => !o && setViewing(null)} />
     </div>
   );
@@ -368,7 +384,10 @@ function PostFooter({
                       className="size-5 rounded-full object-cover"
                     />
                   ) : (
-                    <div className="flex size-5 items-center justify-center rounded-full bg-accent font-mono text-[7px] font-semibold uppercase">
+                    <div
+                      className="flex size-5 items-center justify-center rounded-full font-mono text-[7px] font-semibold uppercase"
+                      style={avatarColor(c.author?.id ?? name)}
+                    >
                       {initials(name)}
                     </div>
                   )}
