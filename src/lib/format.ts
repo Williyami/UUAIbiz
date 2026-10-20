@@ -54,7 +54,9 @@ export function timeAgo(d: string | Date | null | undefined): string {
 export function normalizeTimeInput(value: string): string | null {
   const raw = value.trim();
   if (!raw) return "";
-  const m = raw.match(/^(\d{1,2})[:.]?(\d{2})$/);
+  // Postgres hands time columns back with seconds ("16:30:00"), so a meeting
+  // opened for editing and saved untouched arrives in that form.
+  const m = raw.match(/^(\d{1,2})[:.]?(\d{2})(?::\d{2})?$/);
   if (!m) return null;
   const hours = Number(m[1]);
   const minutes = Number(m[2]);
