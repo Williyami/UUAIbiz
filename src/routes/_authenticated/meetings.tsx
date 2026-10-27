@@ -10,7 +10,8 @@ import { companyStatusColor, type CompanyStatus } from "@/components/outreach/st
 import { formatDate, initials, parseLocalDate } from "@/lib/format";
 import { MeetingDialog } from "@/components/meetings/MeetingDialog";
 import { downloadICS, type IcsEvent } from "@/lib/ics";
-import { Plus, CalendarPlus, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, CalendarPlus, ChevronLeft, ChevronRight, Video } from "lucide-react";
+import { normalizeMeetingLink, meetingProvider } from "@/lib/meeting-link";
 import { errorMessage } from "@/lib/chunk-error";
 
 export const Route = createFileRoute("/_authenticated/meetings")({
@@ -57,6 +58,8 @@ function MeetingsPage() {
     subtitle: m.internal ? "Internal" : m.company?.name || "No linked company",
     meeting_date: m.meeting_date,
     meeting_time: m.meeting_time,
+    // Re-checked on read: only a valid http(s) link ever becomes a button.
+    meeting_link: normalizeMeetingLink(m.meeting_link) || null,
     status: null,
     assignees: m.assignees,
     source: m,
@@ -165,9 +168,14 @@ function icsFromRow(row: any): IcsEvent {
     date: row.meeting_date,
     time: row.meeting_time || null,
     description:
-      [row.subtitle === "No linked company" ? null : row.subtitle, row.source?.notes]
+      [
+        row.subtitle === "No linked company" ? null : row.subtitle,
+        row.meeting_link ? `Join: ${row.meeting_link}` : null,
+        row.source?.notes,
+      ]
         .filter(Boolean)
         .join(" — ") || null,
+    url: row.meeting_link ?? null,
   };
 }
 
@@ -236,6 +244,7 @@ function NextMeetingHero({
           >
             <CalendarPlus className="h-3.5 w-3.5" /> Add to calendar
           </Button>
+          {meeting.meeting_link && <JoinButton href={meeting.meeting_link} size="sm" />}
         </div>
       </div>
     </section>
@@ -422,6 +431,7 @@ function MeetingList({
                     {row.meeting_date ? formatDate(row.meeting_date) : "Date TBD"}
                     {row.meeting_time && ` · ${row.meeting_time.slice(0, 5)}`}
                   </span>
+                  {row.meeting_link && <JoinButton href={row.meeting_link} compact />}
                   {row.meeting_date && (
                     <button
                       title="Add to calendar (.ics)"
@@ -441,5 +451,24 @@ function MeetingList({
         </ul>
       )}
     </section>
+  );
+}
+
+/** Opens the meeting's video call in a new tab, labelled with its service. */
+function JoinButton({ href, size, compact }: { href: string; size?: "sm"; compact?: boolean }) {
+  const provider = meetingProvider(href);
+  const label = provider === "Join" ? "Join" : `Join ${compact ? "" : provider}`.trim();
+  return (
+    <Button asChild size={size ?? "sm"} className={compact ? "h-7 gap-1 px-2 text-xs" : undefined}>
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        title={`Join on ${provider === "Join" ? new URL(href).hostname : provider}`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <Video className="h-3.5 w-3.5" /> {label}
+      </a>
+    </Button>
   );
 }

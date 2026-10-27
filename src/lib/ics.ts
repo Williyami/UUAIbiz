@@ -61,6 +61,7 @@ export type IcsEvent = {
   date: string; // YYYY-MM-DD
   time?: string | null; // HH:MM or HH:MM:SS — omitted = all-day event
   description?: string | null;
+  url?: string | null; // a video-call link, shown by calendar apps as the event URL
 };
 
 // Floating local time (no TZID): correct for a team that all lives in the
@@ -77,7 +78,10 @@ function plusOneHour(isoDate: string, time: string): { date: string; time: strin
 }
 
 export function buildICS(events: IcsEvent[]): string {
-  const stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+  const stamp = new Date()
+    .toISOString()
+    .replace(/[-:]/g, "")
+    .replace(/\.\d{3}/, "");
   const lines = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
@@ -100,6 +104,8 @@ export function buildICS(events: IcsEvent[]): string {
         : `DTEND;VALUE=DATE:${dateValue(nextDay(e.date))}`,
       `SUMMARY:${escapeText(e.title)}`,
       ...(e.description ? [`DESCRIPTION:${escapeText(e.description)}`] : []),
+      // URI values are not TEXT, so they are not escaped; folding still applies.
+      ...(e.url ? [`URL:${e.url}`, `LOCATION:${escapeText(e.url)}`] : []),
       "END:VEVENT",
     );
   }

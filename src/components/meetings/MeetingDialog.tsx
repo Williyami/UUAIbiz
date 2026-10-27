@@ -17,6 +17,8 @@ import { AssigneePicker } from "@/components/shared/AssigneePicker";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { profilesQuery, companiesQuery } from "@/lib/queries";
 import { normalizeTimeInput } from "@/lib/format";
+import { normalizeMeetingLink } from "@/lib/meeting-link";
+import { ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 
 type Meeting = any;
@@ -59,6 +61,11 @@ export function MeetingDialog({
         meeting_time: values.meeting_time || null,
         notes: values.notes || null,
         assignees: values.assignees ?? [],
+        // Sent only when there is something to store (or to clear), so saving
+        // a meeting without a link never depends on the column existing.
+        ...(values.meeting_link || meeting?.meeting_link
+          ? { meeting_link: values.meeting_link || null }
+          : {}),
       };
       if (meeting?.id) {
         const { error } = await supabase.from("meetings").update(payload).eq("id", meeting.id);
@@ -106,7 +113,12 @@ export function MeetingDialog({
             if (!form.title?.trim()) return toast.error("Title is required");
             const meeting_time = normalizeTimeInput(form.meeting_time || "");
             if (meeting_time === null) return toast.error("Time must be HH:mm, e.g. 16:30");
-            save.mutate({ ...form, meeting_time });
+            const meeting_link = normalizeMeetingLink(form.meeting_link);
+            if (meeting_link === null)
+              return toast.error(
+                "Meeting link must be a web address, e.g. meet.google.com/abc-defg-hij",
+              );
+            save.mutate({ ...form, meeting_time, meeting_link });
           }}
         >
           <Field label="Title">
@@ -176,6 +188,35 @@ export function MeetingDialog({
               />
             </Field>
           </div>
+          <Field label="Meeting link (optional)">
+            <div className="flex gap-2">
+              <Input
+                type="url"
+                inputMode="url"
+                placeholder="Zoom, Google Meet or Teams link"
+                value={form.meeting_link || ""}
+                onChange={(e) => setForm({ ...form, meeting_link: e.target.value })}
+                onBlur={(e) => {
+                  const link = normalizeMeetingLink(e.target.value);
+                  if (link) setForm({ ...form, meeting_link: link });
+                }}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="shrink-0"
+                title="Open link in a new tab"
+                disabled={!normalizeMeetingLink(form.meeting_link)}
+                onClick={() => {
+                  const link = normalizeMeetingLink(form.meeting_link);
+                  if (link) window.open(link, "_blank", "noopener,noreferrer");
+                }}
+              >
+                <ExternalLink className="h-4 w-4" />
+              </Button>
+            </div>
+          </Field>
           <Field label="Notes">
             <Textarea
               rows={4}

@@ -538,6 +538,7 @@ export type Database = {
           id: string
           internal: boolean
           meeting_date: string | null
+          meeting_link: string | null
           meeting_time: string | null
           notes: string | null
           title: string
@@ -550,6 +551,7 @@ export type Database = {
           id?: string
           internal?: boolean
           meeting_date?: string | null
+          meeting_link?: string | null
           meeting_time?: string | null
           notes?: string | null
           title: string
@@ -562,6 +564,7 @@ export type Database = {
           id?: string
           internal?: boolean
           meeting_date?: string | null
+          meeting_link?: string | null
           meeting_time?: string | null
           notes?: string | null
           title?: string
