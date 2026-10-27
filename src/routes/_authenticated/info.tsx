@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/accordion";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { DocumentCard } from "@/components/shared/DocumentCard";
+import { MeetingPlaybook } from "@/components/info/MeetingPlaybook";
 import { Markdown } from "@/lib/markdown";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, ArrowUp, ArrowDown } from "lucide-react";
@@ -112,6 +113,8 @@ function InfoPage() {
           />
         </div>
       </div>
+
+      <MeetingPlaybook />
 
       {sections.length === 0 ? (
         <div className="border border-dashed bg-card/50 px-6 py-16 text-center">
