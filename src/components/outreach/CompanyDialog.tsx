@@ -25,6 +25,7 @@ import { profilesQuery, contactsQuery } from "@/lib/queries";
 import { ContactPicker } from "./ContactPicker";
 import { INDUSTRY_ORDER } from "./industryStyles";
 import { toast } from "sonner";
+import { todayISO } from "@/lib/outreach";
 
 const STATUSES = [
   "Contacted",
@@ -77,9 +78,14 @@ export function CompanyDialog({
 
   const save = useMutation({
     mutationFn: async (values: any) => {
+      // Changing the status of an existing company means we were just in touch,
+      // unless the date was edited by hand in this same save.
+      const statusChanged = !!company && values.status !== company.status;
+      const dateEdited = !!company && values.last_contact_date !== company.last_contact_date;
       const payload = {
         ...values,
-        last_contact_date: values.last_contact_date || null,
+        last_contact_date:
+          statusChanged && !dateEdited ? todayISO() : values.last_contact_date || null,
         assignees: values.assignees ?? [],
         industry: values.industry || null,
         meeting_booked: !!values.meeting_booked,
@@ -128,9 +134,10 @@ export function CompanyDialog({
           .select("id")
           .single();
         if (error) throw error;
+        // A new person at the company counts as being in touch today.
         const { error: linkError } = await supabase
           .from("companies")
-          .update({ primary_contact_id: created.id })
+          .update({ primary_contact_id: created.id, last_contact_date: todayISO() })
           .eq("id", companyId);
         if (linkError) throw linkError;
       }

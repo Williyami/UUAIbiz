@@ -15,6 +15,7 @@ import { SearchableSelect } from "@/components/shared/SearchableSelect";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { companiesQuery } from "@/lib/queries";
 import { toast } from "sonner";
+import { markContactedToday } from "@/lib/outreach";
 
 type Contact = any;
 
@@ -62,10 +63,13 @@ export function ContactDialog({
       } else {
         const { error } = await supabase.from("contacts").insert(payload);
         if (error) throw error;
+        // A new person at a company counts as being in touch today.
+        if (payload.company_id) await markContactedToday(payload.company_id);
       }
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["contacts"] });
+      qc.invalidateQueries({ queryKey: ["companies"] });
       toast.success(contact ? "Contact updated" : "Contact added");
       onOpenChange(false);
     },

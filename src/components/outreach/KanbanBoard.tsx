@@ -20,6 +20,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { profilesQuery } from "@/lib/queries";
 import { toast } from "sonner";
+import { todayISO } from "@/lib/outreach";
 
 const MAIN_STATUSES: CompanyStatus[] = ["Contacted", "Discussing", "Negotiating", "Booked"];
 const SIDE_STATUSES: CompanyStatus[] = ["Declined", "On hold"];
@@ -41,7 +42,11 @@ export function KanbanBoard({
 
   const move = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: CompanyStatus }) => {
-      const { error } = await supabase.from("companies").update({ status }).eq("id", id);
+      // Moving a company along the pipeline means we were just in touch.
+      const { error } = await supabase
+        .from("companies")
+        .update({ status, last_contact_date: todayISO() })
+        .eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["companies"] }),

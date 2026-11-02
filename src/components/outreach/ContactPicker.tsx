@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { initials } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { Check, ChevronDown, Search, UserPlus, ArrowLeft } from "lucide-react";
+import { markContactedToday } from "@/lib/outreach";
 
 /**
  * Which person at this company the outreach fields describe.
@@ -69,10 +70,13 @@ export function ContactPicker({
         .select()
         .single();
       if (error) throw error;
+      // A new person at the company counts as being in touch today.
+      if (companyId) await markContactedToday(companyId);
       return data;
     },
     onSuccess: (contact) => {
       qc.invalidateQueries({ queryKey: ["contacts"] });
+      qc.invalidateQueries({ queryKey: ["companies"] });
       onSelect(contact);
       toast.success(`${contact.name} added`);
       close();

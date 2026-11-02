@@ -19,6 +19,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { formatDate } from "@/lib/format";
+import { todayISO } from "@/lib/outreach";
 import {
   Mail,
   Phone,
@@ -175,7 +176,13 @@ export function CompanyDetail({
             <section className="grid grid-cols-2 gap-3">
               <div>
                 <label className="microlabel text-muted-foreground">Status</label>
-                <Select value={company.status} onValueChange={(v) => update.mutate({ status: v })}>
+                <Select
+                  value={company.status}
+                  onValueChange={(v) =>
+                    // A status change means we were just in touch.
+                    update.mutate({ status: v, last_contact_date: todayISO() })
+                  }
+                >
                   <SelectTrigger className="mt-1.5">
                     <SelectValue />
                   </SelectTrigger>
