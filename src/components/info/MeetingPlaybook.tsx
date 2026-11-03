@@ -30,7 +30,7 @@ const OPENING: Step[] = [
     say: "UU AI Society is a student-led, non-profit society at Uppsala University for students who want to learn and apply AI, connecting them with the companies shaping it.",
     points: [
       <>
-        <b>Reach:</b> 462 members, about 1,100 followers on LinkedIn and 600 on Instagram, and 12
+        <b>Reach:</b> 494 members, about 1,200 followers on LinkedIn and 600 on Instagram, and 12
         events this year. Founded April 2025.
       </>,
       <>
