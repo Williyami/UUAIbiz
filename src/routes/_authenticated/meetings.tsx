@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { companiesQuery, profilesQuery, meetingsQuery } from "@/lib/queries";
+import { companiesQuery, profilesQuery, meetingsQuery, currentUserQuery } from "@/lib/queries";
+import { AvailabilityDialog } from "@/components/meetings/AvailabilityDialog";
+import { formatSlot } from "@/lib/availability";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { StatusTag } from "@/components/shared/StatusTag";
 import { MemberStack } from "@/components/shared/MemberStack";
@@ -10,7 +12,7 @@ import { companyStatusColor, type CompanyStatus } from "@/components/outreach/st
 import { formatDate, initials, parseLocalDate } from "@/lib/format";
 import { MeetingDialog } from "@/components/meetings/MeetingDialog";
 import { downloadICS, type IcsEvent } from "@/lib/ics";
-import { Plus, CalendarPlus, ChevronLeft, ChevronRight, Video } from "lucide-react";
+import { Plus, CalendarPlus, ChevronLeft, ChevronRight, Video, CalendarClock } from "lucide-react";
 import { normalizeMeetingLink, meetingProvider } from "@/lib/meeting-link";
 import { errorMessage } from "@/lib/chunk-error";
 
@@ -19,6 +21,7 @@ export const Route = createFileRoute("/_authenticated/meetings")({
     context.queryClient.ensureQueryData(companiesQuery);
     context.queryClient.ensureQueryData(profilesQuery);
     context.queryClient.ensureQueryData(meetingsQuery);
+    context.queryClient.ensureQueryData(currentUserQuery);
   },
   component: MeetingsPage,
   errorComponent: ({ error }) => (
@@ -35,6 +38,9 @@ function MeetingsPage() {
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
+  const [polling, setPolling] = useState<any>(null);
+  const { data: me } = useSuspenseQuery(currentUserQuery);
+  const canEdit = me?.role !== "viewer";
 
   const today = new Date(new Date().toDateString());
 
@@ -65,7 +71,12 @@ function MeetingsPage() {
     source: m,
   }));
 
-  const all = [...fromCompanies, ...manual];
+  // Meetings still finding a time have no date yet; they get their own
+  // section instead of sitting in Upcoming as "Date TBD".
+  const openPolls = meetings
+    .filter((m: any) => m.poll_week_start)
+    .sort((a: any, b: any) => a.poll_week_start.localeCompare(b.poll_week_start));
+  const all = [...fromCompanies, ...manual.filter((m) => !m.source.poll_week_start)];
   const sortKey = (m: any) => `${m.meeting_date || "9999"}T${m.meeting_time || "99"}`;
   const upcoming = all
     .filter((m) => !m.meeting_date || parseLocalDate(m.meeting_date) >= today)
@@ -111,7 +122,7 @@ function MeetingsPage() {
         </Button>
       </PageHeader>
 
-      {all.length === 0 ? (
+      {all.length === 0 && openPolls.length === 0 ? (
         <div className="border border-dashed bg-card/50 px-6 py-16 text-center">
           <p className="text-sm text-muted-foreground">
             No meetings yet. Tick "Meeting booked?" on a company in Outreach, or add one manually.
@@ -119,6 +130,14 @@ function MeetingsPage() {
         </div>
       ) : (
         <>
+          {openPolls.length > 0 && (
+            <FindingATime
+              polls={openPolls}
+              profileMap={profileMap}
+              meId={me?.id}
+              onOpen={setPolling}
+            />
+          )}
           <NextMeetingHero
             meeting={upcoming.find((m) => m.meeting_date) ?? null}
             profileMap={profileMap}
@@ -156,7 +175,22 @@ function MeetingsPage() {
         </>
       )}
 
-      <MeetingDialog open={dialogOpen} onOpenChange={setDialogOpen} meeting={editing} />
+      <MeetingDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        meeting={editing}
+        onPollOpened={setPolling}
+      />
+      <AvailabilityDialog
+        // Always the freshest copy, so booking reflects edits made meanwhile.
+        meeting={polling ? (meetings.find((m: any) => m.id === polling.id) ?? polling) : null}
+        onOpenChange={(o) => !o && setPolling(null)}
+        canBook={canEdit}
+        onEdit={(m) => {
+          setEditing(m);
+          setDialogOpen(true);
+        }}
+      />
     </div>
   );
 }
@@ -470,5 +504,57 @@ function JoinButton({ href, size, compact }: { href: string; size?: "sm"; compac
         <Video className="h-3.5 w-3.5" /> {label}
       </a>
     </Button>
+  );
+}
+
+/** Meetings with an open "Find a time" poll, waiting for answers or a booking. */
+function FindingATime({
+  polls,
+  profileMap,
+  meId,
+  onOpen,
+}: {
+  polls: any[];
+  profileMap: Map<string, any>;
+  meId: string | undefined;
+  onOpen: (meeting: any) => void;
+}) {
+  return (
+    <section className="border border-(--brand-red)/40 bg-card">
+      <div className="flex items-center gap-2 border-b px-4 py-3">
+        <CalendarClock className="h-4 w-4 text-(--brand-red)" />
+        <h2 className="font-display text-base font-medium tracking-tight">Finding a time</h2>
+        <span className="microlabel tnum ml-auto text-[10px] text-muted-foreground">
+          {polls.length} open
+        </span>
+      </div>
+      <ul className="divide-y">
+        {polls.map((m) => {
+          const invited = (m.assignees ?? []).includes(meId);
+          return (
+            <li
+              key={m.id}
+              onClick={() => onOpen(m)}
+              className="flex cursor-pointer flex-wrap items-center justify-between gap-3 px-4 py-3 transition-colors hover:bg-accent/50"
+            >
+              <div className="min-w-0">
+                <div className="truncate text-sm font-medium">{m.title}</div>
+                <div className="microlabel mt-0.5 text-[9.5px] text-muted-foreground/80">
+                  Week of {formatSlot(`${m.poll_week_start}T00:00`).split(",")[0]} ·{" "}
+                  {m.duration_minutes ?? 60} min
+                  {m.internal ? " · Internal" : m.company?.name ? ` · ${m.company.name}` : ""}
+                </div>
+              </div>
+              <div className="flex shrink-0 items-center gap-3">
+                <MemberStack ids={m.assignees} profileMap={profileMap} />
+                <Button size="sm" variant={invited ? "default" : "outline"}>
+                  {invited ? "Add your times" : "View answers"}
+                </Button>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
   );
 }

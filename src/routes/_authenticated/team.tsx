@@ -67,12 +67,7 @@ import {
   List,
 } from "lucide-react";
 import { errorMessage } from "@/lib/chunk-error";
-
-type AppRole = "admin" | "member" | "viewer";
-
-function roleLabel(role: AppRole | undefined): string {
-  return role === "admin" ? "Admin" : role === "viewer" ? "Viewer" : "Business team";
-}
+import { ROLE_ORDER, isAdminRole, roleLabel, type AppRole } from "@/lib/roles";
 
 export const Route = createFileRoute("/_authenticated/team")({
   loader: ({ context }) => {
@@ -281,7 +276,7 @@ function TeamPage() {
                         <span className="microlabel text-[9px] text-muted-foreground">You</span>
                       )}
                       <span
-                        className={`microlabel text-[9px] ${role === "admin" ? "text-brand" : "text-muted-foreground"}`}
+                        className={`microlabel text-[9px] ${isAdminRole(role) ? "text-brand" : "text-muted-foreground"}`}
                       >
                         {roleLabel(role)}
                       </span>
@@ -337,21 +332,19 @@ function TeamPage() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      {(["admin", "member", "viewer"] as const)
-                        .filter((r) => r !== role)
-                        .map((r) => (
-                          <DropdownMenuItem
-                            key={r}
-                            onClick={() => changeRole.mutate({ userId: p.id, role: r })}
-                          >
-                            {r === "viewer" ? (
-                              <Eye className="h-3.5 w-3.5" />
-                            ) : (
-                              <ShieldCheck className="h-3.5 w-3.5" />
-                            )}{" "}
-                            Make {roleLabel(r).toLowerCase()}
-                          </DropdownMenuItem>
-                        ))}
+                      {ROLE_ORDER.filter((r) => r !== role).map((r) => (
+                        <DropdownMenuItem
+                          key={r}
+                          onClick={() => changeRole.mutate({ userId: p.id, role: r })}
+                        >
+                          {r === "viewer" ? (
+                            <Eye className="h-3.5 w-3.5" />
+                          ) : (
+                            <ShieldCheck className="h-3.5 w-3.5" />
+                          )}{" "}
+                          Make {roleLabel(r).toLowerCase()}
+                        </DropdownMenuItem>
+                      ))}
                       <DropdownMenuItem onClick={() => reset.mutate(p.id)}>
                         <KeyRound className="h-3.5 w-3.5" /> Reset password
                       </DropdownMenuItem>
@@ -478,9 +471,11 @@ function AddMemberDialog({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="admin">Admin</SelectItem>
-                <SelectItem value="member">Business team</SelectItem>
-                <SelectItem value="viewer">Viewer</SelectItem>
+                {ROLE_ORDER.map((r) => (
+                  <SelectItem key={r} value={r}>
+                    {roleLabel(r)}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -698,7 +693,7 @@ function TeamOverview({
                 </div>
                 <div className="flex items-center gap-2">
                   <span
-                    className={`microlabel text-[9px] ${role === "admin" ? "text-brand" : "text-muted-foreground"}`}
+                    className={`microlabel text-[9px] ${isAdminRole(role) ? "text-brand" : "text-muted-foreground"}`}
                   >
                     {roleLabel(role)}
                   </span>

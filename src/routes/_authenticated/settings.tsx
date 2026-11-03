@@ -7,6 +7,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { playSound, setSoundsEnabled, soundsEnabled } from "@/lib/sounds";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { AvatarCropDialog } from "@/components/layout/AvatarCropDialog";
 import { initials } from "@/lib/format";
@@ -146,6 +148,8 @@ function SettingsPage() {
           <div className="font-mono text-xs text-muted-foreground">{me?.email}</div>
         </div>
 
+        <SoundsSetting />
+
         <div className="border-t pt-5">
           <Button variant="outline" size="sm" asChild>
             <Link to="/auth/change-password">
@@ -162,6 +166,31 @@ function SettingsPage() {
           setCropSrc(null);
         }}
         onCropped={onCropped}
+      />
+    </div>
+  );
+}
+
+/** Per-browser switch for the interface sounds (see lib/sounds.ts). */
+function SoundsSetting() {
+  const [on, setOn] = useState(() => typeof window === "undefined" || soundsEnabled());
+  return (
+    <div className="flex items-center justify-between gap-4 border-t pt-5">
+      <div>
+        <Label className="microlabel text-muted-foreground">Sounds</Label>
+        <p className="mt-1 text-xs text-muted-foreground">
+          A soft chime for new notifications and chat messages, and a short sound when you finish a
+          task or book a meeting. Saved on this device only.
+        </p>
+      </div>
+      <Switch
+        checked={on}
+        onCheckedChange={(v) => {
+          setOn(v);
+          setSoundsEnabled(v);
+          if (v) playSound("notify");
+        }}
+        aria-label="Play sounds"
       />
     </div>
   );

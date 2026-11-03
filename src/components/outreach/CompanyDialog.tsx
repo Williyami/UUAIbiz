@@ -21,7 +21,9 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { AssigneePicker } from "@/components/shared/AssigneePicker";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
-import { profilesQuery, contactsQuery } from "@/lib/queries";
+import { profilesQuery, contactsQuery, companiesQuery } from "@/lib/queries";
+import { findSimilarCompanies } from "@/lib/company-match";
+import { AlertTriangle } from "lucide-react";
 import { ContactPicker } from "./ContactPicker";
 import { INDUSTRY_ORDER } from "./industryStyles";
 import { toast } from "sonner";
@@ -50,6 +52,9 @@ export function CompanyDialog({
   const qc = useQueryClient();
   const { data: profiles } = useSuspenseQuery(profilesQuery);
   const { data: allContacts } = useSuspenseQuery(contactsQuery);
+  const { data: allCompanies } = useSuspenseQuery(companiesQuery);
+  // Set once someone has seen the duplicate warning and chosen to save anyway.
+  const [duplicateOk, setDuplicateOk] = useState(false);
   const [form, setForm] = useState<any>({});
 
   const companyContacts = allContacts.filter((c: any) => c.company_id === company?.id);
@@ -75,6 +80,11 @@ export function CompanyDialog({
       },
     );
   }, [company, open]);
+
+  useEffect(() => setDuplicateOk(false), [form.name, open]);
+
+  const similar = findSimilarCompanies(form.name ?? "", allCompanies, company?.id);
+  const exactDuplicate = similar.some((m) => m.exact);
 
   const save = useMutation({
     mutationFn: async (values: any) => {
@@ -166,6 +176,13 @@ export function CompanyDialog({
           onSubmit={(e) => {
             e.preventDefault();
             if (!form.name?.trim()) return toast.error("Name is required");
+            // Same company already on file: make the first Save a pause, not an add.
+            if (exactDuplicate && !duplicateOk) {
+              setDuplicateOk(true);
+              return toast.warning(
+                `${similar[0].company.name} is already in Outreach. Save again to add it anyway.`,
+              );
+            }
             save.mutate(form);
           }}
         >
@@ -175,6 +192,26 @@ export function CompanyDialog({
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               required
             />
+            {similar.length > 0 && (
+              <div className="flex gap-2 border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-900 dark:text-amber-200">
+                <AlertTriangle className="mt-px h-3.5 w-3.5 shrink-0" />
+                <div className="min-w-0 space-y-0.5">
+                  <div className="font-medium">
+                    {exactDuplicate ? "Already in Outreach:" : "Looks similar to:"}
+                  </div>
+                  {similar.map(({ company: c }) => (
+                    <div key={c.id} className="truncate">
+                      {c.name}
+                      <span className="opacity-75">
+                        {" "}
+                        · {c.status}
+                        {c.last_contact_date ? ` · last contact ${c.last_contact_date}` : ""}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </Field>
           <div className="grid grid-cols-2 gap-3">
             {company?.id && (
@@ -311,7 +348,7 @@ export function CompanyDialog({
               Cancel
             </Button>
             <Button type="submit" disabled={save.isPending}>
-              {save.isPending ? "Saving…" : "Save"}
+              {save.isPending ? "Saving…" : exactDuplicate && duplicateOk ? "Add anyway" : "Save"}
             </Button>
           </DialogFooter>
         </form>

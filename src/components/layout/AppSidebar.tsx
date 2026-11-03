@@ -35,6 +35,7 @@ import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { currentUserQuery } from "@/lib/queries";
 import { initials } from "@/lib/format";
 import { avatarColor } from "@/lib/avatar";
+import { roleLabel } from "@/lib/roles";
 
 const nav = [
   { title: "Home", url: "/dashboard", icon: House },
@@ -157,7 +158,7 @@ export function AppSidebar() {
                 {me?.profile?.name || me?.email}
               </div>
               <div className="microlabel text-[9px] text-sidebar-foreground/55">
-                {me?.isAdmin ? "Admin" : me?.role === "viewer" ? "Viewer" : "Business team"}
+                {roleLabel(me?.role)}
               </div>
             </div>
             <Link

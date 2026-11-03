@@ -5,6 +5,7 @@ import { StatusTag } from "@/components/shared/StatusTag";
 import { companyStatusColor, type CompanyStatus } from "@/components/outreach/statusStyles";
 import { companiesQuery, eventsQuery, tasksQuery, userRolesQuery } from "@/lib/queries";
 import { initials, formatDate } from "@/lib/format";
+import { isAdminRole, roleLabel as labelFor } from "@/lib/roles";
 import { Mail } from "lucide-react";
 
 // Small profile card for any team member: who they are plus what they
@@ -29,7 +30,7 @@ export function ProfileWidget({
   if (!profile) return null;
 
   const role = roles.find((r: any) => r.user_id === profile.id)?.role;
-  const roleLabel = role === "admin" ? "Admin" : role === "viewer" ? "Viewer" : "Business team";
+  const roleLabel = labelFor(role);
   const displayName = profile.name || profile.email || "Former member";
 
   const owned = companies.filter((c: any) => (c.assignees ?? []).includes(profile.id));
@@ -68,7 +69,7 @@ export function ProfileWidget({
               {displayName}
             </div>
             <div
-              className={`microlabel text-[10px] ${role === "admin" ? "text-brand" : "text-muted-foreground"}`}
+              className={`microlabel text-[10px] ${isAdminRole(role) ? "text-brand" : "text-muted-foreground"}`}
             >
               {roleLabel}
             </div>

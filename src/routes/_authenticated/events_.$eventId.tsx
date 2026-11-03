@@ -41,6 +41,7 @@ import {
   Building2,
 } from "lucide-react";
 import { errorMessage } from "@/lib/chunk-error";
+import { playSound } from "@/lib/sounds";
 
 export const Route = createFileRoute("/_authenticated/events_/$eventId")({
   loader: ({ context }) => {
@@ -139,7 +140,10 @@ function EventPage() {
         .eq("id", id);
       if (error) throw error;
     },
-    onSuccess: invalidate,
+    onSuccess: (_data, { done }) => {
+      if (done) playSound("complete");
+      invalidate();
+    },
     onError: (e: any) => toast.error(e.message),
   });
 

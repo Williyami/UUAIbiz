@@ -31,7 +31,7 @@ function FinancePage() {
   const { data: me } = useSuspenseQuery(currentUserQuery);
 
   const canEdit = me?.role !== "viewer";
-  const isAdmin = me?.role === "admin";
+  const isAdmin = !!me?.isAdmin;
 
   const [entryOpen, setEntryOpen] = useState(false);
   const [editing, setEditing] = useState<any | null>(null);

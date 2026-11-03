@@ -20,6 +20,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { formatDate } from "@/lib/format";
 import { todayISO } from "@/lib/outreach";
+import { playSound } from "@/lib/sounds";
 import {
   Mail,
   Phone,
@@ -178,10 +179,11 @@ export function CompanyDetail({
                 <label className="microlabel text-muted-foreground">Status</label>
                 <Select
                   value={company.status}
-                  onValueChange={(v) =>
+                  onValueChange={(v) => {
                     // A status change means we were just in touch.
-                    update.mutate({ status: v, last_contact_date: todayISO() })
-                  }
+                    update.mutate({ status: v, last_contact_date: todayISO() });
+                    if (v === "Booked") playSound("success");
+                  }}
                 >
                   <SelectTrigger className="mt-1.5">
                     <SelectValue />

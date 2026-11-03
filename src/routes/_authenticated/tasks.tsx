@@ -38,7 +38,11 @@ function TasksPage() {
   const [editing, setEditing] = useState<any | null>(null);
   // Defaults to your own list — the board opens on what you're responsible for
   // rather than everything the team has.
-  const [mineOnly, setMineOnly] = useState(true);
+  const [mineOnlyChoice, setMineOnly] = useState(true);
+  // The business team only gets their own list; the team-wide board is for
+  // admins, board, others and viewers.
+  const canSeeTeam = me?.role !== "member";
+  const mineOnly = mineOnlyChoice || !canSeeTeam;
 
   // Anything assigned to me, personal items included. Someone else's personal
   // task never matches, since it isn't assigned to me (and RLS blocks it too).
@@ -90,20 +94,22 @@ function TasksPage() {
             : "All team to-dos. Personal items stay hidden."
         }
       >
-        <div className="inline-flex border bg-card p-0.5">
-          <ScopeButton
-            active={mineOnly}
-            onClick={() => setMineOnly(true)}
-            icon={User}
-            label="My tasks"
-          />
-          <ScopeButton
-            active={!mineOnly}
-            onClick={() => setMineOnly(false)}
-            icon={Users}
-            label="All team"
-          />
-        </div>
+        {canSeeTeam && (
+          <div className="inline-flex border bg-card p-0.5">
+            <ScopeButton
+              active={mineOnly}
+              onClick={() => setMineOnly(true)}
+              icon={User}
+              label="My tasks"
+            />
+            <ScopeButton
+              active={!mineOnly}
+              onClick={() => setMineOnly(false)}
+              icon={Users}
+              label="All team"
+            />
+          </div>
+        )}
         {canEdit && doneVisible.length > 0 && (
           <Button
             variant="ghost"

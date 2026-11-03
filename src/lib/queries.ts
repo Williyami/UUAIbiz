@@ -1,6 +1,7 @@
 import { queryOptions } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { lastTouchedAt } from "@/lib/stale";
+import { ROLE_ORDER, isAdminRole, type AppRole } from "@/lib/roles";
 
 export const profilesQuery = queryOptions({
   queryKey: ["profiles"],
@@ -51,6 +52,21 @@ export const meetingsQuery = queryOptions({
     return data ?? [];
   },
 });
+
+/** Everyone's answers for one meeting's "Find a time" poll. Polled while open. */
+export function meetingAvailabilityQuery(meetingId: string) {
+  return queryOptions({
+    queryKey: ["meetingAvailability", meetingId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("meeting_availability")
+        .select("user_id, slots, updated_at")
+        .eq("meeting_id", meetingId);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
 
 export const boardPostsQuery = queryOptions({
   queryKey: ["boardPosts"],
@@ -182,17 +198,13 @@ export const currentUserQuery = queryOptions({
       supabase.from("profiles").select("*").eq("id", userData.user.id).maybeSingle(),
       supabase.from("user_roles").select("role").eq("user_id", userData.user.id),
     ]);
-    const roleSet = new Set((roles ?? []).map((r) => r.role));
-    const role: "admin" | "member" | "viewer" = roleSet.has("admin")
-      ? "admin"
-      : roleSet.has("member")
-        ? "member"
-        : "viewer";
+    const roleSet = new Set<string>((roles ?? []).map((r) => r.role));
+    const role: AppRole = ROLE_ORDER.find((r) => roleSet.has(r)) ?? "viewer";
     return {
       id: userData.user.id,
       email: userData.user.email ?? "",
       profile,
-      isAdmin: role === "admin",
+      isAdmin: isAdminRole(role),
       role,
     };
   },

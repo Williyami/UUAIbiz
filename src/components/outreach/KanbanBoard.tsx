@@ -21,6 +21,7 @@ import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-q
 import { profilesQuery } from "@/lib/queries";
 import { toast } from "sonner";
 import { todayISO } from "@/lib/outreach";
+import { playSound } from "@/lib/sounds";
 
 const MAIN_STATUSES: CompanyStatus[] = ["Contacted", "Discussing", "Negotiating", "Booked"];
 const SIDE_STATUSES: CompanyStatus[] = ["Declined", "On hold"];
@@ -59,7 +60,10 @@ export function KanbanBoard({
     const id = e.active.id as string;
     if (!status || !STATUS_ORDER.includes(status)) return;
     const c = companies.find((x) => x.id === id);
-    if (c && c.status !== status) move.mutate({ id, status });
+    if (c && c.status !== status) {
+      move.mutate({ id, status });
+      if (status === "Booked") playSound("success");
+    }
   }
 
   const profileMap = new Map(profiles.map((p) => [p.id, p]));

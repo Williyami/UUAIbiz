@@ -13,6 +13,7 @@ import { timeAgo } from "@/lib/format";
 import { toast } from "sonner";
 import { Send, Trash2 } from "lucide-react";
 import { errorMessage } from "@/lib/chunk-error";
+import { playSound } from "@/lib/sounds";
 
 const chatMessagesQuery = queryOptions({
   queryKey: ["chatMessages"],
@@ -66,6 +67,16 @@ function ChatPage() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ block: "end" });
   }, [messages.length]);
+
+  // Pop when someone else's message arrives while the chat is open.
+  const seenMessages = useRef<Set<string> | null>(null);
+  useEffect(() => {
+    const fresh = messages.filter(
+      (m: any) => seenMessages.current && !seenMessages.current.has(m.id),
+    );
+    if (fresh.some((m: any) => m.author_id !== me?.id)) playSound("message");
+    seenMessages.current = new Set(messages.map((m: any) => m.id));
+  }, [messages, me?.id]);
 
   const send = useMutation({
     mutationFn: async (text: string) => {

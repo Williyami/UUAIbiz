@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -7,6 +7,7 @@ import { ScrollList } from "@/components/shared/ScrollList";
 import { notificationsQuery } from "@/lib/queries";
 import { timeAgo } from "@/lib/format";
 import { Bell } from "lucide-react";
+import { playSound } from "@/lib/sounds";
 
 export function NotificationBell() {
   const qc = useQueryClient();
@@ -15,6 +16,15 @@ export function NotificationBell() {
   const [open, setOpen] = useState(false);
 
   const unread = notifications.filter((n: any) => !n.read);
+
+  // Chime when an unread notification shows up that wasn't there before. The
+  // first load only records what exists, so opening the hub stays quiet.
+  const seen = useRef<Set<string> | null>(null);
+  useEffect(() => {
+    const before = seen.current;
+    if (before && notifications.some((n: any) => !n.read && !before.has(n.id))) playSound("notify");
+    seen.current = new Set(notifications.map((n: any) => n.id as string));
+  }, [notifications]);
 
   const markRead = useMutation({
     mutationFn: async (ids: string[]) => {

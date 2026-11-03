@@ -18,6 +18,14 @@ import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-q
 import { profilesQuery, companiesQuery } from "@/lib/queries";
 import { normalizeTimeInput } from "@/lib/format";
 import { normalizeMeetingLink } from "@/lib/meeting-link";
+import { mondayOf, nextMonday } from "@/lib/availability";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 
@@ -27,10 +35,13 @@ export function MeetingDialog({
   open,
   onOpenChange,
   meeting,
+  onPollOpened,
 }: {
   open: boolean;
   onOpenChange: (o: boolean) => void;
   meeting?: Meeting | null;
+  /** Called with the saved meeting when it now has an open "Find a time" poll. */
+  onPollOpened?: (meeting: Meeting) => void;
 }) {
   const qc = useQueryClient();
   const { data: profiles } = useSuspenseQuery(profilesQuery);
@@ -51,14 +62,17 @@ export function MeetingDialog({
     );
   }, [meeting, open]);
 
+  const findTime = !!form.poll_week_start;
+
   const save = useMutation({
     mutationFn: async (values: any) => {
       const payload = {
         title: values.title,
         internal: !!values.internal,
         company_id: values.internal ? null : values.company_id || null,
-        meeting_date: values.meeting_date || null,
-        meeting_time: values.meeting_time || null,
+        // An open poll leaves the time unset until it is booked.
+        meeting_date: values.poll_week_start ? null : values.meeting_date || null,
+        meeting_time: values.poll_week_start ? null : values.meeting_time || null,
         notes: values.notes || null,
         assignees: values.assignees ?? [],
         // Sent only when there is something to store (or to clear), so saving
@@ -66,19 +80,45 @@ export function MeetingDialog({
         ...(values.meeting_link || meeting?.meeting_link
           ? { meeting_link: values.meeting_link || null }
           : {}),
+        // Poll fields likewise only when a poll is being opened or closed.
+        ...(values.poll_week_start
+          ? {
+              poll_week_start: mondayOf(values.poll_week_start),
+              poll_days: Number(values.poll_days ?? 5),
+              poll_day_start: Number(values.poll_day_start ?? 8),
+              poll_day_end: Number(values.poll_day_end ?? 18),
+              duration_minutes: Number(values.duration_minutes ?? 60),
+            }
+          : meeting?.poll_week_start
+            ? { poll_week_start: null }
+            : {}),
       };
       if (meeting?.id) {
-        const { error } = await supabase.from("meetings").update(payload).eq("id", meeting.id);
+        const { data, error } = await supabase
+          .from("meetings")
+          .update(payload)
+          .eq("id", meeting.id)
+          .select()
+          .single();
         if (error) throw error;
-      } else {
-        const { error } = await supabase.from("meetings").insert(payload);
-        if (error) throw error;
+        return data;
       }
+      const { data, error } = await supabase.from("meetings").insert(payload).select().single();
+      if (error) throw error;
+      return data;
     },
-    onSuccess: () => {
+    onSuccess: (saved: any) => {
       qc.invalidateQueries({ queryKey: ["meetings"] });
-      toast.success(meeting ? "Meeting updated" : "Meeting added");
+      const pollNew = saved?.poll_week_start && saved.poll_week_start !== meeting?.poll_week_start;
+      toast.success(
+        pollNew
+          ? "Poll opened. Everyone assigned has been asked to pick their times."
+          : meeting
+            ? "Meeting updated"
+            : "Meeting added",
+      );
       onOpenChange(false);
+      if (saved?.poll_week_start) onPollOpened?.(saved);
     },
     onError: (e: any) => toast.error(e.message),
   });
@@ -111,6 +151,10 @@ export function MeetingDialog({
           onSubmit={(e) => {
             e.preventDefault();
             if (!form.title?.trim()) return toast.error("Title is required");
+            if (findTime && !(form.assignees ?? []).length)
+              return toast.error("Assign the people who should pick their times");
+            if (findTime && Number(form.poll_day_end ?? 18) <= Number(form.poll_day_start ?? 8))
+              return toast.error("The day has to end after it starts");
             const meeting_time = normalizeTimeInput(form.meeting_time || "");
             if (meeting_time === null) return toast.error("Time must be HH:mm, e.g. 16:30");
             const meeting_link = normalizeMeetingLink(form.meeting_link);
@@ -139,6 +183,70 @@ export function MeetingDialog({
               Internal meeting (no company)
             </span>
           </label>
+          <label className="flex w-fit cursor-pointer items-center gap-2 py-0.5">
+            <Checkbox
+              checked={findTime}
+              onCheckedChange={(v) =>
+                setForm({
+                  ...form,
+                  poll_week_start: v ? (meeting?.poll_week_start ?? nextMonday()) : null,
+                })
+              }
+            />
+            <span className="microlabel text-[10px] text-muted-foreground">
+              Find a time with the team (everyone assigned picks their availability)
+            </span>
+          </label>
+          {findTime && (
+            <div className="grid grid-cols-2 gap-3 border bg-muted/30 p-3 sm:grid-cols-4">
+              <Field label="Week of">
+                <Input
+                  type="date"
+                  value={form.poll_week_start || ""}
+                  onChange={(e) =>
+                    setForm({ ...form, poll_week_start: e.target.value || nextMonday() })
+                  }
+                />
+              </Field>
+              <Field label="Days">
+                <PollSelect
+                  value={String(form.poll_days ?? 5)}
+                  onChange={(v) => setForm({ ...form, poll_days: Number(v) })}
+                  options={[
+                    ["5", "Mon–Fri"],
+                    ["7", "Mon–Sun"],
+                  ]}
+                />
+              </Field>
+              <Field label="Hours">
+                <div className="flex items-center gap-1">
+                  <PollSelect
+                    value={String(form.poll_day_start ?? 8)}
+                    onChange={(v) => setForm({ ...form, poll_day_start: Number(v) })}
+                    options={HOURS.slice(0, -1).map((h) => [String(h), `${h}`.padStart(2, "0")])}
+                  />
+                  <span className="text-muted-foreground">–</span>
+                  <PollSelect
+                    value={String(form.poll_day_end ?? 18)}
+                    onChange={(v) => setForm({ ...form, poll_day_end: Number(v) })}
+                    options={HOURS.slice(1).map((h) => [String(h), `${h}`.padStart(2, "0")])}
+                  />
+                </div>
+              </Field>
+              <Field label="Length">
+                <PollSelect
+                  value={String(form.duration_minutes ?? 60)}
+                  onChange={(v) => setForm({ ...form, duration_minutes: Number(v) })}
+                  options={[
+                    ["30", "30 min"],
+                    ["60", "1 hour"],
+                    ["90", "1.5 hours"],
+                    ["120", "2 hours"],
+                  ]}
+                />
+              </Field>
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-3">
             {!form.internal && (
               <Field label="Company (optional)">
@@ -155,31 +263,35 @@ export function MeetingDialog({
                 />
               </Field>
             )}
-            <Field label="Date">
-              <Input
-                type="date"
-                value={form.meeting_date || ""}
-                onChange={(e) => setForm({ ...form, meeting_date: e.target.value })}
-              />
-            </Field>
-            <Field label="Time (optional)">
-              <Input
-                inputMode="numeric"
-                placeholder="16:30"
-                maxLength={5}
-                value={(form.meeting_time || "").slice(0, 5)}
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    meeting_time: e.target.value.replace(/[^\d:.]/g, "").slice(0, 5),
-                  })
-                }
-                onBlur={(e) => {
-                  const t = normalizeTimeInput(e.target.value);
-                  if (t) setForm({ ...form, meeting_time: t });
-                }}
-              />
-            </Field>
+            {!findTime && (
+              <Field label="Date">
+                <Input
+                  type="date"
+                  value={form.meeting_date || ""}
+                  onChange={(e) => setForm({ ...form, meeting_date: e.target.value })}
+                />
+              </Field>
+            )}
+            {!findTime && (
+              <Field label="Time (optional)">
+                <Input
+                  inputMode="numeric"
+                  placeholder="16:30"
+                  maxLength={5}
+                  value={(form.meeting_time || "").slice(0, 5)}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      meeting_time: e.target.value.replace(/[^\d:.]/g, "").slice(0, 5),
+                    })
+                  }
+                  onBlur={(e) => {
+                    const t = normalizeTimeInput(e.target.value);
+                    if (t) setForm({ ...form, meeting_time: t });
+                  }}
+                />
+              </Field>
+            )}
             <Field label="Assigned to">
               <AssigneePicker
                 value={form.assignees ?? []}
@@ -255,5 +367,32 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       <Label className="microlabel text-muted-foreground">{label}</Label>
       {children}
     </div>
+  );
+}
+
+const HOURS = Array.from({ length: 17 }, (_, i) => i + 7); // 07–23
+
+function PollSelect({
+  value,
+  onChange,
+  options,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  options: [string, string][];
+}) {
+  return (
+    <Select value={value} onValueChange={onChange}>
+      <SelectTrigger className="h-9">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        {options.map(([v, label]) => (
+          <SelectItem key={v} value={v}>
+            {label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }

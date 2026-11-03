@@ -530,17 +530,58 @@ export type Database = {
         }
         Relationships: []
       }
+      meeting_availability: {
+        Row: {
+          meeting_id: string
+          slots: string[]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          meeting_id: string
+          slots?: string[]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          meeting_id?: string
+          slots?: string[]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meeting_availability_meeting_id_fkey"
+            columns: ["meeting_id"]
+            isOneToOne: false
+            referencedRelation: "meetings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meeting_availability_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       meetings: {
         Row: {
           assignees: string[]
           company_id: string | null
           created_at: string
+          duration_minutes: number
           id: string
           internal: boolean
           meeting_date: string | null
           meeting_link: string | null
           meeting_time: string | null
           notes: string | null
+          poll_day_end: number
+          poll_day_start: number
+          poll_days: number
+          poll_week_start: string | null
           title: string
           updated_at: string
         }
@@ -548,12 +589,17 @@ export type Database = {
           assignees?: string[]
           company_id?: string | null
           created_at?: string
+          duration_minutes?: number
           id?: string
           internal?: boolean
           meeting_date?: string | null
           meeting_link?: string | null
           meeting_time?: string | null
           notes?: string | null
+          poll_day_end?: number
+          poll_day_start?: number
+          poll_days?: number
+          poll_week_start?: string | null
           title: string
           updated_at?: string
         }
@@ -561,12 +607,17 @@ export type Database = {
           assignees?: string[]
           company_id?: string | null
           created_at?: string
+          duration_minutes?: number
           id?: string
           internal?: boolean
           meeting_date?: string | null
           meeting_link?: string | null
           meeting_time?: string | null
           notes?: string | null
+          poll_day_end?: number
+          poll_day_start?: number
+          poll_days?: number
+          poll_week_start?: string | null
           title?: string
           updated_at?: string
         }
@@ -765,7 +816,7 @@ export type Database = {
       record_visit: { Args: never; Returns: undefined }
     }
     Enums: {
-      app_role: "admin" | "member" | "viewer"
+      app_role: "admin" | "member" | "viewer" | "board" | "other"
       company_industry:
         | "VC"
         | "Finance"
@@ -937,7 +988,7 @@ export const Constants = {
   },
   public: {
     Enums: {
-      app_role: ["admin", "member", "viewer"],
+      app_role: ["admin", "member", "viewer", "board", "other"],
       company_industry: [
         "VC",
         "Finance",

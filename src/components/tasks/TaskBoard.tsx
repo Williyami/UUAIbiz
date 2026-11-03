@@ -24,6 +24,7 @@ import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-q
 import { profilesQuery, eventsQuery } from "@/lib/queries";
 import { CalendarDays } from "lucide-react";
 import { toast } from "sonner";
+import { playSound } from "@/lib/sounds";
 
 function isOverdue(task: any) {
   return (
@@ -63,7 +64,10 @@ export function TaskBoard({
     const id = e.active.id as string;
     if (!status || !TASK_STATUS_ORDER.includes(status)) return;
     const t = tasks.find((x) => x.id === id);
-    if (t && t.status !== status) move.mutate({ id, status });
+    if (t && t.status !== status) {
+      move.mutate({ id, status });
+      if (status === "Done") playSound("complete");
+    }
   }
 
   const profileMap = new Map(profiles.map((p) => [p.id, p]));
