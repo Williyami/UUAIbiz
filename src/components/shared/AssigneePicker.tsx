@@ -25,9 +25,14 @@ export function AssigneePicker({
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
   const selected = profiles.filter((p) => value.includes(p.id));
-  const shown = profiles.filter((p) =>
-    `${p.name ?? ""} ${p.email ?? ""}`.toLowerCase().includes(q.trim().toLowerCase()),
-  );
+  // Picked people first, the most recently picked at the top (value is in
+  // pick order), then everyone else in their usual order.
+  const pickOrder = new Map(value.map((id, i) => [id, i]));
+  const shown = profiles
+    .filter((p) =>
+      `${p.name ?? ""} ${p.email ?? ""}`.toLowerCase().includes(q.trim().toLowerCase()),
+    )
+    .sort((a, b) => (pickOrder.get(b.id) ?? -1) - (pickOrder.get(a.id) ?? -1));
 
   function toggle(id: string) {
     onChange(value.includes(id) ? value.filter((v) => v !== id) : [...value, id]);
@@ -48,7 +53,9 @@ export function AssigneePicker({
   }
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    // Modal so it scrolls inside dialogs: the dialog's scroll lock otherwise
+    // swallows wheel and touch on the list, which is portalled outside it.
+    <Popover open={open} onOpenChange={setOpen} modal>
       <PopoverTrigger asChild>
         <button
           type="button"
@@ -79,7 +86,14 @@ export function AssigneePicker({
           <ChevronDown className="h-4 w-4 shrink-0 opacity-50" />
         </button>
       </PopoverTrigger>
-      <PopoverContent align="start" className="w-64 p-1">
+      <PopoverContent
+        align="start"
+        side="bottom"
+        // Always opens downwards and shrinks to the room left, scrolling inside.
+        avoidCollisions={false}
+        collisionPadding={12}
+        className="flex max-h-(--radix-popover-content-available-height) w-64 flex-col p-1"
+      >
         {profiles.length > 6 && (
           <div className="relative mb-1">
             <Search className="absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
@@ -107,7 +121,7 @@ export function AssigneePicker({
             {allBiz && <Check className="h-3.5 w-3.5 shrink-0 text-(--brand-red)" />}
           </button>
         )}
-        <ScrollList as="ul" className="max-h-[25rem]">
+        <ScrollList as="ul" wrapperClassName="flex min-h-0 flex-col" className="max-h-[25rem]">
           {shown.length === 0 && (
             <li className="px-2 py-3 text-center text-xs text-muted-foreground">No matches.</li>
           )}
