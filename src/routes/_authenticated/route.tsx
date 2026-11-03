@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/AppSidebar";
+import { FallingLeaves } from "@/components/layout/FallingLeaves";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { NotificationBell } from "@/components/layout/NotificationBell";
 import { ProfileWidgetProvider } from "@/components/shared/profile-widget-context";
@@ -69,7 +70,9 @@ function AuthenticatedShell() {
     >
       <PresenceProvider userId={me?.id}>
         <ProfileWidgetProvider>
-          <div className="flex min-h-screen w-full">
+          <FallingLeaves />
+          {/* relative z-10 lifts the app above the leaves layer */}
+          <div className="relative z-10 flex min-h-screen w-full">
             <AppSidebar />
             <div className="relative flex min-w-0 flex-1 flex-col">
               <div className="flex items-center justify-between gap-2 border-b border-border/70 bg-card/85 px-3 py-2 md:absolute md:right-3 md:top-3 md:z-10 md:justify-start md:rounded-[3px] md:border md:px-2.5 md:py-1.5 md:shadow-sm md:backdrop-blur-sm">

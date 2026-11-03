@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { leavesEnabled, setLeavesEnabled } from "@/lib/leaves";
 import { playSound, setSoundsEnabled, soundsEnabled } from "@/lib/sounds";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { AvatarCropDialog } from "@/components/layout/AvatarCropDialog";
@@ -150,6 +151,8 @@ function SettingsPage() {
 
         <SoundsSetting />
 
+        <LeavesSetting />
+
         <div className="border-t pt-5">
           <Button variant="outline" size="sm" asChild>
             <Link to="/auth/change-password">
@@ -191,6 +194,30 @@ function SoundsSetting() {
           if (v) playSound("notify");
         }}
         aria-label="Play sounds"
+      />
+    </div>
+  );
+}
+
+/** Per-browser switch for the falling-leaves background. */
+function LeavesSetting() {
+  const [on, setOn] = useState(() => typeof window === "undefined" || leavesEnabled());
+  return (
+    <div className="flex items-center justify-between gap-4 border-t pt-5">
+      <div>
+        <Label className="microlabel text-muted-foreground">Falling leaves</Label>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Red autumn leaves drifting in the background. Always off if your device is set to reduce
+          motion. Saved on this device only.
+        </p>
+      </div>
+      <Switch
+        checked={on}
+        onCheckedChange={(v) => {
+          setOn(v);
+          setLeavesEnabled(v);
+        }}
+        aria-label="Show falling leaves"
       />
     </div>
   );

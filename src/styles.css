@@ -245,3 +245,35 @@
   backdrop-filter: blur(3px) saturate(160%);
 }
 
+
+/* Falling autumn leaves (FallingLeaves.tsx): the outer element falls, the
+   inner one sways and turns, so the two motions combine into a drift. */
+@keyframes leaf-fall {
+  from {
+    transform: translate3d(0, -12vh, 0);
+  }
+  to {
+    transform: translate3d(0, 112vh, 0);
+  }
+}
+@keyframes leaf-sway {
+  from {
+    transform: translateX(-28px) rotate(-30deg);
+  }
+  to {
+    transform: translateX(28px) rotate(40deg);
+  }
+}
+.leaf-fall {
+  animation-name: leaf-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  will-change: transform;
+}
+.leaf-sway {
+  display: block;
+  animation-name: leaf-sway;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}

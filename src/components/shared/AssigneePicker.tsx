@@ -8,6 +8,12 @@ import { userRolesQuery } from "@/lib/queries";
 import { cn } from "@/lib/utils";
 import { Check, ChevronDown, Search, Users } from "lucide-react";
 
+// Business-team people whose role is something else (e.g. admin), so the
+// shortcut can include them without changing their role.
+const BIZ_TEAM_EXTRA = [
+  "929d409a-f22c-4433-8ae2-3c22bb12c8e5", // William Eklund
+];
+
 /** Multi-select of team members, styled like the other form controls. */
 export function AssigneePicker({
   value,
@@ -38,10 +44,15 @@ export function AssigneePicker({
     onChange(value.includes(id) ? value.filter((v) => v !== id) : [...value, id]);
   }
 
-  // "Biz Team" shortcut: everyone with the business-team role, in one click.
+  // "Biz Team" shortcut: everyone with the business-team role, in one click,
+  // plus anyone on the team who holds a different role.
   const { data: roles = [] } = useQuery(userRolesQuery);
   const bizIds = profiles
-    .filter((p) => roles.some((r) => r.user_id === p.id && r.role === "member"))
+    .filter(
+      (p) =>
+        BIZ_TEAM_EXTRA.includes(p.id) ||
+        roles.some((r) => r.user_id === p.id && r.role === "member"),
+    )
     .map((p) => p.id);
   const allBiz = bizIds.length > 0 && bizIds.every((id) => value.includes(id));
   function toggleBiz() {
