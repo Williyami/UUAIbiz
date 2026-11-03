@@ -464,7 +464,7 @@ function StatCard({
 
 // Home cards are slightly see-through so the background (and the leaves)
 // show behind them; the blur and solid border keep text and edges crisp.
-const GLASS = "border-border/80 bg-card/75 backdrop-blur-[3px]";
+const GLASS = "border-border/80 bg-card/60 backdrop-blur-[3px]";
 
 function Panel({
   title,
