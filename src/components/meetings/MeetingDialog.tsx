@@ -18,7 +18,13 @@ import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-q
 import { profilesQuery, companiesQuery } from "@/lib/queries";
 import { normalizeTimeInput } from "@/lib/format";
 import { normalizeMeetingLink } from "@/lib/meeting-link";
-import { mondayOf, nextMonday } from "@/lib/availability";
+import {
+  mondayOf,
+  nextMonday,
+  POLL_DAY_END,
+  POLL_DAY_START,
+  POLL_DURATION,
+} from "@/lib/availability";
 import {
   Select,
   SelectContent,
@@ -85,9 +91,9 @@ export function MeetingDialog({
           ? {
               poll_week_start: mondayOf(values.poll_week_start),
               poll_days: Number(values.poll_days ?? 5),
-              poll_day_start: Number(values.poll_day_start ?? 8),
-              poll_day_end: Number(values.poll_day_end ?? 18),
-              duration_minutes: Number(values.duration_minutes ?? 60),
+              poll_day_start: POLL_DAY_START,
+              poll_day_end: POLL_DAY_END,
+              duration_minutes: POLL_DURATION,
             }
           : meeting?.poll_week_start
             ? { poll_week_start: null }
@@ -153,8 +159,6 @@ export function MeetingDialog({
             if (!form.title?.trim()) return toast.error("Title is required");
             if (findTime && !(form.assignees ?? []).length)
               return toast.error("Assign the people who should pick their times");
-            if (findTime && Number(form.poll_day_end ?? 18) <= Number(form.poll_day_start ?? 8))
-              return toast.error("The day has to end after it starts");
             const meeting_time = normalizeTimeInput(form.meeting_time || "");
             if (meeting_time === null) return toast.error("Time must be HH:mm, e.g. 16:30");
             const meeting_link = normalizeMeetingLink(form.meeting_link);
@@ -198,7 +202,7 @@ export function MeetingDialog({
             </span>
           </label>
           {findTime && (
-            <div className="grid grid-cols-2 gap-3 border bg-muted/30 p-3 sm:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 border bg-muted/30 p-3">
               <Field label="Week of">
                 <Input
                   type="date"
@@ -215,33 +219,6 @@ export function MeetingDialog({
                   options={[
                     ["5", "Mon–Fri"],
                     ["7", "Mon–Sun"],
-                  ]}
-                />
-              </Field>
-              <Field label="Hours">
-                <div className="flex items-center gap-1">
-                  <PollSelect
-                    value={String(form.poll_day_start ?? 8)}
-                    onChange={(v) => setForm({ ...form, poll_day_start: Number(v) })}
-                    options={HOURS.slice(0, -1).map((h) => [String(h), `${h}`.padStart(2, "0")])}
-                  />
-                  <span className="text-muted-foreground">–</span>
-                  <PollSelect
-                    value={String(form.poll_day_end ?? 18)}
-                    onChange={(v) => setForm({ ...form, poll_day_end: Number(v) })}
-                    options={HOURS.slice(1).map((h) => [String(h), `${h}`.padStart(2, "0")])}
-                  />
-                </div>
-              </Field>
-              <Field label="Length">
-                <PollSelect
-                  value={String(form.duration_minutes ?? 60)}
-                  onChange={(v) => setForm({ ...form, duration_minutes: Number(v) })}
-                  options={[
-                    ["30", "30 min"],
-                    ["60", "1 hour"],
-                    ["90", "1.5 hours"],
-                    ["120", "2 hours"],
                   ]}
                 />
               </Field>
@@ -369,8 +346,6 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
     </div>
   );
 }
-
-const HOURS = Array.from({ length: 17 }, (_, i) => i + 7); // 07–23
 
 function PollSelect({
   value,

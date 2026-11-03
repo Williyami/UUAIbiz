@@ -3,7 +3,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { companiesQuery, profilesQuery, meetingsQuery, currentUserQuery } from "@/lib/queries";
 import { AvailabilityDialog } from "@/components/meetings/AvailabilityDialog";
-import { formatSlot } from "@/lib/availability";
+import { formatSlot, POLL_DURATION } from "@/lib/availability";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { StatusTag } from "@/components/shared/StatusTag";
 import { MemberStack } from "@/components/shared/MemberStack";
@@ -130,14 +130,6 @@ function MeetingsPage() {
         </div>
       ) : (
         <>
-          {openPolls.length > 0 && (
-            <FindingATime
-              polls={openPolls}
-              profileMap={profileMap}
-              meId={me?.id}
-              onOpen={setPolling}
-            />
-          )}
           <NextMeetingHero
             meeting={upcoming.find((m) => m.meeting_date) ?? null}
             profileMap={profileMap}
@@ -161,6 +153,16 @@ function MeetingsPage() {
               />
             </div>
           </div>
+          {/* Open polls sit right under the calendar, where people go to
+              mark their times. */}
+          {openPolls.length > 0 && (
+            <FindingATime
+              polls={openPolls}
+              profileMap={profileMap}
+              meId={me?.id}
+              onOpen={setPolling}
+            />
+          )}
           {upcoming.length > UPCOMING_BESIDE && (
             <MeetingList
               title="Later"
@@ -540,8 +542,8 @@ function FindingATime({
               <div className="min-w-0">
                 <div className="truncate text-sm font-medium">{m.title}</div>
                 <div className="microlabel mt-0.5 text-[9.5px] text-muted-foreground/80">
-                  Week of {formatSlot(`${m.poll_week_start}T00:00`).split(",")[0]} ·{" "}
-                  {m.duration_minutes ?? 60} min
+                  Week of {formatSlot(`${m.poll_week_start}T00:00`).split(",")[0]} · {POLL_DURATION}{" "}
+                  min
                   {m.internal ? " · Internal" : m.company?.name ? ` · ${m.company.name}` : ""}
                 </div>
               </div>

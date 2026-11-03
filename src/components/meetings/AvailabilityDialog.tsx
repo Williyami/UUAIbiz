@@ -8,6 +8,9 @@ import {
   bestFits,
   buildDays,
   formatSlot,
+  POLL_DAY_END,
+  POLL_DAY_START,
+  POLL_DURATION,
   rankStarts,
   slotDate,
   slotTime,
@@ -76,9 +79,10 @@ function PollBody({
   const poll: PollShape = {
     poll_week_start: meeting.poll_week_start,
     poll_days: meeting.poll_days ?? 5,
-    poll_day_start: meeting.poll_day_start ?? 8,
-    poll_day_end: meeting.poll_day_end ?? 18,
-    duration_minutes: meeting.duration_minutes ?? 60,
+    // Fixed for every poll, older ones included, whatever they stored.
+    poll_day_start: POLL_DAY_START,
+    poll_day_end: POLL_DAY_END,
+    duration_minutes: POLL_DURATION,
   };
   const days = useMemo(() => buildDays(poll), [JSON.stringify(poll)]); // eslint-disable-line react-hooks/exhaustive-deps
   const allSlots = useMemo(() => new Set(days.flatMap((d) => d.slots)), [days]);

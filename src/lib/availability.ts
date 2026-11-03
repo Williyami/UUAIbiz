@@ -6,6 +6,12 @@
 
 export const SLOT_MINUTES = 30;
 
+// Every poll covers the same day, 08–21, and books a single half hour, like
+// When2Meet: nobody picks hours or a length, people just paint when they're free.
+export const POLL_DAY_START = 8;
+export const POLL_DAY_END = 21;
+export const POLL_DURATION = SLOT_MINUTES;
+
 export type PollShape = {
   poll_week_start: string; // YYYY-MM-DD, a Monday
   poll_days: number; // 5 = Mon–Fri, 7 = Mon–Sun
