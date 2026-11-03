@@ -15,6 +15,7 @@ import { Send, Trash2 } from "lucide-react";
 import { errorMessage } from "@/lib/chunk-error";
 import { playSound } from "@/lib/sounds";
 import { deleteWithUndo } from "@/lib/undo";
+import { MentionText, useMentions } from "@/components/shared/mentions";
 
 const chatMessagesQuery = queryOptions({
   queryKey: ["chatMessages"],
@@ -51,6 +52,14 @@ function ChatPage() {
   const [draft, setDraft] = useState("");
   const online = useOnlineUsers();
   const bottomRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const mentions = useMentions({
+    people: profiles,
+    value: draft,
+    setValue: setDraft,
+    inputRef,
+    above: true,
+  });
 
   // Live message stream; presence comes from the app-wide provider.
   useEffect(() => {
@@ -160,7 +169,7 @@ function ChatPage() {
                         )}
                       </div>
                       <p className="mt-0.5 whitespace-pre-wrap text-sm leading-relaxed">
-                        {m.content}
+                        <MentionText text={m.content} people={profiles} />
                       </p>
                     </div>
                   </li>
@@ -171,18 +180,27 @@ function ChatPage() {
           <div ref={bottomRef} />
         </div>
         <div className="flex items-center gap-2 border-t p-3">
-          <Input
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                submit();
-              }
-            }}
-            placeholder="Message the team…"
-            autoFocus
-          />
+          <div className="relative flex-1">
+            {mentions.menu}
+            <Input
+              ref={inputRef}
+              value={draft}
+              onChange={(e) => {
+                setDraft(e.target.value);
+                mentions.track(e.target);
+              }}
+              onClick={(e) => mentions.track(e.currentTarget)}
+              onKeyDown={(e) => {
+                if (mentions.onKeyDown(e)) return;
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  submit();
+                }
+              }}
+              placeholder="Message the team… type @ to mention someone"
+              autoFocus
+            />
+          </div>
           <Button disabled={!draft.trim() || send.isPending} onClick={submit}>
             <Send className="h-4 w-4" />
           </Button>

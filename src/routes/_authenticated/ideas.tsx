@@ -1,8 +1,8 @@
 import { avatarColor } from "@/lib/avatar";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
-import { boardPostsQuery, currentUserQuery } from "@/lib/queries";
+import { boardPostsQuery, currentUserQuery, profilesQuery } from "@/lib/queries";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,10 +14,12 @@ import { ProfileWidget } from "@/components/shared/ProfileWidget";
 import { Input } from "@/components/ui/input";
 import { errorMessage } from "@/lib/chunk-error";
 import { deleteWithUndo } from "@/lib/undo";
+import { MentionText, useMentions } from "@/components/shared/mentions";
 
 export const Route = createFileRoute("/_authenticated/ideas")({
   loader: ({ context }) => {
     context.queryClient.ensureQueryData(boardPostsQuery);
+    context.queryClient.ensureQueryData(profilesQuery);
   },
   component: IdeasPage,
   errorComponent: ({ error }) => (
@@ -37,8 +39,16 @@ function IdeasPage() {
   const qc = useQueryClient();
   const { data: posts } = useSuspenseQuery(boardPostsQuery);
   const { data: me } = useSuspenseQuery(currentUserQuery);
+  const { data: profiles } = useSuspenseQuery(profilesQuery);
+  const composeRef = useRef<HTMLTextAreaElement>(null);
 
   const [content, setContent] = useState("");
+  const composeMentions = useMentions({
+    people: profiles,
+    value: content,
+    setValue: setContent,
+    inputRef: composeRef,
+  });
   const [category, setCategory] = useState<string>("General");
   const [filter, setFilter] = useState<string>("All");
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -161,13 +171,22 @@ function IdeasPage() {
           create.mutate();
         }}
       >
-        <Textarea
-          rows={3}
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          placeholder="Share an idea: a company we should reach out to, an event format, anything…"
-          className="resize-none rounded-none border-0 px-4 py-3 shadow-none focus-visible:ring-0"
-        />
+        <div className="relative">
+          <Textarea
+            ref={composeRef}
+            rows={3}
+            value={content}
+            onChange={(e) => {
+              setContent(e.target.value);
+              composeMentions.track(e.target);
+            }}
+            onClick={(e) => composeMentions.track(e.currentTarget)}
+            onKeyDown={(e) => composeMentions.onKeyDown(e)}
+            placeholder="Share an idea: a company we should reach out to, an event format, anything… Type @ to mention someone."
+            className="resize-none rounded-none border-0 px-4 py-3 shadow-none focus-visible:ring-0"
+          />
+          {composeMentions.menu}
+        </div>
         <div className="flex flex-wrap items-center justify-between gap-3 border-t bg-muted/30 px-4 py-2.5">
           <div className="flex items-center gap-1.5">
             <span className="microlabel mr-1 text-[9.5px] text-muted-foreground">Category</span>
@@ -304,10 +323,11 @@ function IdeasPage() {
                     </div>
                   ) : (
                     <p className="mt-2.5 whitespace-pre-wrap text-sm leading-relaxed">
-                      {p.content}
+                      <MentionText text={p.content} people={profiles} />
                     </p>
                   )}
                   <PostFooter
+                    people={profiles}
                     post={p}
                     meId={me?.id}
                     isAdmin={!!me?.isAdmin}
@@ -339,7 +359,9 @@ function PostFooter({
   onAddComment,
   onRemoveComment,
   onViewProfile,
+  people,
 }: {
+  people: { id: string; name: string | null; email: string }[];
   post: any;
   meId?: string;
   isAdmin: boolean;
@@ -351,6 +373,8 @@ function PostFooter({
   onViewProfile: (p: any) => void;
 }) {
   const [draft, setDraft] = useState("");
+  const draftRef = useRef<HTMLInputElement>(null);
+  const mentions = useMentions({ people, value: draft, setValue: setDraft, inputRef: draftRef });
   const likes: any[] = post.likes ?? [];
   const comments: any[] = post.comments ?? [];
   const liked = likes.some((l) => l.user_id === meId);
@@ -428,24 +452,35 @@ function PostFooter({
                       </button>
                     )}
                   </div>
-                  <p className="mt-0.5 whitespace-pre-wrap text-xs leading-relaxed">{c.content}</p>
+                  <p className="mt-0.5 whitespace-pre-wrap text-xs leading-relaxed">
+                    <MentionText text={c.content} people={people} />
+                  </p>
                 </div>
               </div>
             );
           })}
           <div className="flex items-center gap-2">
-            <Input
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  submit();
-                }
-              }}
-              placeholder="Write a comment…"
-              className="h-8 text-xs"
-            />
+            <div className="relative flex-1">
+              {mentions.menu}
+              <Input
+                ref={draftRef}
+                value={draft}
+                onChange={(e) => {
+                  setDraft(e.target.value);
+                  mentions.track(e.target);
+                }}
+                onClick={(e) => mentions.track(e.currentTarget)}
+                onKeyDown={(e) => {
+                  if (mentions.onKeyDown(e)) return;
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    submit();
+                  }
+                }}
+                placeholder="Write a comment… type @ to mention"
+                className="h-8 text-xs"
+              />
+            </div>
             <Button size="sm" className="h-8" disabled={!draft.trim()} onClick={submit}>
               <Send className="h-3 w-3" />
             </Button>

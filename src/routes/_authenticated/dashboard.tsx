@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import {
   companiesQuery,
   contactsQuery,
@@ -10,7 +10,9 @@ import {
   profilesQuery,
   currentUserQuery,
 } from "@/lib/queries";
-import { formatDate, parseLocalDate } from "@/lib/format";
+import { formatDate, initials, parseLocalDate, timeAgo } from "@/lib/format";
+import { activityQuery } from "@/lib/queries";
+import { avatarColor } from "@/lib/avatar";
 import { daysSinceContact, isStale } from "@/lib/stale";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { StatusTag } from "@/components/shared/StatusTag";
@@ -397,6 +399,11 @@ function Home() {
             </ul>
           )}
         </Panel>
+
+        {/* What the team has been doing */}
+        <Panel title="Recent activity" className="lg:col-span-3">
+          <ActivityFeed />
+        </Panel>
       </div>
 
       <CompanyDialog
@@ -497,4 +504,106 @@ function Panel({
 
 function Empty({ children }: { children: React.ReactNode }) {
   return <div className="px-4 py-10 text-center text-sm text-muted-foreground">{children}</div>;
+}
+
+// What each kind of activity row reads as, after the person's name.
+function describe(a: { kind: string; title: string; detail: string | null }) {
+  const t = <b className="font-medium">{a.title}</b>;
+  switch (a.kind) {
+    case "company_added":
+      return <>added {t} to Outreach</>;
+    case "company_moved":
+      return (
+        <>
+          moved {t} to {a.detail}
+        </>
+      );
+    case "contact_added":
+      return (
+        <>
+          added contact {t}
+          {a.detail ? ` at ${a.detail}` : ""}
+        </>
+      );
+    case "event_added":
+      return <>created the event {t}</>;
+    case "event_status":
+      return (
+        <>
+          marked {t} as {a.detail}
+        </>
+      );
+    case "task_done":
+      return <>completed {t}</>;
+    case "meeting_added":
+      return <>added the meeting {t}</>;
+    case "meeting_booked":
+      return (
+        <>
+          booked {t} for {a.detail}
+        </>
+      );
+    case "idea_posted":
+      return <>shared an idea: “{a.title}”</>;
+    default:
+      return t;
+  }
+}
+
+function ActivityFeed() {
+  const { data: rows = [], isLoading, isError } = useQuery(activityQuery);
+  const { data: profiles } = useSuspenseQuery(profilesQuery);
+  const profileMap = new Map(profiles.map((p) => [p.id, p]));
+
+  if (isLoading) return <Empty>Loading…</Empty>;
+  if (isError) return <Empty>Activity isn't available yet.</Empty>;
+  if (rows.length === 0)
+    return <Empty>Nothing yet. Moves, new companies, finished tasks and more show up here.</Empty>;
+
+  return (
+    <ul className="grid grid-cols-1 divide-y md:grid-cols-2 md:divide-y-0">
+      {rows.map((a) => {
+        const p = a.actor_id ? profileMap.get(a.actor_id) : null;
+        const name = (p?.name || p?.email || "Someone").split(" ")[0];
+        const body = (
+          <>
+            {p?.avatar_url ? (
+              <img
+                src={p.avatar_url}
+                alt=""
+                className="size-6 shrink-0 rounded-full object-cover"
+              />
+            ) : (
+              <span
+                className="flex size-6 shrink-0 items-center justify-center rounded-full text-[9px] font-semibold"
+                style={avatarColor(a.actor_id)}
+              >
+                {initials(p?.name || p?.email)}
+              </span>
+            )}
+            <span className="min-w-0 flex-1 truncate text-sm">
+              <span className="font-medium">{name}</span> {describe(a)}
+            </span>
+            <span className="microlabel shrink-0 text-[10px] text-muted-foreground">
+              {timeAgo(a.created_at)}
+            </span>
+          </>
+        );
+        return (
+          <li key={a.id} className="md:border-b md:odd:border-r">
+            {a.link ? (
+              <Link
+                to={a.link}
+                className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-accent/50"
+              >
+                {body}
+              </Link>
+            ) : (
+              <div className="flex items-center gap-3 px-4 py-2.5">{body}</div>
+            )}
+          </li>
+        );
+      })}
+    </ul>
+  );
 }

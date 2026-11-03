@@ -68,6 +68,21 @@ export function meetingAvailabilityQuery(meetingId: string) {
   });
 }
 
+/** The latest things teammates did, for the home page feed. */
+export const activityQuery = queryOptions({
+  queryKey: ["activity"],
+  queryFn: async () => {
+    const { data, error } = await supabase
+      .from("activity")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(12);
+    if (error) throw error;
+    return data ?? [];
+  },
+  refetchInterval: 60_000,
+});
+
 export const boardPostsQuery = queryOptions({
   queryKey: ["boardPosts"],
   queryFn: async () => {
