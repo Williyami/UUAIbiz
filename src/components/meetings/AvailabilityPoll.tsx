@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { currentUserQuery, meetingAvailabilityQuery, profilesQuery } from "@/lib/queries";
@@ -24,47 +23,18 @@ import { toast } from "sonner";
 import { Check, Loader2 } from "lucide-react";
 
 /**
- * When2Meet-style poll for one meeting: each invited person paints the half
- * hours they can make, everyone sees the overlap, and an editor books the
- * best fit or any start they pick.
+ * When2Meet-style poll for one meeting, shown inline on the Meetings page:
+ * each invited person paints the half hours they can make, everyone sees the
+ * overlap, and an editor books the best fit or any start they pick.
  */
-export function AvailabilityDialog({
-  meeting,
-  onOpenChange,
-  canBook,
-  onEdit,
-}: {
-  meeting: any | null;
-  onOpenChange: (open: boolean) => void;
-  canBook: boolean;
-  /** Opens the meeting form, to change the poll's week or hours, or close it. */
-  onEdit?: (meeting: any) => void;
-}) {
-  return (
-    <Dialog open={!!meeting} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[92vh] max-w-6xl overflow-y-auto">
-        {meeting && (
-          <PollBody
-            meeting={meeting}
-            canBook={canBook}
-            onDone={() => onOpenChange(false)}
-            onEdit={onEdit}
-          />
-        )}
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-function PollBody({
+export function AvailabilityPoll({
   meeting,
   canBook,
-  onDone,
   onEdit,
 }: {
   meeting: any;
   canBook: boolean;
-  onDone: () => void;
+  /** Opens the meeting form, to change the poll's week, or close it. */
   onEdit?: (meeting: any) => void;
 }) {
   const qc = useQueryClient();
@@ -161,8 +131,8 @@ function PollBody({
     onSuccess: (_d, start) => {
       playSound("success");
       toast.success(`Booked for ${formatSlot(start)}`);
+      // Booking closes the poll, so it drops out of the open polls by itself.
       qc.invalidateQueries({ queryKey: ["meetings"] });
-      onDone();
     },
     onError: (e: any) => toast.error(e.message),
   });
@@ -177,10 +147,8 @@ function PollBody({
 
   return (
     <>
-      <DialogHeader>
-        <DialogTitle className="font-display text-xl font-medium tracking-tight">
-          Find a time: {meeting.title}
-        </DialogTitle>
+      <div className="mb-4 space-y-1">
+        <h3 className="font-display text-lg font-medium tracking-tight">{meeting.title}</h3>
         <p className="text-sm text-muted-foreground">
           Week of {formatSlot(`${poll.poll_week_start}T00:00`).split(",")[0]} ·{" "}
           {poll.duration_minutes} min meeting · {responded.length} of {invited.length} have answered
@@ -188,15 +156,12 @@ function PollBody({
         {canBook && onEdit && (
           <button
             className="microlabel w-fit text-[10px] text-muted-foreground underline underline-offset-2 hover:text-foreground"
-            onClick={() => {
-              onDone();
-              onEdit(meeting);
-            }}
+            onClick={() => onEdit(meeting)}
           >
             Edit meeting or change the week
           </button>
         )}
-      </DialogHeader>
+      </div>
 
       {invited.length === 0 ? (
         <p className="border border-dashed px-4 py-8 text-center text-sm text-muted-foreground">

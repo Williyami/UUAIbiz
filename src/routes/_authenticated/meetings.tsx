@@ -2,8 +2,8 @@ import { useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { companiesQuery, profilesQuery, meetingsQuery, currentUserQuery } from "@/lib/queries";
-import { AvailabilityDialog } from "@/components/meetings/AvailabilityDialog";
-import { formatSlot, POLL_DURATION } from "@/lib/availability";
+import { AvailabilityPoll } from "@/components/meetings/AvailabilityPoll";
+import { formatSlot } from "@/lib/availability";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { StatusTag } from "@/components/shared/StatusTag";
 import { MemberStack } from "@/components/shared/MemberStack";
@@ -38,7 +38,8 @@ function MeetingsPage() {
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
-  const [polling, setPolling] = useState<any>(null);
+  // Which open poll the "Finding a time" card shows.
+  const [activePollId, setActivePollId] = useState<string | null>(null);
   const { data: me } = useSuspenseQuery(currentUserQuery);
   const canEdit = me?.role !== "viewer";
 
@@ -160,7 +161,13 @@ function MeetingsPage() {
               polls={openPolls}
               profileMap={profileMap}
               meId={me?.id}
-              onOpen={setPolling}
+              activeId={activePollId}
+              onSelect={setActivePollId}
+              canBook={canEdit}
+              onEdit={(m) => {
+                setEditing(m);
+                setDialogOpen(true);
+              }}
             />
           )}
           {upcoming.length > UPCOMING_BESIDE && (
@@ -181,16 +188,16 @@ function MeetingsPage() {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         meeting={editing}
-        onPollOpened={setPolling}
-      />
-      <AvailabilityDialog
-        // Always the freshest copy, so booking reflects edits made meanwhile.
-        meeting={polling ? (meetings.find((m: any) => m.id === polling.id) ?? polling) : null}
-        onOpenChange={(o) => !o && setPolling(null)}
-        canBook={canEdit}
-        onEdit={(m) => {
-          setEditing(m);
-          setDialogOpen(true);
+        onPollOpened={(m) => {
+          setActivePollId(m.id);
+          // Bring the card into view once the new poll has rendered there.
+          setTimeout(
+            () =>
+              document
+                .getElementById("finding-a-time")
+                ?.scrollIntoView({ behavior: "smooth", block: "start" }),
+            300,
+          );
         }}
       />
     </div>
@@ -509,20 +516,32 @@ function JoinButton({ href, size, compact }: { href: string; size?: "sm"; compac
   );
 }
 
-/** Meetings with an open "Find a time" poll, waiting for answers or a booking. */
+/**
+ * Meetings with an open "Find a time" poll. The poll itself (paint your times,
+ * see the overlap, book) sits right in the card; with several open, tabs
+ * switch between them.
+ */
 function FindingATime({
   polls,
   profileMap,
   meId,
-  onOpen,
+  activeId,
+  onSelect,
+  canBook,
+  onEdit,
 }: {
   polls: any[];
   profileMap: Map<string, any>;
   meId: string | undefined;
-  onOpen: (meeting: any) => void;
+  activeId: string | null;
+  onSelect: (id: string) => void;
+  canBook: boolean;
+  onEdit: (meeting: any) => void;
 }) {
+  // Falls back to the first poll when none is chosen or the chosen one closed.
+  const active = polls.find((m) => m.id === activeId) ?? polls[0];
   return (
-    <section className="border border-(--brand-red)/40 bg-card">
+    <section id="finding-a-time" className="scroll-mt-6 border border-(--brand-red)/40 bg-card">
       <div className="flex items-center gap-2 border-b px-4 py-3">
         <CalendarClock className="h-4 w-4 text-(--brand-red)" />
         <h2 className="font-display text-base font-medium tracking-tight">Finding a time</h2>
@@ -530,33 +549,35 @@ function FindingATime({
           {polls.length} open
         </span>
       </div>
-      <ul className="divide-y">
-        {polls.map((m) => {
-          const invited = (m.assignees ?? []).includes(meId);
-          return (
-            <li
-              key={m.id}
-              onClick={() => onOpen(m)}
-              className="flex cursor-pointer flex-wrap items-center justify-between gap-3 px-4 py-3 transition-colors hover:bg-accent/50"
-            >
-              <div className="min-w-0">
-                <div className="truncate text-sm font-medium">{m.title}</div>
-                <div className="microlabel mt-0.5 text-[9.5px] text-muted-foreground/80">
-                  Week of {formatSlot(`${m.poll_week_start}T00:00`).split(",")[0]} · {POLL_DURATION}{" "}
-                  min
-                  {m.internal ? " · Internal" : m.company?.name ? ` · ${m.company.name}` : ""}
-                </div>
-              </div>
-              <div className="flex shrink-0 items-center gap-3">
+      {polls.length > 1 && (
+        <div className="flex gap-1 overflow-x-auto border-b px-2 py-1.5">
+          {polls.map((m) => {
+            const isActive = m.id === active.id;
+            const invited = (m.assignees ?? []).includes(meId);
+            return (
+              <button
+                key={m.id}
+                onClick={() => onSelect(m.id)}
+                className={`flex shrink-0 cursor-pointer items-center gap-2 px-3 py-1.5 text-left transition-colors ${
+                  isActive ? "bg-foreground text-background" : "hover:bg-accent/50"
+                }`}
+              >
+                <span className="max-w-48 truncate text-xs font-medium">{m.title}</span>
+                <span
+                  className={`microlabel text-[9px] ${isActive ? "text-background/70" : "text-muted-foreground"}`}
+                >
+                  {formatSlot(`${m.poll_week_start}T00:00`).split(",")[0]}
+                  {invited ? " · you" : ""}
+                </span>
                 <MemberStack ids={m.assignees} profileMap={profileMap} />
-                <Button size="sm" variant={invited ? "default" : "outline"}>
-                  {invited ? "Add your times" : "View answers"}
-                </Button>
-              </div>
-            </li>
-          );
-        })}
-      </ul>
+              </button>
+            );
+          })}
+        </div>
+      )}
+      <div className="p-4">
+        <AvailabilityPoll key={active.id} meeting={active} canBook={canBook} onEdit={onEdit} />
+      </div>
     </section>
   );
 }

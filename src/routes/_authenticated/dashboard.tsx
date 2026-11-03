@@ -265,7 +265,7 @@ function Home() {
         />
       </div>
 
-      <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         {/* Coming up */}
         <Panel
           title="Coming up"
@@ -320,84 +320,92 @@ function Home() {
           )}
         </Panel>
 
-        {/* Needs a follow-up */}
-        <Panel
-          title="Needs a follow-up"
-          hint={`${stale.length} quiet`}
-          to={stale.length ? "/outreach" : undefined}
-        >
-          {stale.length === 0 ? (
-            <Empty>Every active conversation has been touched in the last two weeks.</Empty>
-          ) : (
-            <ul className="divide-y">
-              {stale.slice(0, 6).map((c) => (
-                <li key={c.id}>
-                  <Link
-                    to="/outreach"
-                    className="flex items-center justify-between gap-3 px-4 py-3 transition-colors hover:bg-accent/50"
-                  >
-                    <div className="min-w-0">
-                      <div className="truncate text-sm font-medium">{c.name}</div>
-                      <StatusTag
-                        color={companyStatusColor[c.status as CompanyStatus]}
-                        className="mt-1 text-[9px]"
+        {/* Right column: follow-ups over your tasks, together exactly as tall as
+            Coming up. On wide screens the pair is pinned to that height and each
+            list scrolls inside its own card. */}
+        <div className="flex flex-col gap-4 lg:relative lg:min-h-[28rem]">
+          <div className="flex flex-col gap-4 lg:absolute lg:inset-0">
+            {/* Needs a follow-up */}
+            <Panel
+              className="lg:min-h-0 lg:flex-1"
+              title="Needs a follow-up"
+              hint={`${stale.length} quiet`}
+              to={stale.length ? "/outreach" : undefined}
+            >
+              {stale.length === 0 ? (
+                <Empty>Every active conversation has been touched in the last two weeks.</Empty>
+              ) : (
+                <ul className="divide-y">
+                  {stale.slice(0, 10).map((c) => (
+                    <li key={c.id}>
+                      <Link
+                        to="/outreach"
+                        className="flex items-center justify-between gap-3 px-4 py-3 transition-colors hover:bg-accent/50"
                       >
-                        {c.status}
-                      </StatusTag>
-                    </div>
-                    <span className="microlabel tnum shrink-0 text-[10px] text-muted-foreground">
-                      {c.quietFor} days quiet
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-        </Panel>
+                        <div className="min-w-0">
+                          <div className="truncate text-sm font-medium">{c.name}</div>
+                          <StatusTag
+                            color={companyStatusColor[c.status as CompanyStatus]}
+                            className="mt-1 text-[9px]"
+                          >
+                            {c.status}
+                          </StatusTag>
+                        </div>
+                        <span className="microlabel tnum shrink-0 text-[10px] text-muted-foreground">
+                          {c.quietFor} days quiet
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Panel>
+
+            {/* Your tasks */}
+            <Panel title="Your tasks" to="/tasks" className="lg:min-h-0 lg:flex-1">
+              {myTasks.length === 0 ? (
+                <Empty>No open tasks assigned to you.</Empty>
+              ) : (
+                <ul className="divide-y">
+                  {myTasks.slice(0, 10).map((t) => {
+                    const overdue = !!t.due_date && parseLocalDate(t.due_date) < today;
+                    return (
+                      <li key={t.id}>
+                        <Link
+                          to="/tasks"
+                          className="flex items-center justify-between gap-3 px-4 py-3 transition-colors hover:bg-accent/50"
+                        >
+                          <div className="min-w-0">
+                            <div className="truncate text-sm font-medium">{t.title}</div>
+                            <StatusTag
+                              color={priorityColor[t.priority as TaskPriority]}
+                              className="mt-1 text-[9px]"
+                            >
+                              {t.priority}
+                            </StatusTag>
+                          </div>
+                          <span
+                            className={`microlabel tnum shrink-0 text-[10px] ${overdue ? "font-semibold text-brand" : "text-muted-foreground"}`}
+                          >
+                            {t.due_date ? formatDate(t.due_date) : "No date"}
+                          </span>
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </Panel>
+          </div>
+        </div>
 
         {/* Pipeline */}
         <Panel
           title="Pipeline"
           hint={`${companies.length} companies · ${declined} declined · ${onHold} on hold`}
-          className="lg:col-span-2"
+          className="lg:col-span-3"
         >
           <PipelineWave companies={companies} />
-        </Panel>
-
-        {/* Your tasks */}
-        <Panel title="Your tasks" to="/tasks">
-          {myTasks.length === 0 ? (
-            <Empty>No open tasks assigned to you.</Empty>
-          ) : (
-            <ul className="divide-y">
-              {myTasks.slice(0, 5).map((t) => {
-                const overdue = !!t.due_date && parseLocalDate(t.due_date) < today;
-                return (
-                  <li key={t.id}>
-                    <Link
-                      to="/tasks"
-                      className="flex items-center justify-between gap-3 px-4 py-3 transition-colors hover:bg-accent/50"
-                    >
-                      <div className="min-w-0">
-                        <div className="truncate text-sm font-medium">{t.title}</div>
-                        <StatusTag
-                          color={priorityColor[t.priority as TaskPriority]}
-                          className="mt-1 text-[9px]"
-                        >
-                          {t.priority}
-                        </StatusTag>
-                      </div>
-                      <span
-                        className={`microlabel tnum shrink-0 text-[10px] ${overdue ? "font-semibold text-brand" : "text-muted-foreground"}`}
-                      >
-                        {t.due_date ? formatDate(t.due_date) : "No date"}
-                      </span>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
         </Panel>
 
         {/* What the team has been doing */}
@@ -497,7 +505,7 @@ function Panel({
           )}
         </div>
       </div>
-      {children}
+      <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
     </section>
   );
 }
