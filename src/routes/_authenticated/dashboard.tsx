@@ -16,7 +16,6 @@ import { avatarColor } from "@/lib/avatar";
 import { daysSinceContact, isStale } from "@/lib/stale";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { StatusTag } from "@/components/shared/StatusTag";
-import { PipelineWave } from "@/components/dashboard/PipelineWave";
 import { isEventActive } from "@/components/events/eventStyles";
 import { companyStatusColor, type CompanyStatus } from "@/components/outreach/statusStyles";
 import { priorityColor, type TaskPriority } from "@/components/tasks/taskStyles";
@@ -101,8 +100,6 @@ function Home() {
     .filter(isStale)
     .map((c) => ({ ...c, quietFor: daysSinceContact(c) ?? 0 }))
     .sort((a, b) => b.quietFor - a.quietFor);
-  const declined = companies.filter((c) => c.status === "Declined").length;
-  const onHold = companies.filter((c) => c.status === "On hold").length;
 
   // Events still going ahead, from today on
   const upcomingEvents = events
@@ -399,15 +396,6 @@ function Home() {
           </div>
         </div>
 
-        {/* Pipeline */}
-        <Panel
-          title="Pipeline"
-          hint={`${companies.length} companies · ${declined} declined · ${onHold} on hold`}
-          className="lg:col-span-3"
-        >
-          <PipelineWave companies={companies} />
-        </Panel>
-
         {/* What the team has been doing */}
         <Panel title="Recent activity" className="lg:col-span-3">
           <ActivityFeed />
@@ -456,7 +444,7 @@ function StatCard({
   return (
     <Link
       to={to}
-      className="group border bg-card px-5 py-4 transition-colors hover:border-foreground/30"
+      className={`group border px-5 py-4 transition-colors hover:border-foreground/30 ${GLASS}`}
     >
       <div className="flex items-center justify-between gap-2">
         <span className="microlabel text-[10px] text-muted-foreground">{label}</span>
@@ -474,6 +462,10 @@ function StatCard({
   );
 }
 
+// Home cards are slightly see-through so the background (and the leaves)
+// show behind them; the blur and solid border keep text and edges crisp.
+const GLASS = "border-border/80 bg-card/75 backdrop-blur-[3px]";
+
 function Panel({
   title,
   hint,
@@ -488,7 +480,7 @@ function Panel({
   children: React.ReactNode;
 }) {
   return (
-    <section className={`flex flex-col border bg-card ${className}`}>
+    <section className={`flex flex-col border ${GLASS} ${className}`}>
       <div className="flex items-center justify-between gap-3 border-b px-4 py-3">
         <h2 className="font-display text-base font-medium tracking-tight">{title}</h2>
         <div className="flex items-center gap-3">
