@@ -271,80 +271,82 @@ export function AvailabilityPoll({
             </div>
           </div>
 
-          {/* Booking */}
-          <div className="border-t pt-4">
-            <h3 className="mb-2 text-sm font-semibold">Best times</h3>
-            {best.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                No overlap yet. Best times appear here as people mark when they're free.
-              </p>
-            ) : (
-              <ul className="grid grid-cols-1 gap-2 md:grid-cols-3">
-                {best.map((c, i) => (
-                  <li key={c.start} className="flex flex-col gap-2 border px-3 py-2.5">
-                    <div className="flex items-baseline justify-between gap-2">
-                      <span className="text-sm font-medium">
-                        {formatSlot(c.start)}–{endOf(c.start)}
+          {/* Booking: only for whoever books it; the rest just fill in. */}
+          {canBook && (
+            <div className="border-t pt-4">
+              <h3 className="mb-2 text-sm font-semibold">Best times</h3>
+              {best.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  No overlap yet. Best times appear here as people mark when they're free.
+                </p>
+              ) : (
+                <ul className="grid grid-cols-1 gap-2 md:grid-cols-3">
+                  {best.map((c, i) => (
+                    <li key={c.start} className="flex flex-col gap-2 border px-3 py-2.5">
+                      <div className="flex items-baseline justify-between gap-2">
+                        <span className="text-sm font-medium">
+                          {formatSlot(c.start)}–{endOf(c.start)}
+                        </span>
+                        {i === 0 && (
+                          <span className="microlabel text-[9px] text-(--brand-red)">Best fit</span>
+                        )}
+                      </div>
+                      <span className="text-xs text-muted-foreground">
+                        {c.available.length} of {invited.length} can make it
+                        {c.available.length < invited.length &&
+                          ` · not ${invited
+                            .filter((id) => !c.available.includes(id))
+                            .map(nameOf)
+                            .join(", ")}`}
                       </span>
-                      {i === 0 && (
-                        <span className="microlabel text-[9px] text-(--brand-red)">Best fit</span>
+                      {canBook && (
+                        <Button
+                          size="sm"
+                          variant={i === 0 ? "default" : "outline"}
+                          disabled={book.isPending}
+                          onClick={() => book.mutate(c.start)}
+                        >
+                          Book this time
+                        </Button>
                       )}
-                    </div>
-                    <span className="text-xs text-muted-foreground">
-                      {c.available.length} of {invited.length} can make it
-                      {c.available.length < invited.length &&
-                        ` · not ${invited
-                          .filter((id) => !c.available.includes(id))
-                          .map(nameOf)
-                          .join(", ")}`}
-                    </span>
-                    {canBook && (
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              {canBook && (
+                <div className="mt-3 flex flex-wrap items-center gap-3 text-sm">
+                  {picked ? (
+                    <>
+                      <span>
+                        Your pick: <b>{formatSlot(picked)}</b>–{endOf(picked)} ·{" "}
+                        {ranked.get(picked)?.available.length ?? 0} of {invited.length} can make the
+                        whole meeting
+                      </span>
                       <Button
                         size="sm"
-                        variant={i === 0 ? "default" : "outline"}
+                        variant="outline"
                         disabled={book.isPending}
-                        onClick={() => book.mutate(c.start)}
+                        onClick={() => book.mutate(picked)}
                       >
-                        Book this time
+                        Book {slotTime(picked)}
                       </Button>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            )}
-
-            {canBook && (
-              <div className="mt-3 flex flex-wrap items-center gap-3 text-sm">
-                {picked ? (
-                  <>
-                    <span>
-                      Your pick: <b>{formatSlot(picked)}</b>–{endOf(picked)} ·{" "}
-                      {ranked.get(picked)?.available.length ?? 0} of {invited.length} can make the
-                      whole meeting
+                      <button
+                        className="text-xs text-muted-foreground underline underline-offset-2"
+                        onClick={() => setPicked(null)}
+                      >
+                        Clear
+                      </button>
+                    </>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">
+                      Or click any start time in the Everyone grid to book it yourself.
                     </span>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      disabled={book.isPending}
-                      onClick={() => book.mutate(picked)}
-                    >
-                      Book {slotTime(picked)}
-                    </Button>
-                    <button
-                      className="text-xs text-muted-foreground underline underline-offset-2"
-                      onClick={() => setPicked(null)}
-                    >
-                      Clear
-                    </button>
-                  </>
-                ) : (
-                  <span className="text-xs text-muted-foreground">
-                    Or click any start time in the Everyone grid to book it yourself.
-                  </span>
-                )}
-              </div>
-            )}
-          </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
     </>
@@ -353,7 +355,7 @@ export function AvailabilityPoll({
 
 function TimeGutter({ days }: { days: { slots: string[] }[] }) {
   return (
-    <div className="pt-6">
+    <div className="w-10 shrink-0 pt-6">
       {days[0]?.slots.map((s) => (
         <div key={s} className="relative h-4 pr-1.5 text-right">
           {s.endsWith(":00") && (

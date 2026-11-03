@@ -163,7 +163,8 @@ function MeetingsPage() {
               meId={me?.id}
               activeId={activePollId}
               onSelect={setActivePollId}
-              canBook={canEdit}
+              // Booking is for admins (and board); everyone else just fills it in.
+              canBook={!!me?.isAdmin}
               onEdit={(m) => {
                 setEditing(m);
                 setDialogOpen(true);
