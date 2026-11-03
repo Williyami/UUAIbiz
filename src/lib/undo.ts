@@ -1,23 +1,32 @@
+import { createElement } from "react";
 import { toast } from "sonner";
+import { UndoToast } from "@/components/shared/UndoToast";
 import type { QueryClient, QueryKey } from "@tanstack/react-query";
 import { hashKey } from "@tanstack/react-query";
 
 const UNDO_MS = 6000;
 
+/**
+ * Shows the compact Undo toast. Sonner keeps the timing and stacking; its own
+ * swipe is off (dismissible: false) because UndoToast handles the ×, mouse
+ * drag and trackpad swipe itself.
+ */
+function showUndo(message: string, onUndo: () => void) {
+  toast.custom((id) => createElement(UndoToast, { id, message, onUndo }), {
+    duration: UNDO_MS,
+    dismissible: false,
+    unstyled: true,
+  });
+}
+
 /** A toast with an Undo button, for moves and status changes already saved. */
 export function undoToast(message: string, undo: () => unknown) {
-  toast(message, {
-    duration: UNDO_MS,
-    action: {
-      label: "Undo",
-      onClick: async () => {
-        try {
-          await undo();
-        } catch (e: any) {
-          toast.error(e?.message ?? "Couldn't undo");
-        }
-      },
-    },
+  showUndo(message, async () => {
+    try {
+      await undo();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Couldn't undo");
+    }
   });
 }
 
@@ -91,18 +100,12 @@ export function deleteWithUndo({
   const timer = setTimeout(commit, UNDO_MS);
   pending.set(key, commit);
 
-  toast(message, {
-    duration: UNDO_MS,
-    action: {
-      label: "Undo",
-      onClick: () => {
-        if (settled) return;
-        settled = true;
-        clearTimeout(timer);
-        pending.delete(key);
-        unsubscribe();
-        qc.invalidateQueries({ queryKey });
-      },
-    },
+  showUndo(message, () => {
+    if (settled) return;
+    settled = true;
+    clearTimeout(timer);
+    pending.delete(key);
+    unsubscribe();
+    qc.invalidateQueries({ queryKey });
   });
 }
