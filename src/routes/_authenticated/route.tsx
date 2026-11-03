@@ -75,12 +75,18 @@ function AuthenticatedShell() {
           <div className="relative z-10 flex min-h-screen w-full">
             <AppSidebar />
             <div className="relative flex min-w-0 flex-1 flex-col">
-              <div className="flex items-center justify-between gap-2 border-b border-border/70 bg-card/85 px-3 py-2 md:absolute md:right-3 md:top-3 md:z-10 md:justify-start md:rounded-[3px] md:border md:px-2.5 md:py-1.5 md:shadow-sm md:backdrop-blur-sm">
-                <SidebarTrigger className="text-muted-foreground md:hidden" />
-                <div className="flex items-center gap-2">
-                  <CommandPaletteTrigger />
-                  <NotificationBell />
-                  <ThemeToggle />
+              {/* On desktop the toolbar floats over the page, its right edge lined
+                  up with the page content (max-w-[1400px], md:p-10) below. */}
+              <div className="md:pointer-events-none md:absolute md:inset-x-0 md:top-3 md:z-10">
+                <div className="md:mx-auto md:flex md:max-w-[1400px] md:justify-end md:px-10">
+                  <div className="flex items-center justify-between gap-2 border-b border-border/70 bg-card/85 px-3 py-2 md:pointer-events-auto md:justify-start md:rounded-[3px] md:border md:px-2.5 md:py-1.5 md:shadow-sm md:backdrop-blur-sm">
+                    <SidebarTrigger className="text-muted-foreground md:hidden" />
+                    <div className="flex items-center gap-2">
+                      <CommandPaletteTrigger />
+                      <NotificationBell />
+                      <ThemeToggle />
+                    </div>
+                  </div>
                 </div>
               </div>
               <main className="flex-1 overflow-auto">
