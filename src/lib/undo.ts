@@ -1,22 +1,39 @@
-import { createElement } from "react";
 import { toast } from "sonner";
-import { UndoToast } from "@/components/shared/UndoToast";
 import type { QueryClient, QueryKey } from "@tanstack/react-query";
 import { hashKey } from "@tanstack/react-query";
 
 const UNDO_MS = 6000;
 
-/**
- * Shows the compact Undo toast. Sonner keeps the timing and stacking; its own
- * swipe is off (dismissible: false) because UndoToast handles the ×, mouse
- * drag and trackpad swipe itself.
- */
+// The Undo bar isn't a regular toast: it renders inside the top toolbar
+// (UndoSlot), at the toolbar's exact height and right edge, covering it while
+// it shows. Only the latest one is shown; an older one's delete still runs.
+export type UndoItem = { id: number; message: string; onUndo: () => void };
+
+let current: UndoItem | null = null;
+let nextId = 0;
+const listeners = new Set<() => void>();
+const emit = () => listeners.forEach((fn) => fn());
+
+export function subscribeUndo(fn: () => void) {
+  listeners.add(fn);
+  return () => {
+    listeners.delete(fn);
+  };
+}
+export const getUndo = () => current;
+export const UNDO_VISIBLE_MS = UNDO_MS;
+
+/** Hides the bar, if it is still showing this item. */
+export function clearUndo(id: number) {
+  if (current?.id === id) {
+    current = null;
+    emit();
+  }
+}
+
 function showUndo(message: string, onUndo: () => void) {
-  toast.custom((id) => createElement(UndoToast, { id, message, onUndo }), {
-    duration: UNDO_MS,
-    dismissible: false,
-    unstyled: true,
-  });
+  current = { id: ++nextId, message, onUndo };
+  emit();
 }
 
 /** A toast with an Undo button, for moves and status changes already saved. */

@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { FallingLeaves } from "@/components/layout/FallingLeaves";
+import { UndoSlot } from "@/components/shared/UndoToast";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { NotificationBell } from "@/components/layout/NotificationBell";
 import { ProfileWidgetProvider } from "@/components/shared/profile-widget-context";
@@ -79,13 +80,14 @@ function AuthenticatedShell() {
                   up with the page content (max-w-[1400px], md:p-10) below. */}
               <div className="md:pointer-events-none md:absolute md:inset-x-0 md:top-3 md:z-10">
                 <div className="md:mx-auto md:flex md:max-w-[1400px] md:justify-end md:px-10">
-                  <div className="flex items-center justify-between gap-2 border-b border-border/70 bg-card/85 px-3 py-2 md:pointer-events-auto md:justify-start md:rounded-[3px] md:border md:px-2.5 md:py-1.5 md:shadow-sm md:backdrop-blur-sm">
+                  <div className="relative flex items-center justify-between gap-2 border-b border-border/70 bg-card/85 px-3 py-2 md:pointer-events-auto md:justify-start md:rounded-[3px] md:border md:px-2.5 md:py-1.5 md:shadow-sm md:backdrop-blur-sm">
                     <SidebarTrigger className="text-muted-foreground md:hidden" />
                     <div className="flex items-center gap-2">
                       <CommandPaletteTrigger />
                       <NotificationBell />
                       <ThemeToggle />
                     </div>
+                    <UndoSlot />
                   </div>
                 </div>
               </div>
