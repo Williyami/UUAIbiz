@@ -1,10 +1,12 @@
 import { avatarColor } from "@/lib/avatar";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScrollList } from "@/components/shared/ScrollList";
 import { initials } from "@/lib/format";
+import { userRolesQuery } from "@/lib/queries";
 import { cn } from "@/lib/utils";
-import { Check, ChevronDown, Search } from "lucide-react";
+import { Check, ChevronDown, Search, Users } from "lucide-react";
 
 /** Multi-select of team members, styled like the other form controls. */
 export function AssigneePicker({
@@ -29,6 +31,20 @@ export function AssigneePicker({
 
   function toggle(id: string) {
     onChange(value.includes(id) ? value.filter((v) => v !== id) : [...value, id]);
+  }
+
+  // "Biz Team" shortcut: everyone with the business-team role, in one click.
+  const { data: roles = [] } = useQuery(userRolesQuery);
+  const bizIds = profiles
+    .filter((p) => roles.some((r) => r.user_id === p.id && r.role === "member"))
+    .map((p) => p.id);
+  const allBiz = bizIds.length > 0 && bizIds.every((id) => value.includes(id));
+  function toggleBiz() {
+    onChange(
+      allBiz
+        ? value.filter((v) => !bizIds.includes(v))
+        : [...value, ...bizIds.filter((id) => !value.includes(id))],
+    );
   }
 
   return (
@@ -75,6 +91,21 @@ export function AssigneePicker({
               className="h-7 w-full rounded-[3px] border border-input bg-transparent pl-7 pr-2 text-xs outline-none placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring"
             />
           </div>
+        )}
+        {bizIds.length > 0 && !q.trim() && (
+          <button
+            type="button"
+            onClick={toggleBiz}
+            className="mb-1 flex w-full cursor-pointer items-center gap-2.5 rounded-[3px] border-b px-2 py-1.5 text-left transition-colors hover:bg-accent"
+          >
+            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-muted">
+              <Users className="h-3 w-3" />
+            </span>
+            <span className="min-w-0 flex-1 truncate text-xs font-medium">
+              Biz Team <span className="font-normal text-muted-foreground">({bizIds.length})</span>
+            </span>
+            {allBiz && <Check className="h-3.5 w-3.5 shrink-0 text-(--brand-red)" />}
+          </button>
         )}
         <ScrollList as="ul" className="max-h-[25rem]">
           {shown.length === 0 && (

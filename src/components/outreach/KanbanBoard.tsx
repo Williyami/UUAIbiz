@@ -22,6 +22,7 @@ import { profilesQuery } from "@/lib/queries";
 import { toast } from "sonner";
 import { todayISO } from "@/lib/outreach";
 import { playSound } from "@/lib/sounds";
+import { undoToast } from "@/lib/undo";
 
 const MAIN_STATUSES: CompanyStatus[] = ["Contacted", "Discussing", "Negotiating", "Booked"];
 const SIDE_STATUSES: CompanyStatus[] = ["Declined", "On hold"];
@@ -63,6 +64,12 @@ export function KanbanBoard({
     if (c && c.status !== status) {
       move.mutate({ id, status });
       if (status === "Booked") playSound("success");
+      const before = { status: c.status, last_contact_date: c.last_contact_date };
+      undoToast(`Moved ${c.name} to ${status}`, async () => {
+        const { error } = await supabase.from("companies").update(before).eq("id", id);
+        if (error) throw error;
+        qc.invalidateQueries({ queryKey: ["companies"] });
+      });
     }
   }
 

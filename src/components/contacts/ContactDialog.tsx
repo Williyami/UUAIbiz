@@ -16,6 +16,7 @@ import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-q
 import { companiesQuery } from "@/lib/queries";
 import { toast } from "sonner";
 import { markContactedToday } from "@/lib/outreach";
+import { deleteWithUndo } from "@/lib/undo";
 
 type Contact = any;
 
@@ -77,13 +78,19 @@ export function ContactDialog({
   });
 
   const remove = useMutation({
-    mutationFn: async () => {
-      const { error } = await supabase.from("contacts").delete().eq("id", contact.id);
-      if (error) throw error;
-    },
+    // Deleted after a few seconds unless someone presses Undo.
+    mutationFn: async () =>
+      deleteWithUndo({
+        qc,
+        queryKey: ["contacts"],
+        id: contact.id,
+        message: `Deleted ${contact.name}`,
+        run: async () => {
+          const { error } = await supabase.from("contacts").delete().eq("id", contact.id);
+          if (error) throw error;
+        },
+      }),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["contacts"] });
-      toast.success("Contact deleted");
       onOpenChange(false);
     },
     onError: (e: any) => toast.error(e.message),
@@ -167,7 +174,7 @@ export function ContactDialog({
                 variant="ghost"
                 className="mr-auto text-destructive hover:text-destructive"
                 disabled={remove.isPending}
-                onClick={() => confirm("Delete this contact?") && remove.mutate()}
+                onClick={() => remove.mutate()}
               >
                 Delete
               </Button>

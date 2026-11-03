@@ -26,6 +26,7 @@ import { profilesQuery, companiesQuery, eventsQuery, currentUserQuery } from "@/
 import { toast } from "sonner";
 import { TASK_STATUS_ORDER, TASK_PRIORITY_ORDER } from "./taskStyles";
 import { Trash2 } from "lucide-react";
+import { deleteWithUndo } from "@/lib/undo";
 
 type Task = any;
 
@@ -93,13 +94,19 @@ export function TaskDialog({
   });
 
   const remove = useMutation({
-    mutationFn: async () => {
-      const { error } = await supabase.from("tasks").delete().eq("id", task.id);
-      if (error) throw error;
-    },
+    // Deleted after a few seconds unless someone presses Undo.
+    mutationFn: async () =>
+      deleteWithUndo({
+        qc,
+        queryKey: ["tasks"],
+        id: task.id,
+        message: `Deleted "${task.title}"`,
+        run: async () => {
+          const { error } = await supabase.from("tasks").delete().eq("id", task.id);
+          if (error) throw error;
+        },
+      }),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["tasks"] });
-      toast.success("Task deleted");
       onOpenChange(false);
     },
     onError: (e: any) => toast.error(e.message),

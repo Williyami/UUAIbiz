@@ -142,10 +142,11 @@ function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <head>
-        {/* Restore saved theme before first paint to avoid a flash; dark is the default. */}
+        {/* Restore saved theme before first paint to avoid a flash. */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `try{if(localStorage.getItem("bh-theme")!=="light")document.documentElement.classList.add("dark")}catch(e){document.documentElement.classList.add("dark")}`,
+            // "auto" follows the system; no choice yet means dark (the default).
+            __html: `try{var t=localStorage.getItem("bh-theme");if(t==="auto"?matchMedia("(prefers-color-scheme: dark)").matches:t!=="light")document.documentElement.classList.add("dark")}catch(e){document.documentElement.classList.add("dark")}`,
           }}
         />
         <HeadContent />

@@ -25,6 +25,7 @@ import { profilesQuery, eventsQuery } from "@/lib/queries";
 import { CalendarDays } from "lucide-react";
 import { toast } from "sonner";
 import { playSound } from "@/lib/sounds";
+import { undoToast } from "@/lib/undo";
 
 function isOverdue(task: any) {
   return (
@@ -67,6 +68,11 @@ export function TaskBoard({
     if (t && t.status !== status) {
       move.mutate({ id, status });
       if (status === "Done") playSound("complete");
+      const before = t.status;
+      undoToast(
+        status === "Done" ? `Marked "${t.title}" done` : `Moved "${t.title}" to ${status}`,
+        () => move.mutateAsync({ id, status: before }),
+      );
     }
   }
 

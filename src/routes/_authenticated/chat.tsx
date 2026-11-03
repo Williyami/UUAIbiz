@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { Send, Trash2 } from "lucide-react";
 import { errorMessage } from "@/lib/chunk-error";
 import { playSound } from "@/lib/sounds";
+import { deleteWithUndo } from "@/lib/undo";
 
 const chatMessagesQuery = queryOptions({
   queryKey: ["chatMessages"],
@@ -90,11 +91,17 @@ function ChatPage() {
   });
 
   const remove = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from("chat_messages").delete().eq("id", id);
-      if (error) throw error;
-    },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["chatMessages"] }),
+    mutationFn: async (id: string) =>
+      deleteWithUndo({
+        qc,
+        queryKey: ["chatMessages"],
+        id,
+        message: "Message deleted",
+        run: async () => {
+          const { error } = await supabase.from("chat_messages").delete().eq("id", id);
+          if (error) throw error;
+        },
+      }),
     onError: (e: any) => toast.error(e.message),
   });
 
@@ -145,7 +152,7 @@ function ChatPage() {
                         {(mine || me?.isAdmin) && (
                           <button
                             title="Delete message"
-                            onClick={() => confirm("Delete this message?") && remove.mutate(m.id)}
+                            onClick={() => remove.mutate(m.id)}
                             className="ml-auto cursor-pointer text-muted-foreground/40 opacity-0 transition-opacity hover:text-destructive group-hover:opacity-100"
                           >
                             <Trash2 className="h-3 w-3" />

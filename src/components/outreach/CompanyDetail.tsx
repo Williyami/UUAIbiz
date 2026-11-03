@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import { formatDate } from "@/lib/format";
 import { todayISO } from "@/lib/outreach";
 import { playSound } from "@/lib/sounds";
+import { deleteWithUndo, undoToast } from "@/lib/undo";
 import {
   Mail,
   Phone,
@@ -66,15 +67,19 @@ export function CompanyDetail({
   });
 
   const del = useMutation({
-    mutationFn: async () => {
-      const { error } = await supabase.from("companies").delete().eq("id", company.id);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["companies"] });
-      toast.success("Company deleted");
-      onClose();
-    },
+    // Deleted after a few seconds unless someone presses Undo.
+    mutationFn: async () =>
+      deleteWithUndo({
+        qc,
+        queryKey: ["companies"],
+        id: company.id,
+        message: `Deleted ${company.name}`,
+        run: async () => {
+          const { error } = await supabase.from("companies").delete().eq("id", company.id);
+          if (error) throw error;
+        },
+      }),
+    onSuccess: () => onClose(),
     onError: (e: any) => toast.error(e.message),
   });
 
@@ -180,9 +185,14 @@ export function CompanyDetail({
                 <Select
                   value={company.status}
                   onValueChange={(v) => {
+                    const before = {
+                      status: company.status,
+                      last_contact_date: company.last_contact_date,
+                    };
                     // A status change means we were just in touch.
                     update.mutate({ status: v, last_contact_date: todayISO() });
                     if (v === "Booked") playSound("success");
+                    undoToast(`Moved ${company.name} to ${v}`, () => update.mutateAsync(before));
                   }}
                 >
                   <SelectTrigger className="mt-1.5">
@@ -267,7 +277,7 @@ export function CompanyDetail({
                 variant="ghost"
                 size="sm"
                 className="ml-auto text-destructive hover:text-destructive"
-                onClick={() => confirm(`Delete ${company.name}?`) && del.mutate()}
+                onClick={() => del.mutate()}
               >
                 <Trash2 className="h-3.5 w-3.5" /> Delete
               </Button>

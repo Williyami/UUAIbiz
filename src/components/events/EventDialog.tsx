@@ -26,6 +26,7 @@ import { profilesQuery, companiesQuery } from "@/lib/queries";
 import { toast } from "sonner";
 import { EVENT_STATUS_ORDER, EVENT_TYPE_ORDER } from "./eventStyles";
 import { Trash2 } from "lucide-react";
+import { deleteWithUndo } from "@/lib/undo";
 
 export function EventDialog({
   open,
@@ -103,13 +104,19 @@ export function EventDialog({
   });
 
   const remove = useMutation({
-    mutationFn: async () => {
-      const { error } = await supabase.from("events").delete().eq("id", event.id);
-      if (error) throw error;
-    },
+    // Deleted after a few seconds unless someone presses Undo.
+    mutationFn: async () =>
+      deleteWithUndo({
+        qc,
+        queryKey: ["events"],
+        id: event.id,
+        message: `Deleted "${event.title}"`,
+        run: async () => {
+          const { error } = await supabase.from("events").delete().eq("id", event.id);
+          if (error) throw error;
+        },
+      }),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["events"] });
-      toast.success("Event deleted");
       onOpenChange(false);
     },
     onError: (e: any) => toast.error(e.message),
@@ -277,7 +284,7 @@ export function EventDialog({
                 type="button"
                 variant="ghost"
                 className="text-destructive hover:text-destructive"
-                onClick={() => confirm(`Delete "${event.title}"?`) && remove.mutate()}
+                onClick={() => remove.mutate()}
                 disabled={remove.isPending}
               >
                 <Trash2 className="h-3.5 w-3.5" /> Delete

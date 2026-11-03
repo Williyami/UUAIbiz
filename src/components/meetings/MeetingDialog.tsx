@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/select";
 import { ExternalLink } from "lucide-react";
 import { toast } from "sonner";
+import { deleteWithUndo } from "@/lib/undo";
 
 type Meeting = any;
 
@@ -130,13 +131,19 @@ export function MeetingDialog({
   });
 
   const remove = useMutation({
-    mutationFn: async () => {
-      const { error } = await supabase.from("meetings").delete().eq("id", meeting.id);
-      if (error) throw error;
-    },
+    // Deleted after a few seconds unless someone presses Undo.
+    mutationFn: async () =>
+      deleteWithUndo({
+        qc,
+        queryKey: ["meetings"],
+        id: meeting.id,
+        message: `Deleted "${meeting.title}"`,
+        run: async () => {
+          const { error } = await supabase.from("meetings").delete().eq("id", meeting.id);
+          if (error) throw error;
+        },
+      }),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["meetings"] });
-      toast.success("Meeting deleted");
       onOpenChange(false);
     },
     onError: (e: any) => toast.error(e.message),
@@ -320,7 +327,7 @@ export function MeetingDialog({
                 variant="ghost"
                 className="mr-auto text-destructive hover:text-destructive"
                 disabled={remove.isPending}
-                onClick={() => confirm("Delete this meeting?") && remove.mutate()}
+                onClick={() => remove.mutate()}
               >
                 Delete
               </Button>

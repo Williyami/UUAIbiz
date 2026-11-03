@@ -42,6 +42,7 @@ import {
 } from "lucide-react";
 import { errorMessage } from "@/lib/chunk-error";
 import { playSound } from "@/lib/sounds";
+import { deleteWithUndo, undoToast } from "@/lib/undo";
 
 export const Route = createFileRoute("/_authenticated/events_/$eventId")({
   loader: ({ context }) => {
@@ -140,9 +141,14 @@ function EventPage() {
         .eq("id", id);
       if (error) throw error;
     },
-    onSuccess: (_data, { done }) => {
-      if (done) playSound("complete");
+    onSuccess: (_data, { id, done }) => {
       invalidate();
+      if (!done) return;
+      playSound("complete");
+      const item = eventTasks.find((t: any) => t.id === id);
+      undoToast(`Checked off "${item?.title ?? "item"}"`, () =>
+        toggleDone.mutateAsync({ id, done: false }),
+      );
     },
     onError: (e: any) => toast.error(e.message),
   });
@@ -172,14 +178,20 @@ function EventPage() {
   });
 
   const del = useMutation({
+    // Leave the page first, then hide it; deleted after a few seconds unless undone.
     mutationFn: async () => {
-      const { error } = await supabase.from("events").delete().eq("id", event.id);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["events"] });
-      toast.success("Event deleted");
-      navigate({ to: "/events" });
+      const { id, title } = event;
+      await navigate({ to: "/events" });
+      deleteWithUndo({
+        qc,
+        queryKey: ["events"],
+        id,
+        message: `Deleted "${title}"`,
+        run: async () => {
+          const { error } = await supabase.from("events").delete().eq("id", id);
+          if (error) throw error;
+        },
+      });
     },
     onError: (e: any) => toast.error(e.message),
   });
@@ -255,7 +267,7 @@ function EventPage() {
                 variant="ghost"
                 size="sm"
                 className="text-destructive hover:text-destructive"
-                onClick={() => confirm(`Delete "${event.title}"?`) && del.mutate()}
+                onClick={() => del.mutate()}
               >
                 <Trash2 className="h-3.5 w-3.5" /> Delete
               </Button>

@@ -13,6 +13,7 @@ import { Pencil, Trash2, Send, Heart, MessageCircle } from "lucide-react";
 import { ProfileWidget } from "@/components/shared/ProfileWidget";
 import { Input } from "@/components/ui/input";
 import { errorMessage } from "@/lib/chunk-error";
+import { deleteWithUndo } from "@/lib/undo";
 
 export const Route = createFileRoute("/_authenticated/ideas")({
   loader: ({ context }) => {
@@ -75,11 +76,17 @@ function IdeasPage() {
   });
 
   const remove = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from("board_posts").delete().eq("id", id);
-      if (error) throw error;
-    },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["boardPosts"] }),
+    mutationFn: async (id: string) =>
+      deleteWithUndo({
+        qc,
+        queryKey: ["boardPosts"],
+        id,
+        message: "Idea deleted",
+        run: async () => {
+          const { error } = await supabase.from("board_posts").delete().eq("id", id);
+          if (error) throw error;
+        },
+      }),
     onError: (e: any) => toast.error(e.message),
   });
 
@@ -115,11 +122,24 @@ function IdeasPage() {
   });
 
   const removeComment = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from("idea_comments").delete().eq("id", id);
-      if (error) throw error;
-    },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["boardPosts"] }),
+    mutationFn: async (id: string) =>
+      deleteWithUndo({
+        qc,
+        queryKey: ["boardPosts"],
+        id,
+        message: "Comment deleted",
+        hide: (posts: any) =>
+          Array.isArray(posts)
+            ? posts.map((p: any) => ({
+                ...p,
+                comments: (p.comments ?? []).filter((c: any) => c.id !== id),
+              }))
+            : posts,
+        run: async () => {
+          const { error } = await supabase.from("idea_comments").delete().eq("id", id);
+          if (error) throw error;
+        },
+      }),
     onError: (e: any) => toast.error(e.message),
   });
 
@@ -255,7 +275,7 @@ function IdeasPage() {
                     {canDelete && (
                       <button
                         title="Delete"
-                        onClick={() => confirm("Delete this post?") && remove.mutate(p.id)}
+                        onClick={() => remove.mutate(p.id)}
                         className="rounded-[3px] p-1 text-muted-foreground/60 transition-colors hover:bg-accent hover:text-destructive"
                       >
                         <Trash2 className="h-3 w-3" />
@@ -401,7 +421,7 @@ function PostFooter({
                     {(c.author_id === meId || isAdmin) && (
                       <button
                         title="Delete comment"
-                        onClick={() => confirm("Delete this comment?") && onRemoveComment(c.id)}
+                        onClick={() => onRemoveComment(c.id)}
                         className="ml-auto cursor-pointer text-muted-foreground/50 transition-colors hover:text-destructive"
                       >
                         <Trash2 className="h-2.5 w-2.5" />
