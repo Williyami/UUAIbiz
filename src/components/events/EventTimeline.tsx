@@ -1,243 +1,170 @@
-import { useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { eventStatusColor, semesterBounds, type EventStatus } from "./eventStyles";
+import { eventStatusColor, eventCompanyNames, type EventStatus } from "./eventStyles";
 import { parseLocalDate } from "@/lib/format";
 
 /*
- * A semester at a glance: one horizontal line from the first to the last day
- * of the term, month ticks underneath, a "today" marker, and every dated event
- * as a dot in its status colour. Labels sit on lanes above and below the line,
- * placed so they never overlap; each opens its event.
+ * A quiet strip of events in date order along one thin line. Events are spaced
+ * evenly rather than to scale, so nothing ever overlaps and every event gets
+ * the same room: a big day number, month and weekday, title, partner. A "Today"
+ * marker sits where today falls between them, and the strip opens scrolled to
+ * the next event. It shows whatever the filters above it leave.
  */
 
-const DAY = 86_400_000;
-const LANE = 44; // px between label rows
-const GAP = 10; // px kept free between neighbouring labels
-const LANE_ORDER = [-1, 1, -2, 2, -3, 3]; // above/below the line, nearest first
-const MIN_WIDTH = 760; // below this the strip scrolls sideways
-
-type Placed = {
-  e: any;
-  x: number; // px from the left of the track
-  lane: number; // negative = above the line
-  width: number; // px reserved for its label
-};
-
-function labelWidth(title: string) {
-  // Roughly the rendered width at text-xs, capped so long titles truncate.
-  return Math.min(170, Math.max(88, title.length * 6.2 + 20));
-}
+const COL = 176; // px per event
 
 export function EventTimeline({ events, companies }: { events: any[]; companies: any[] }) {
   const navigate = useNavigate();
-  const [shift, setShift] = useState(0); // semesters away from the current one
   const scroller = useRef<HTMLDivElement>(null);
-  const track = useRef<HTMLDivElement>(null);
-  const [width, setWidth] = useState(0);
+  const [edges, setEdges] = useState({ start: false, end: false });
 
-  const sem = useMemo(() => {
-    const now = new Date();
-    // Step half a year per semester, landing safely inside the target term.
-    return semesterBounds(new Date(now.getFullYear(), now.getMonth() + shift * 6, 15));
-  }, [shift]);
-  const start = sem.start.getTime();
-  const span = sem.end.getTime() - start;
   const today = new Date(new Date().toDateString()).getTime();
-  const todayIn = today >= start && today <= sem.end.getTime();
-
-  useLayoutEffect(() => {
-    const el = track.current;
-    if (!el) return;
-    const ro = new ResizeObserver(() => setWidth(el.clientWidth));
-    ro.observe(el);
-    setWidth(el.clientWidth);
-    return () => ro.disconnect();
-  }, []);
-
-  // On narrow screens, start scrolled so today is in view.
-  useLayoutEffect(() => {
-    const sc = scroller.current;
-    if (!sc || !width || !todayIn) return;
-    sc.scrollLeft = Math.max(0, ((today - start) / span) * width - sc.clientWidth / 2);
-  }, [width, todayIn, today, start, span]);
-
-  const companyName = useMemo(() => new Map(companies.map((c) => [c.id, c.name])), [companies]);
-
-  const inTerm = events
+  const dated = events
     .filter((e) => e.date)
     .map((e) => ({ e, t: parseLocalDate(e.date).getTime() }))
-    .filter(({ t }) => t >= start && t <= sem.end.getTime())
     .sort((a, b) => a.t - b.t);
-
-  const nextId = inTerm.find(
+  const firstUpcoming = dated.findIndex(({ t }) => t >= today);
+  const todayAt = firstUpcoming === -1 ? dated.length : firstUpcoming;
+  const nextId = dated.find(
     ({ e, t }) => t >= today && e.status !== "Cancelled" && e.status !== "Idea",
   )?.e.id;
 
-  // Greedy lane placement: each label takes the nearest lane where it fits.
-  const placed: Placed[] = [];
-  const laneEnd = new Map<number, number>();
-  if (width) {
-    for (const { e, t } of inTerm) {
-      const x = ((t - start) / span) * width;
-      const w = labelWidth(e.title ?? "");
-      const left = Math.min(Math.max(x - w / 2, 0), width - w);
-      const lane =
-        LANE_ORDER.find((l) => (laneEnd.get(l) ?? -Infinity) + GAP <= left) ??
-        // Everything's full: reuse the lane that frees up first.
-        [...LANE_ORDER].sort((a, b) => (laneEnd.get(a) ?? 0) - (laneEnd.get(b) ?? 0))[0];
-      laneEnd.set(lane, left + w);
-      placed.push({ e, x, lane, width: w });
-    }
-  }
-  const above = Math.max(1, ...placed.map((p) => (p.lane < 0 ? -p.lane : 0)));
-  const below = Math.max(1, ...placed.map((p) => (p.lane > 0 ? p.lane : 0)));
-  const axisY = above * LANE + 8;
-  const height = axisY + below * LANE + 34; // room for the month row
-
-  const months: { label: string; x: number }[] = [];
-  for (let d = new Date(sem.start); d <= sem.end; d.setMonth(d.getMonth() + 1)) {
-    months.push({
-      label: d.toLocaleDateString("en-GB", { month: "short" }),
-      x: width ? ((d.getTime() - start) / span) * width : 0,
+  function updateEdges() {
+    const sc = scroller.current;
+    if (!sc) return;
+    setEdges({
+      start: sc.scrollLeft > 4,
+      end: sc.scrollLeft + sc.clientWidth < sc.scrollWidth - 4,
     });
   }
 
-  const upcoming = inTerm.filter(({ t, e }) => t >= today && e.status !== "Cancelled").length;
+  // Open with one past event in view, then what's coming.
+  useLayoutEffect(() => {
+    const sc = scroller.current;
+    if (!sc) return;
+    sc.scrollLeft = Math.max(0, (todayAt - 1) * COL);
+    updateEdges();
+    // Only when the set of events changes, not on every render.
+  }, [dated.length, todayAt]);
+
+  function page(dir: 1 | -1) {
+    const sc = scroller.current;
+    sc?.scrollBy({ left: dir * Math.max(COL, sc.clientWidth - COL), behavior: "smooth" });
+  }
+
+  if (dated.length === 0) {
+    return (
+      <p className="py-6 text-center text-xs text-muted-foreground">
+        No dated events match the filters.
+      </p>
+    );
+  }
+
+  const columns: React.ReactNode[] = [];
+  dated.forEach(({ e, t }, i) => {
+    if (i === todayAt) columns.push(<TodayMark key="today" />);
+    const d = new Date(t);
+    const past = t < today;
+    const cancelled = e.status === "Cancelled";
+    const next = e.id === nextId;
+    const partner = eventCompanyNames(e, companies)[0];
+    columns.push(
+      <li key={e.id} className="shrink-0 snap-start" style={{ width: COL }}>
+        <button
+          onClick={() => navigate({ to: "/events/$eventId", params: { eventId: e.id } })}
+          title={`${e.title} · ${e.status}${partner ? ` · ${partner}` : ""}`}
+          className={`group block w-full pr-4 text-left transition-opacity ${past || cancelled ? "opacity-45 hover:opacity-80" : ""}`}
+        >
+          {/* Dot on the line */}
+          <span className="relative flex h-5 items-center">
+            <span
+              className={`size-2 rounded-full transition-transform group-hover:scale-150 ${
+                next ? "ring-2 ring-(--brand-red)/30 ring-offset-2 ring-offset-background" : ""
+              }`}
+              style={{
+                backgroundColor:
+                  eventStatusColor[e.status as EventStatus] ?? "var(--muted-foreground)",
+              }}
+            />
+          </span>
+          <span className="mt-2 flex items-baseline gap-2">
+            <span
+              className={`tnum font-display text-2xl font-medium leading-none tracking-tight ${next ? "text-(--brand-red)" : ""}`}
+            >
+              {d.getDate()}
+            </span>
+            <span className="microlabel text-[9.5px] text-muted-foreground">
+              {d.toLocaleDateString("en-GB", { month: "short" })} ·{" "}
+              {d.toLocaleDateString("en-GB", { weekday: "short" })}
+              {d.getFullYear() !== new Date().getFullYear() && ` ${d.getFullYear()}`}
+            </span>
+          </span>
+          <span
+            className={`mt-1.5 line-clamp-2 text-[13px] font-medium leading-snug group-hover:underline group-hover:underline-offset-2 ${cancelled ? "line-through" : ""}`}
+          >
+            {e.title}
+          </span>
+          <span className="mt-0.5 block truncate text-xs text-muted-foreground">
+            {partner ?? e.event_type}
+          </span>
+        </button>
+      </li>,
+    );
+  });
+  if (todayAt === dated.length) columns.push(<TodayMark key="today" />);
 
   return (
-    <section className="border bg-card">
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b px-4 py-2.5">
-        <div className="flex items-baseline gap-3">
-          <h2 className="font-display text-base font-medium tracking-tight">{sem.label}</h2>
-          <span className="microlabel tnum text-[10px] text-muted-foreground">
-            {inTerm.length} {inTerm.length === 1 ? "event" : "events"}
-            {todayIn && ` · ${upcoming} to come`}
-          </span>
-        </div>
-        <div className="flex items-center gap-1">
-          {shift !== 0 && (
-            <button
-              onClick={() => setShift(0)}
-              className="microlabel rounded-[3px] px-2 py-1 text-[10px] text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-            >
-              This term
-            </button>
-          )}
-          <button
-            title="Previous term"
-            onClick={() => setShift((s) => s - 1)}
-            className="rounded-[3px] p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </button>
-          <button
-            title="Next term"
-            onClick={() => setShift((s) => s + 1)}
-            className="rounded-[3px] p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </button>
-        </div>
+    <section className="group/timeline relative">
+      <div
+        ref={scroller}
+        onScroll={updateEdges}
+        className="relative snap-x overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
+        <ol className="relative flex w-max">
+          {/* The line, through the middle of the dots */}
+          <span aria-hidden className="absolute inset-x-0 top-2.5 h-px bg-border" />
+          {columns}
+        </ol>
       </div>
 
-      <div ref={scroller} className="overflow-x-auto px-6 py-3">
-        <div ref={track} className="relative" style={{ minWidth: MIN_WIDTH, height }}>
-          {/* The line, faint for the past and solid from today on */}
-          <div className="absolute inset-x-0 h-px bg-border" style={{ top: axisY }} />
-          {todayIn && width > 0 && (
-            <div
-              className="absolute right-0 h-[2px] bg-foreground/25"
-              style={{ top: axisY - 0.5, left: ((today - start) / span) * width }}
-            />
-          )}
-
-          {/* Month ticks */}
-          {months.map((m) => (
-            <div key={m.label}>
-              <div className="absolute h-2 w-px bg-border" style={{ left: m.x, top: axisY - 4 }} />
-              <span
-                className="microlabel absolute whitespace-nowrap text-[9.5px] text-muted-foreground"
-                style={{ left: m.x, top: height - 16 }}
-              >
-                {m.label}
-              </span>
-            </div>
-          ))}
-
-          {/* Today */}
-          {todayIn && width > 0 && (
-            <div
-              className="pointer-events-none absolute top-0 w-px border-l border-dashed border-(--brand-red)/60"
-              style={{ left: ((today - start) / span) * width, height: axisY + 6 }}
-            >
-              <span className="microlabel absolute -top-0.5 left-1.5 whitespace-nowrap text-[9px] text-(--brand-red)">
-                Today
-              </span>
-            </div>
-          )}
-
-          {placed.map(({ e, x, lane, width: w }) => {
-            const past = parseLocalDate(e.date).getTime() < today;
-            const cancelled = e.status === "Cancelled";
-            const next = e.id === nextId;
-            const color = eventStatusColor[e.status as EventStatus] ?? "var(--muted-foreground)";
-            const left = Math.min(Math.max(x - w / 2, 0), width - w);
-            const labelTop = lane < 0 ? axisY + lane * LANE - 2 : axisY + (lane - 1) * LANE + 12;
-            const company =
-              (e.company_ids?.[0] && companyName.get(e.company_ids[0])) || e.company?.name || null;
-            return (
-              <div key={e.id} className={past || cancelled ? "opacity-55" : ""}>
-                {/* Stem from the dot to its label */}
-                <div
-                  className="absolute z-0 w-px bg-border"
-                  style={
-                    lane < 0
-                      ? { left: x, top: labelTop + 32, height: axisY - labelTop - 32 }
-                      : { left: x, top: axisY, height: labelTop - axisY }
-                  }
-                />
-                {/* Dot */}
-                <span
-                  className={`absolute z-10 size-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full ring-2 ring-card ${
-                    next ? "outline-2 outline-offset-2 outline-(--brand-red)" : ""
-                  }`}
-                  style={{ left: x, top: axisY, backgroundColor: color }}
-                />
-                {/* Label */}
-                <button
-                  onClick={() => navigate({ to: "/events/$eventId", params: { eventId: e.id } })}
-                  title={`${e.title} · ${e.status}${company ? ` · ${company}` : ""}`}
-                  className="group absolute z-10 flex h-8 flex-col justify-center rounded-[3px] bg-card px-1.5 text-left transition-colors hover:bg-accent"
-                  style={{ left, top: labelTop, width: w }}
-                >
-                  <span className="microlabel tnum text-[9px] text-muted-foreground">
-                    {parseLocalDate(e.date).toLocaleDateString("en-GB", {
-                      day: "numeric",
-                      month: "short",
-                    })}
-                    {next && <span className="ml-1.5 text-(--brand-red)">Next</span>}
-                  </span>
-                  <span
-                    className={`truncate text-xs font-medium leading-tight ${cancelled ? "line-through" : ""}`}
-                  >
-                    {e.title}
-                  </span>
-                </button>
-              </div>
-            );
-          })}
-
-          {width > 0 && inTerm.length === 0 && (
-            <p
-              className="absolute inset-x-0 text-center text-xs text-muted-foreground"
-              style={{ top: axisY - 26 }}
-            >
-              No dated events this term.
-            </p>
-          )}
-        </div>
-      </div>
+      {/* Soft edges and arrows only where there's more to see */}
+      {edges.start && (
+        <>
+          <span className="pointer-events-none absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-background to-transparent" />
+          <ScrollButton side="left" onClick={() => page(-1)} />
+        </>
+      )}
+      {edges.end && (
+        <>
+          <span className="pointer-events-none absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-background to-transparent" />
+          <ScrollButton side="right" onClick={() => page(1)} />
+        </>
+      )}
     </section>
+  );
+}
+
+function TodayMark() {
+  return (
+    <li aria-label="Today" className="relative w-14 shrink-0">
+      <span className="absolute left-0 top-0 h-full w-px bg-(--brand-red)/50" />
+      <span className="microlabel absolute left-2 top-0 text-[9px] text-(--brand-red)">Today</span>
+    </li>
+  );
+}
+
+function ScrollButton({ side, onClick }: { side: "left" | "right"; onClick: () => void }) {
+  const Icon = side === "left" ? ChevronLeft : ChevronRight;
+  return (
+    <button
+      onClick={onClick}
+      aria-label={side === "left" ? "Earlier events" : "Later events"}
+      className={`absolute top-0 flex size-5 items-center justify-center rounded-full border bg-background text-muted-foreground opacity-0 transition-opacity hover:text-foreground group-hover/timeline:opacity-100 ${
+        side === "left" ? "left-0" : "right-0"
+      }`}
+    >
+      <Icon className="h-3 w-3" />
+    </button>
   );
 }

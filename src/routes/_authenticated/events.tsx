@@ -164,8 +164,6 @@ function EventsPage() {
         )}
       </PageHeader>
 
-      <EventTimeline events={events} companies={companies} />
-
       <div className="flex flex-wrap items-center gap-2">
         <div className="relative max-w-xs">
           <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
@@ -205,6 +203,9 @@ function EventsPage() {
           {rows.length} / {events.length}
         </span>
       </div>
+
+      {/* Follows the filters above it */}
+      <EventTimeline events={rows} companies={companies} />
 
       <div className="overflow-x-auto border bg-card">
         <table className="w-full text-sm">
