@@ -23,6 +23,7 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { StatusTag } from "@/components/shared/StatusTag";
 import { MemberStack } from "@/components/shared/MemberStack";
 import { EventDialog } from "@/components/events/EventDialog";
+import { EventTimeline } from "@/components/events/EventTimeline";
 import {
   EVENT_STATUS_ORDER,
   EVENT_TYPE_ORDER,
@@ -162,6 +163,8 @@ function EventsPage() {
           </Button>
         )}
       </PageHeader>
+
+      <EventTimeline events={events} companies={companies} />
 
       <div className="flex flex-wrap items-center gap-2">
         <div className="relative max-w-xs">
